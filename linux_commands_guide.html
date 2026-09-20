@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux 指令速查手册 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --heading: #f0f6fc;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --yellow: #d29922;
+            --red: #f85149;
+            --purple: #bc8cff;
+            --orange: #e8873a;
+            --code-bg: #1c2128;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 {
+            font-size: 2.4em;
+            color: var(--heading);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .header .subtitle {
+            color: var(--accent);
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .header .meta {
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+
+        /* Nav */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            background: var(--code-bg);
+        }
+        .nav a:hover {
+            color: var(--accent);
+            background: var(--border);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 48px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 20px 28px;
+            background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .section-header h2 {
+            color: var(--heading);
+            font-size: 1.3em;
+        }
+        .section-header .badge {
+            margin-left: auto;
+            background: var(--code-bg);
+            color: #8b949e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+        }
+        .section-body { padding: 24px 28px; }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--code-bg);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+        /* Code */
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            overflow-x: auto;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85em;
+            line-height: 1.6;
+            color: var(--text);
+        }
+        .code-block .cmd { color: var(--green); }
+        .code-block .flag { color: var(--yellow); }
+        .code-block .arg { color: var(--purple); }
+        .code-block .comment { color: #8b949e; }
+        .code-block .pipe { color: var(--orange); }
+        .code-block .prompt { color: var(--accent); }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .card {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .card .card-desc {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .card code { font-size: 0.82em; }
+
+        /* Callout */
+        .callout {
+            border-left: 4px solid;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout.tip {
+            border-color: var(--green);
+            background: rgba(63, 185, 80, 0.08);
+        }
+        .callout.warn {
+            border-color: var(--yellow);
+            background: rgba(210, 153, 34, 0.08);
+        }
+        .callout.danger {
+            border-color: var(--red);
+            background: rgba(248, 81, 73, 0.08);
+        }
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+
+        /* Color tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.78em;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .tag-essential { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+        /* Pipeline diagram */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 0;
+            padding: 16px;
+            background: var(--code-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .pipeline .step {
+            background: var(--card);
+            border: 1px solid var(--accent);
+            padding: 6px 14px;
+            border-radius: 6px;
+            color: var(--accent);
+            font-size: 0.85em;
+        }
+        .pipeline .arrow { color: var(--orange); font-size: 1.2em; }
+
+        /* Summary stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .stat-card {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card .num {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-card .label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-top: 4px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            color: #8b949e;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>Linux 指令速查手册</h1>
+    <div class="meta">WSL Ubuntu 22.04 &nbsp;|&nbsp; 创建日期: 2026-09-20 &nbsp;|&nbsp; 用于面试与日常参考</div>
+</div>
+
+<div class="nav">
+    <a href="#nav-file">文件操作</a>
+    <a href="#nav-text">文本处理</a>
+    <a href="#nav-search">搜索查找</a>
+    <a href="#nav-process">进程管理</a>
+    <a href="#nav-user">用户权限</a>
+    <a href="#nav-net">网络</a>
+    <a href="#nav-pkg">软件包</a>
+    <a href="#nav-disk">磁盘</a>
+    <a href="#nav-pipe">管道重定向</a>
+    <a href="#nav-shell">Shell 技巧</a>
+    <a href="#nav-vim">Vim</a>
+    <a href="#nav-env">环境配置</a>
+    <a href="#nav-ssh">SSH</a>
+    <a href="#nav-git">Git</a>
+    <a href="#nav-combo">组合技</a>
+</div>
+
+<div class="container">
+
+    <!-- 统计概览 -->
+    <div class="stats">
+        <div class="stat-card"><div class="num">150+</div><div class="label">常用命令</div></div>
+        <div class="stat-card"><div class="num">14</div><div class="label">分类模块</div></div>
+        <div class="stat-card"><div class="num">50+</div><div class="label">实战技巧</div></div>
+        <div class="stat-card"><div class="num">8</div><div class="label">环境配置</div></div>
+    </div>
+
+    <!-- ===================== 文件操作 ===================== -->
+    <div class="section" id="nav-file">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128193;</div>
+            <h2>文件与目录操作</h2>
+            <span class="badge">基础必备</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>pwd</code></td>
+                    <td>显示当前目录路径</td>
+                    <td><code>pwd</code> &rarr; /home/geist</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>ls</code></td>
+                    <td>列出目录内容</td>
+                    <td><code>ls -alh</code> (全部+详细+人类可读大小)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>cd</code></td>
+                    <td>切换目录</td>
+                    <td><code>cd ~/projects</code> / <code>cd -</code>(返回上次) / <code>cd ..</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>mkdir</code></td>
+                    <td>创建目录</td>
+                    <td><code>mkdir -p a/b/c</code> (递归创建)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>rm</code></td>
+                    <td>删除文件/目录</td>
+                    <td><code>rm -rf dir/</code> (强制递归删除)</td>
+                    <td><span class="tag tag-advanced">危险</span></td>
+                </tr>
+                <tr>
+                    <td><code>cp</code></td>
+                    <td>复制文件/目录</td>
+                    <td><code>cp -r src/ dst/</code> (递归复制目录)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>mv</code></td>
+                    <td>移动/重命名</td>
+                    <td><code>mv old.txt new.txt</code> / <code>mv file.txt ~/dir/</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>touch</code></td>
+                    <td>创建空文件/更新时间戳</td>
+                    <td><code>touch app.py</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>ln</code></td>
+                    <td>创建链接</td>
+                    <td><code>ln -s /target/path ~/link</code> (软链接)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>tree</code></td>
+                    <td>树状显示目录</td>
+                    <td><code>tree -L 2</code> (只显示2层)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>stat</code></td>
+                    <td>显示文件详细信息</td>
+                    <td><code>stat app.py</code> (大小/权限/时间)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>file</code></td>
+                    <td>识别文件类型</td>
+                    <td><code>file data.bin</code> &rarr; "ELF 64-bit" / "ASCII text"</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>du</code></td>
+                    <td>查看目录大小</td>
+                    <td><code>du -sh *</code> (每个子目录总大小)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>df</code></td>
+                    <td>查看磁盘使用情况</td>
+                    <td><code>df -h</code> (人类可读格式)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">技巧：快捷路径</div>
+                <code>~</code> = 家目录 &nbsp;|&nbsp; <code>.</code> = 当前目录 &nbsp;|&nbsp; <code>..</code> = 上级目录 &nbsp;|&nbsp; <code>-</code> = 上次所在目录 &nbsp;|&nbsp; <code>/</code> = 根目录
+            </div>
+
+            <div class="callout danger">
+                <div class="callout-title">危险：rm 命令</div>
+                <strong>永远不要执行</strong> <code>rm -rf /</code> 或 <code>rm -rf ~</code>。<br>
+                建议用 <code>alias rm='rm -i'</code> 加确认提示。删除前先 <code>ls</code> 确认路径。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 文本处理 ===================== -->
+    <div class="section" id="nav-text">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128221;</div>
+            <h2>文本查看与处理</h2>
+            <span class="badge">高频使用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>cat</code></td>
+                    <td>查看文件全部内容</td>
+                    <td><code>cat app.py</code> / <code>cat -n file</code>(带行号)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>less</code></td>
+                    <td>分页查看（可搜索）</td>
+                    <td><code>less log.txt</code> → /搜索词 &nbsp; q退出</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>head</code></td>
+                    <td>查看文件开头</td>
+                    <td><code>head -20 file</code> (前20行)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>tail</code></td>
+                    <td>查看文件末尾/实时跟踪</td>
+                    <td><code>tail -f app.log</code> (实时看日志)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>grep</code></td>
+                    <td>文本搜索（最常用）</td>
+                    <td><code>grep -rn "error" ./</code> (递归+行号)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>sed</code></td>
+                    <td>流编辑器（批量替换）</td>
+                    <td><code>sed -i 's/old/new/g' file</code> (全局替换)</td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>awk</code></td>
+                    <td>文本分析工具</td>
+                    <td><code>awk '{print $1}' file</code> (打印第一列)</td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>sort</code></td>
+                    <td>排序</td>
+                    <td><code>sort -n -r</code> (数字倒序)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>uniq</code></td>
+                    <td>去重（需先排序）</td>
+                    <td><code>sort file | uniq -c</code> (去重并计数)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>wc</code></td>
+                    <td>统计行/词/字符数</td>
+                    <td><code>wc -l file</code> (只统计行数)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>cut</code></td>
+                    <td>按列截取</td>
+                    <td><code>cut -d: -f1 /etc/passwd</code> (按:分割取第1列)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>tr</code></td>
+                    <td>字符替换/删除</td>
+                    <td><code>echo "HELLO" | tr A-Z a-z</code> → hello</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>tee</code></td>
+                    <td>同时输出到屏幕和文件</td>
+                    <td><code>cmd | tee log.txt</code> (既显示又保存)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>xargs</code></td>
+                    <td>把输入作为参数传给命令</td>
+                    <td><code>find . -name "*.log" | xargs rm</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>diff</code></td>
+                    <td>比较两个文件差异</td>
+                    <td><code>diff file1 file2</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">技巧：grep 常用参数</div>
+                <code>-r</code> 递归搜索 &nbsp;|&nbsp; <code>-n</code> 显示行号 &nbsp;|&nbsp; <code>-i</code> 忽略大小写 &nbsp;|&nbsp; <code>-v</code> 反向匹配(不包含) &nbsp;|&nbsp; <code>-c</code> 只计数 &nbsp;|&nbsp; <code>--color=auto</code> 高亮匹配
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">技巧：tail -f 实时看日志</div>
+                开发服务器时最常用：<code>tail -f /var/log/syslog</code> 或 <code>tail -f app.log</code><br>
+                按 <code>Ctrl+C</code> 退出。加 <code>-100f</code> 表示先看最后100行再实时跟踪。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 搜索查找 ===================== -->
+    <div class="section" id="nav-search">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#128269;</div>
+            <h2>文件搜索与查找</h2>
+            <span class="badge">日常必备</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>find</code></td>
+                    <td>按条件查找文件</td>
+                    <td><code>find . -name "*.py" -type f</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>locate</code></td>
+                    <td>快速查找（依赖数据库）</td>
+                    <td><code>locate app.py</code> (比find快很多)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>which</code></td>
+                    <td>查找命令的位置</td>
+                    <td><code>which python3</code> → /usr/bin/python3</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>whereis</code></td>
+                    <td>查找命令及配置文件</td>
+                    <td><code>whereis nginx</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>dpkg -L</code></td>
+                    <td>查看软件安装了哪些文件</td>
+                    <td><code>dpkg -L python3</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">find 实战技巧</div>
+                <div class="code-block">
+<span class="comment"># 按名称查找（支持通配符）</span>
+<span class="cmd">find</span> . <span class="flag">-name</span> <span class="arg">"*.py"</span>
+
+<span class="comment"># 按类型：f=文件 d=目录 l=链接</span>
+<span class="cmd">find</span> /var/log <span class="flag">-type</span> <span class="arg">f -name</span> <span class="arg">"*.log"</span>
+
+<span class="comment"># 按大小查找（大于100M）</span>
+<span class="cmd">find</span> . <span class="flag">-size</span> <span class="arg">+100M</span>
+
+<span class="comment"># 按时间查找（7天内修改过的）</span>
+<span class="cmd">find</span> . <span class="flag">-mtime</span> <span class="arg">-7</span>
+
+<span class="comment"># 找到后执行命令（删除所有 .log 文件）</span>
+<span class="cmd">find</span> . <span class="flag">-name</span> <span class="arg">"*.log"</span> <span class="flag">-exec</span> <span class="cmd">rm</span> {} \;
+
+<span class="comment"># 查找并统计数量</span>
+<span class="cmd">find</span> . <span class="flag">-name</span> <span class="arg">"*.py"</span> <span class="pipe">|</span> <span class="cmd">wc</span> <span class="flag">-l</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 进程管理 ===================== -->
+    <div class="section" id="nav-process">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9881;</div>
+            <h2>进程与服务管理</h2>
+            <span class="badge">系统运维</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>ps</code></td>
+                    <td>查看进程</td>
+                    <td><code>ps aux</code> (所有进程) / <code>ps aux | grep python</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>top</code></td>
+                    <td>实时进程监控</td>
+                    <td><code>top</code> → 按M内存排序/P CPU排序/q退出</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>htop</code></td>
+                    <td>更好看的top（需安装）</td>
+                    <td><code>sudo apt install htop && htop</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>kill</code></td>
+                    <td>终止进程</td>
+                    <td><code>kill -9 1234</code> (强制杀死PID 1234)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>killall</code></td>
+                    <td>按名称杀进程</td>
+                    <td><code>killall python3</code> (杀所有python进程)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>jobs</code></td>
+                    <td>查看后台任务</td>
+                    <td><code>jobs</code> → [1] Running python app.py</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>fg/bg</code></td>
+                    <td>前台/后台切换</td>
+                    <td><code>fg %1</code>(调到前台) / Ctrl+Z → <code>bg</code>(放后台)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>nohup</code></td>
+                    <td>退出终端后继续运行</td>
+                    <td><code>nohup python app.py &</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>&amp;</code></td>
+                    <td>放到后台执行</td>
+                    <td><code>python app.py &amp;</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>systemctl</code></td>
+                    <td>管理服务（systemd）</td>
+                    <td><code>sudo systemctl start/stop/enable/status ssh</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>service</code></td>
+                    <td>管理服务（旧方式）</td>
+                    <td><code>sudo service ssh start</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">systemctl 常用操作</div>
+                <div class="code-block">
+<span class="cmd">sudo systemctl</span> <span class="arg">start</span> ssh      <span class="comment"># 启动服务</span>
+<span class="cmd">sudo systemctl</span> <span class="arg">stop</span> ssh       <span class="comment"># 停止服务</span>
+<span class="cmd">sudo systemctl</span> <span class="arg">restart</span> ssh    <span class="comment"># 重启服务</span>
+<span class="cmd">sudo systemctl</span> <span class="arg">enable</span> ssh     <span class="comment"># 开机自启</span>
+<span class="cmd">sudo systemctl</span> <span class="arg">disable</span> ssh    <span class="comment"># 禁止自启</span>
+<span class="cmd">sudo systemctl</span> <span class="arg">status</span> ssh     <span class="comment"># 查看状态</span>
+<span class="cmd">sudo systemctl</span> <span class="arg">is-active</span> ssh <span class="comment"># 是否运行中</span>
+                </div>
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-title">kill 信号说明</div>
+                <code>kill -15</code> (SIGTERM) = 优雅终止，让程序自己清理 &nbsp;|&nbsp;
+                <code>kill -9</code> (SIGKILL) = 强制杀死，立即终止 &nbsp;|&nbsp;
+                <code>kill -1</code> (SIGHUP) = 重载配置<br>
+                先用 -15，不行再用 -9。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 用户权限 ===================== -->
+    <div class="section" id="nav-user">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128100;</div>
+            <h2>用户与权限管理</h2>
+            <span class="badge">安全基础</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>sudo</code></td>
+                    <td>以管理员权限执行</td>
+                    <td><code>sudo apt update</code> (输入自己的密码)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>su</code></td>
+                    <td>切换用户</td>
+                    <td><code>su -</code> (切到root) / <code>su geist</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>chmod</code></td>
+                    <td>修改文件权限</td>
+                    <td><code>chmod +x script.sh</code> / <code>chmod 755 file</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>chown</code></td>
+                    <td>修改文件所有者</td>
+                    <td><code>sudo chown geist:geist file</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>chgrp</code></td>
+                    <td>修改文件所属组</td>
+                    <td><code>sudo chgrp developers file</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>passwd</code></td>
+                    <td>修改密码</td>
+                    <td><code>passwd</code>(改自己) / <code>sudo passwd root</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>useradd</code></td>
+                    <td>添加用户</td>
+                    <td><code>sudo useradd -m -s /bin/bash newuser</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>userdel</code></td>
+                    <td>删除用户</td>
+                    <td><code>sudo userdel -r olduser</code> (-r删家目录)</td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>groupadd</code></td>
+                    <td>添加用户组</td>
+                    <td><code>sudo groupadd developers</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>查看用户信息</td>
+                    <td><code>id</code> → uid=1000(geist) gid=1000(geist)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>whoami</code></td>
+                    <td>当前用户名</td>
+                    <td><code>whoami</code> → geist</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">权限数字速查</div>
+                <div class="code-block">
+<span class="comment"># 权限格式：所有者 | 组 | 其他</span>
+<span class="comment"># r=4(读)  w=2(写)  x=1(执行)</span>
+
+<span class="arg">777</span> = rwxrwxrwx  <span class="comment"># 全部权限（危险）</span>
+<span class="arg">755</span> = rwxr-xr-x  <span class="comment"># 所有者全权限，其他人只读+执行</span>
+<span class="arg">644</span> = rw-r--r--  <span class="comment"># 所有者读写，其他人只读</span>
+<span class="arg">600</span> = rw-------  <span class="comment"># 仅所有者读写</span>
+<span class="arg">+x</span>  = 给所有用户加执行权限  <span class="comment"># 用于脚本</span>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">sudo vs su 的区别</div>
+                <table>
+                    <tr><th>命令</th><th>需要的密码</th><th>作用</th></tr>
+                    <tr><td><code>sudo cmd</code></td><td>自己的密码</td><td>以root权限执行单条命令</td></tr>
+                    <tr><td><code>su -</code></td><td>root密码</td><td>切换到root用户环境</td></tr>
+                    <tr><td><code>sudo -i</code></td><td>自己的密码</td><td>用sudo切到root环境（推荐）</td></tr>
+                    <tr><td><code>sudo su -</code></td><td>自己的密码</td><td>等价于 sudo -i</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 网络 ===================== -->
+    <div class="section" id="nav-net">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#127760;</div>
+            <h2>网络命令</h2>
+            <span class="badge">服务器必备</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>ip</code></td>
+                    <td>查看/配置网络（新）</td>
+                    <td><code>ip addr</code> / <code>ip a</code> (查看IP)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>ifconfig</code></td>
+                    <td>查看网络（旧，需安装）</td>
+                    <td><code>ifconfig</code> (显示IP/子网掩码等)</td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>ping</code></td>
+                    <td>测试网络连通性</td>
+                    <td><code>ping -c 4 baidu.com</code> (发4个包)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>curl</code></td>
+                    <td>发送HTTP请求/下载文件</td>
+                    <td><code>curl ifconfig.me</code> / <code>curl -O url</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>wget</code></td>
+                    <td>下载文件</td>
+                    <td><code>wget https://example.com/file.zip</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>ss</code></td>
+                    <td>查看端口连接（替代netstat）</td>
+                    <td><code>ss -tlnp</code> (查看监听端口)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>netstat</code></td>
+                    <td>查看网络状态（旧）</td>
+                    <td><code>netstat -tlnp</code> (查看监听端口)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>ufw</code></td>
+                    <td>防火墙管理</td>
+                    <td><code>sudo ufw allow 2222</code> / <code>sudo ufw enable</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>nslookup</code></td>
+                    <td>DNS查询</td>
+                    <td><code>nslookup github.com</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>dig</code></td>
+                    <td>详细DNS查询</td>
+                    <td><code>dig github.com</code> (比nslookup更详细)</td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>traceroute</code></td>
+                    <td>路由追踪</td>
+                    <td><code>traceroute baidu.com</code> (看经过哪些节点)</td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>scp</code></td>
+                    <td>远程复制文件</td>
+                    <td><code>scp file.txt user@host:~/</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>rsync</code></td>
+                    <td>高效远程同步</td>
+                    <td><code>rsync -avz dir/ user@host:~/dir/</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">curl 常用技巧</div>
+                <div class="code-block">
+<span class="cmd">curl</span> <span class="arg">ifconfig.me</span>                    <span class="comment"># 查看公网IP</span>
+<span class="cmd">curl</span> <span class="arg">ipinfo.io</span>                     <span class="comment"># 查看IP地理位置</span>
+<span class="cmd">curl</span> <span class="flag">-X</span> <span class="arg">POST</span> <span class="flag">-d</span> <span class="arg">"name=geist"</span> http://localhost:5000/api  <span class="comment"># 发POST请求</span>
+<span class="cmd">curl</span> <span class="flag">-H</span> <span class="arg">"Content-Type: application/json"</span> \  <span class="comment"># 发JSON</span>
+     <span class="flag">-d</span> <span class="arg">'{"key":"value"}'</span> http://localhost:5000/api
+<span class="cmd">curl</span> <span class="flag">-O</span> <span class="arg">https://example.com/file.zip</span>  <span class="comment"># 下载文件</span>
+<span class="cmd">curl</span> <span class="flag">-I</span> <span class="arg">https://github.com</span>           <span class="comment"># 只看响应头</span>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">ss -tlnp 参数解释</div>
+                <code>-t</code> = TCP &nbsp;|&nbsp; <code>-l</code> = 监听状态 &nbsp;|&nbsp; <code>-n</code> = 显示端口号不解析名称 &nbsp;|&nbsp; <code>-p</code> = 显示进程信息<br>
+                结果示例：<code>LISTEN 0 128 0.0.0.0:2222  users:(("sshd",pid=253,fd=3))</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 软件包 ===================== -->
+    <div class="section" id="nav-pkg">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128230;</div>
+            <h2>软件包管理 (apt)</h2>
+            <span class="badge">Ubuntu/Debian</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>apt update</code></td>
+                    <td>更新软件源列表</td>
+                    <td><code>sudo apt update</code> (安装前先执行)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt upgrade</code></td>
+                    <td>升级所有已装软件</td>
+                    <td><code>sudo apt upgrade -y</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt install</code></td>
+                    <td>安装软件</td>
+                    <td><code>sudo apt install nginx -y</code></td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt remove</code></td>
+                    <td>卸载软件（保留配置）</td>
+                    <td><code>sudo apt remove nginx</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt purge</code></td>
+                    <td>彻底卸载（含配置）</td>
+                    <td><code>sudo apt purge nginx</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt search</code></td>
+                    <td>搜索软件包</td>
+                    <td><code>apt search python3</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt show</code></td>
+                    <td>查看软件包信息</td>
+                    <td><code>apt show nginx</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>apt autoremove</code></td>
+                    <td>清理无用依赖</td>
+                    <td><code>sudo apt autoremove -y</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>dpkg -i</code></td>
+                    <td>安装本地deb包</td>
+                    <td><code>sudo dpkg -i package.deb</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+                <tr>
+                    <td><code>snap</code></td>
+                    <td>另一种包管理器</td>
+                    <td><code>sudo snap install code --classic</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">安装软件的标准流程</div>
+                <div class="pipeline">
+                    <span class="step">apt update</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">apt search 名称</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">apt show 名称</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">apt install -y</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 磁盘 ===================== -->
+    <div class="section" id="nav-disk">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(232,135,58,0.15);color:#e8873a;">&#128190;</div>
+            <h2>磁盘与压缩</h2>
+            <span class="badge">系统管理</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th><th>难度</th></tr>
+                <tr>
+                    <td><code>df -h</code></td>
+                    <td>查看磁盘使用情况</td>
+                    <td><code>df -h</code> → /dev/sda1 100G 50G 50G 50%</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>du -sh</code></td>
+                    <td>查看目录大小</td>
+                    <td><code>du -sh ~/*</code> (家目录下各文件夹大小)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>tar</code></td>
+                    <td>打包/解压</td>
+                    <td><code>tar -zcvf archive.tar.gz dir/</code> (压缩)</td>
+                    <td><span class="tag tag-essential">必会</span></td>
+                </tr>
+                <tr>
+                    <td><code>zip/unzip</code></td>
+                    <td>zip压缩/解压</td>
+                    <td><code>unzip file.zip -d target/</code></td>
+                    <td><span class="tag tag-beginner">入门</span></td>
+                </tr>
+                <tr>
+                    <td><code>gzip/gunzip</code></td>
+                    <td>gzip压缩/解压</td>
+                    <td><code>gunzip file.gz</code></td>
+                    <td><span class="tag tag-intermediate">进阶</span></td>
+                </tr>
+                <tr>
+                    <td><code>mount</code></td>
+                    <td>挂载文件系统</td>
+                    <td><code>sudo mount /dev/sdb1 /mnt/usb</code></td>
+                    <td><span class="tag tag-advanced">高级</span></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">tar 参数记忆口诀</div>
+                <div class="code-block">
+<span class="comment"># 压缩：</span>
+<span class="cmd">tar</span> <span class="flag">-zcvf</span> <span class="arg">archive.tar.gz</span> <span class="arg">dir/</span>
+        <span class="comment"># z=gzip  c=创建  v=显示过程  f=文件名</span>
+
+<span class="comment"># 解压：</span>
+<span class="cmd">tar</span> <span class="flag">-zxvf</span> <span class="arg">archive.tar.gz</span>
+        <span class="comment"># z=gzip  x=解压  v=显示过程  f=文件名</span>
+
+<span class="comment"># 只打包不压缩（用 .tar）：</span>
+<span class="cmd">tar</span> <span class="flag">-cvf</span> <span class="arg">archive.tar</span> <span class="arg">dir/</span>
+
+<span class="comment"># 解压到指定目录：</span>
+<span class="cmd">tar</span> <span class="flag">-zxvf</span> <span class="arg">archive.tar.gz</span> <span class="flag">-C</span> <span class="arg">/target/path</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 管道重定向 ===================== -->
+    <div class="section" id="nav-pipe">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128279;</div>
+            <h2>管道与重定向</h2>
+            <span class="badge">核心概念</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>符号</th><th>说明</th><th>示例</th></tr>
+                <tr>
+                    <td><code>|</code></td>
+                    <td>管道：前一个命令的输出作为后一个的输入</td>
+                    <td><code>ps aux | grep python</code></td>
+                </tr>
+                <tr>
+                    <td><code>&gt;</code></td>
+                    <td>输出重定向（覆盖）</td>
+                    <td><code>echo "hello" > file.txt</code></td>
+                </tr>
+                <tr>
+                    <td><code>&gt;&gt;</code></td>
+                    <td>输出重定向（追加）</td>
+                    <td><code>echo "world" >> file.txt</code></td>
+                </tr>
+                <tr>
+                    <td><code>2&gt;</code></td>
+                    <td>错误输出重定向</td>
+                    <td><code>cmd 2> error.log</code></td>
+                </tr>
+                <tr>
+                    <td><code>&amp;&gt;</code></td>
+                    <td>正确和错误都重定向</td>
+                    <td><code>cmd &amp;> all.log</code></td>
+                </tr>
+                <tr>
+                    <td><code>&lt;</code></td>
+                    <td>输入重定向</td>
+                    <td><code>sort < list.txt</code></td>
+                </tr>
+                <tr>
+                    <td><code>&lt;&lt;</code></td>
+                    <td>Here Document（多行输入）</td>
+                    <td><code>cat &lt;&lt; EOF ... EOF</code></td>
+                </tr>
+                <tr>
+                    <td><code>&amp;&amp;</code></td>
+                    <td>逻辑与（前一个成功才执行下一个）</td>
+                    <td><code>make &amp;&amp; make install</code></td>
+                </tr>
+                <tr>
+                    <td><code>||</code></td>
+                    <td>逻辑或（前一个失败才执行下一个）</td>
+                    <td><code>cmd || echo "失败"</code></td>
+                </tr>
+                <tr>
+                    <td><code>;</code></td>
+                    <td>顺序执行（不管成功失败）</td>
+                    <td><code>cmd1 ; cmd2</code></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">管道经典组合</div>
+                <div class="code-block">
+<span class="comment"># 1. 查找正在运行的进程</span>
+<span class="cmd">ps aux</span> <span class="pipe">|</span> <span class="cmd">grep</span> python
+
+<span class="comment"># 2. 统计某种文件数量</span>
+<span class="cmd">find</span> . <span class="flag">-name</span> <span class="arg">"*.py"</span> <span class="pipe">|</span> <span class="cmd">wc</span> <span class="flag">-l</span>
+
+<span class="comment"># 3. 查看占用内存最多的5个进程</span>
+<span class="cmd">ps aux</span> <span class="pipe">|</span> <span class="cmd">sort</span> <span class="flag">-rnk4</span> <span class="pipe">|</span> <span class="cmd">head</span> <span class="flag">-5</span>
+
+<span class="comment"># 4. 找出最大的文件</span>
+<span class="cmd">du</span> <span class="flag">-ah</span> ~ <span class="pipe">|</span> <span class="cmd">sort</span> <span class="flag">-rh</span> <span class="pipe">|</span> <span class="cmd">head</span> <span class="flag">-10</span>
+
+<span class="comment"># 5. 批量修改文件权限</span>
+<span class="cmd">find</span> . <span class="flag">-name</span> <span class="arg">"*.sh"</span> <span class="pipe">|</span> <span class="cmd">xargs</span> <span class="cmd">chmod</span> <span class="flag">+x</span>
+
+<span class="comment"># 6. 在日志中统计错误出现次数</span>
+<span class="cmd">grep</span> <span class="flag">-c</span> <span class="arg">"ERROR"</span> app.log
+
+<span class="comment"># 7. 替换文件中的字符串</span>
+<span class="cmd">sed</span> <span class="flag">-i</span> <span class="arg">'s/old_name/new_name/g'</span> *.py
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Shell 技巧 ===================== -->
+    <div class="section" id="nav-shell">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#9000;</div>
+            <h2>Shell 高效技巧</h2>
+            <span class="badge">效率提升</span>
+        </div>
+        <div class="section-body">
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">Tab 补全</div>
+                    <div class="card-desc">输入路径/命令前几个字母按Tab自动补全，按两次显示所有可选项</div>
+                    <code>cd ~/pr[Tab] → cd ~/projects/</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+R 反向搜索</div>
+                    <div class="card-desc">搜索历史命令，输入关键词即可匹配</div>
+                    <code>Ctrl+R → "ssh" → 找到之前的ssh命令</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+L 清屏</div>
+                    <div class="card-desc">等价于 clear，但不用打字</div>
+                    <code>Ctrl+L → 清空屏幕</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+C 中断</div>
+                    <div class="card-desc">强制停止当前运行的命令</div>
+                    <code>Ctrl+C → 停止正在运行的程序</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+Z 挂起</div>
+                    <div class="card-desc">暂停当前进程到后台</div>
+                    <code>Ctrl+Z → bg → 放到后台继续运行</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+D 退出</div>
+                    <div class="card-desc">发送EOF信号，退出当前Shell/会话</div>
+                    <code>Ctrl+D → 退出终端 / 退出python交互</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+A/E 行首/行尾</div>
+                    <div class="card-desc">光标快速移到行首或行尾</div>
+                    <code>Ctrl+A → 行首 / Ctrl+E → 行尾</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">Ctrl+W 删除单词</div>
+                    <div class="card-desc">向前删除一个单词</div>
+                    <code>Ctrl+W → 删除光标前一个单词</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">!! 上一条命令</div>
+                    <div class="card-desc">引用上一条命令</div>
+                    <code>sudo !! → 用sudo重新执行上一条</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">!$ 最后参数</div>
+                    <div class="card-desc">引用上一条命令的最后一个参数</div>
+                    <code>ls file.txt → vim !$</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">alias 别名</div>
+                    <div class="card-desc">给长命令起短名字</div>
+                    <code>alias ll='ls -alh'</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">history 历史</div>
+                    <div class="card-desc">查看命令历史，!数字执行</div>
+                    <code>history → !42 → 执行第42条命令</code>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">推荐的 ~/.zshrc 或 ~/.bashrc 别名</div>
+                <div class="code-block">
+<span class="cmd">alias</span> ll=<span class="arg">'ls -alh'</span>
+<span class="cmd">alias</span> la=<span class="arg">'ls -A'</span>
+<span class="cmd">alias</span> cls=<span class="arg">'clear'</span>
+<span class="cmd">alias</span> venv=<span class="arg">'source ~/projects/venv/bin/activate'</span>
+<span class="cmd">alias</span> gs=<span class="arg">'git status'</span>
+<span class="cmd">alias</span> gp=<span class="arg">'git push'</span>
+<span class="cmd">alias</span> gl=<span class="arg">'git pull'</span>
+<span class="cmd">alias</span> ..=<span class="arg">'cd ..'</span>
+<span class="cmd">alias</span> ...=<span class="arg">'cd ../..'</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Vim ===================== -->
+    <div class="section" id="nav-vim">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#9999;</div>
+            <h2>Vim 编辑器速查</h2>
+            <span class="badge">已配置</span>
+        </div>
+        <div class="section-body">
+            <h3 style="color:var(--accent);margin-bottom:12px;">四种模式</h3>
+            <table>
+                <tr><th>模式</th><th>进入方式</th><th>用途</th></tr>
+                <tr><td>普通模式</td><td>按 <code>Esc</code> 或打开vim默认进入</td><td>移动光标、复制粘贴、删除</td></tr>
+                <tr><td>插入模式</td><td>按 <code>i</code> / <code>a</code> / <code>o</code></td><td>输入文字</td></tr>
+                <tr><td>命令模式</td><td>普通模式下输入 <code>:</code></td><td>保存、退出、搜索替换</td></tr>
+                <tr><td>可视模式</td><td>按 <code>v</code> (字符) / <code>V</code> (行)</td><td>选择文本块</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">移动</h3>
+            <table>
+                <tr><th>按键</th><th>作用</th></tr>
+                <tr><td><code>h j k l</code></td><td>左 下 上 右（方向键也行）</td></tr>
+                <tr><td><code>gg</code></td><td>跳到文件开头</td></tr>
+                <tr><td><code>G</code></td><td>跳到文件末尾</td></tr>
+                <tr><td><code>:42</code></td><td>跳到第42行</td></tr>
+                <tr><td><code>0</code></td><td>行首</td></tr>
+                <tr><td><code>$</code></td><td>行尾</td></tr>
+                <tr><td><code>w</code> / <code>b</code></td><td>下一个单词开头 / 上一个单词开头</td></tr>
+                <tr><td><code>{</code> / <code>}</code></td><td>上一段 / 下一段（按空行分段）</td></tr>
+                <tr><td><code>Ctrl+d</code> / <code>Ctrl+u</code></td><td>向下/上翻半页</td></tr>
+                <tr><td><code>Ctrl+f</code> / <code>Ctrl+b</code></td><td>向下/上翻整页</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">编辑</h3>
+            <table>
+                <tr><th>按键</th><th>作用</th></tr>
+                <tr><td><code>i</code></td><td>在光标前插入</td></tr>
+                <tr><td><code>a</code></td><td>在光标后插入</td></tr>
+                <tr><td><code>o</code></td><td>下方新开一行并插入</td></tr>
+                <tr><td><code>O</code></td><td>上方新开一行并插入</td></tr>
+                <tr><td><code>dd</code></td><td>删除（剪切）整行</td></tr>
+                <tr><td><code>dw</code></td><td>删除一个单词</td></tr>
+                <tr><td><code>yy</code></td><td>复制整行</td></tr>
+                <tr><td><code>p</code></td><td>粘贴到光标后</td></tr>
+                <tr><td><code>u</code></td><td>撤销</td></tr>
+                <tr><td><code>Ctrl+r</code></td><td>重做（恢复撤销）</td></tr>
+                <tr><td><code>.</code></td><td>重复上一次操作</td></tr>
+                <tr><td><code>~</code></td><td>切换大小写</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">搜索替换</h3>
+            <table>
+                <tr><th>命令</th><th>作用</th></tr>
+                <tr><td><code>/关键词</code></td><td>向下搜索</td></tr>
+                <tr><td><code>?关键词</code></td><td>向上搜索</td></tr>
+                <tr><td><code>n</code> / <code>N</code></td><td>下一个 / 上一个匹配</td></tr>
+                <tr><td><code>:%s/old/new/g</code></td><td>全文替换 old 为 new</td></tr>
+                <tr><td><code>:%s/old/new/gc</code></td><td>全文替换（逐个确认）</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">保存退出</h3>
+            <table>
+                <tr><th>命令</th><th>作用</th></tr>
+                <tr><td><code>:w</code></td><td>保存</td></tr>
+                <tr><td><code>:q</code></td><td>退出</td></tr>
+                <tr><td><code>:wq</code></td><td>保存并退出</td></tr>
+                <tr><td><code>:q!</code></td><td>强制退出不保存</td></tr>
+                <tr><td><code>ZZ</code></td><td>有修改则保存退出，无修改直接退出</td></tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">已配置的自定义快捷键（Leader=空格）</div>
+                <code>空格+w</code> 保存 &nbsp;|&nbsp; <code>空格+q</code> 退出 &nbsp;|&nbsp; <code>jk</code> 退出插入模式 &nbsp;|&nbsp; <code>空格+nh</code> 清除搜索高亮 &nbsp;|&nbsp; <code>空格+cc</code> 注释 &nbsp;|&nbsp; <code>空格+sv</code> 垂直分屏
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 环境配置 ===================== -->
+    <div class="section" id="nav-env">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#9881;</div>
+            <h2>环境配置一览（已完成的）</h2>
+            <span class="badge">你的环境</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>环境</th><th>版本/路径</th><th>用途</th><th>配置方式</th></tr>
+                <tr>
+                    <td>WSL2 Ubuntu</td>
+                    <td>22.04.5 LTS</td>
+                    <td>Linux 开发环境</td>
+                    <td><code>wsl --install</code></td>
+                </tr>
+                <tr>
+                    <td>SSH 服务</td>
+                    <td>端口 2222</td>
+                    <td>远程连接（FinalShell）</td>
+                    <td><code>sshd_config</code> 改端口</td>
+                </tr>
+                <tr>
+                    <td>systemd</td>
+                    <td>已启用</td>
+                    <td>服务开机自启</td>
+                    <td><code>/etc/wsl.conf</code></td>
+                </tr>
+                <tr>
+                    <td>Python</td>
+                    <td>3.10.12</td>
+                    <td>Python 开发</td>
+                    <td>系统自带</td>
+                </tr>
+                <tr>
+                    <td>pip</td>
+                    <td>26.2.1（清华源）</td>
+                    <td>Python 包管理</td>
+                    <td><code>pip config</code></td>
+                </tr>
+                <tr>
+                    <td>Python 虚拟环境</td>
+                    <td>~/projects/venv</td>
+                    <td>隔离项目依赖</td>
+                    <td><code>python3 -m venv</code></td>
+                </tr>
+                <tr>
+                    <td>C/C++ 工具链</td>
+                    <td>gcc/g++/make/cmake</td>
+                    <td>C/C++ 编译</td>
+                    <td><code>apt install build-essential</code></td>
+                </tr>
+                <tr>
+                    <td>Zsh + Oh-My-Zsh</td>
+                    <td>agnoster 主题</td>
+                    <td>增强终端</td>
+                    <td><code>sh -c install.sh</code></td>
+                </tr>
+                <tr>
+                    <td>Vim</td>
+                    <td>8.2 + 自定义配置</td>
+                    <td>代码编辑</td>
+                    <td>~/.vimrc</td>
+                </tr>
+                <tr>
+                    <td>Git</td>
+                    <td>2.34.1</td>
+                    <td>版本控制</td>
+                    <td>系统自带</td>
+                </tr>
+                <tr>
+                    <td>UFW 防火墙</td>
+                    <td>放行 2222/22</td>
+                    <td>安全防护</td>
+                    <td><code>ufw allow</code></td>
+                </tr>
+                <tr>
+                    <td>中文支持</td>
+                    <td>zh_CN.UTF-8</td>
+                    <td>防乱码</td>
+                    <td><code>locale-gen</code></td>
+                </tr>
+                <tr>
+                    <td>Flask</td>
+                    <td>venv 内</td>
+                    <td>Web 开发练手</td>
+                    <td><code>pip install flask</code></td>
+                </tr>
+                <tr>
+                    <td>Windows Hosts</td>
+                    <td>GitHub IP 固定</td>
+                    <td>GitHub 加速</td>
+                    <td>hosts 文件</td>
+                </tr>
+                <tr>
+                    <td>SSH config</td>
+                    <td>443 端口 + 保活</td>
+                    <td>GitHub SSH 稳定</td>
+                    <td>~/.ssh/config</td>
+                </tr>
+                <tr>
+                    <td>开机自启脚本</td>
+                    <td>VBS 脚本</td>
+                    <td>自动启动 WSL+SSH</td>
+                    <td>Startup 目录</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== SSH ===================== -->
+    <div class="section" id="nav-ssh">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128274;</div>
+            <h2>SSH 远程连接</h2>
+            <span class="badge">远程操作</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>示例</th></tr>
+                <tr>
+                    <td><code>ssh</code></td>
+                    <td>远程登录</td>
+                    <td><code>ssh -p 2222 geist@127.0.0.1</code></td>
+                </tr>
+                <tr>
+                    <td><code>ssh-keygen</code></td>
+                    <td>生成密钥对</td>
+                    <td><code>ssh-keygen -t ed25519 -C "geist"</code></td>
+                </tr>
+                <tr>
+                    <td><code>ssh-copy-id</code></td>
+                    <td>复制公钥到远程</td>
+                    <td><code>ssh-copy-id -p 2222 geist@127.0.0.1</code></td>
+                </tr>
+                <tr>
+                    <td><code>scp</code></td>
+                    <td>远程复制文件</td>
+                    <td><code>scp -P 2222 file.txt geist@127.0.0.1:~/</code></td>
+                </tr>
+                <tr>
+                    <td><code>sftp</code></td>
+                    <td>交互式文件传输</td>
+                    <td><code>sftp -P 2222 geist@127.0.0.1</code></td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">SSH 配置文件 (~/.ssh/config)</div>
+                <div class="code-block">
+<span class="comment"># GitHub SSH 走 443 端口（绕过 22 限速）</span>
+Host github.com
+    HostName ssh.github.com
+    Port 443
+    User git
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">FinalShell 连接信息</div>
+                主机：<code>127.0.0.1</code> &nbsp; 端口：<code>2222</code> &nbsp; 用户：<code>geist</code> &nbsp; 密码：<code>geistd</code><br>
+                使用 localhost 方式，WSL IP 变化也不影响连接。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Git ===================== -->
+    <div class="section" id="nav-git">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#128279;</div>
+            <h2>Git 版本控制</h2>
+            <span class="badge">开发必备</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>命令</th><th>说明</th><th>常用示例</th></tr>
+                <tr>
+                    <td><code>git init</code></td>
+                    <td>初始化仓库</td>
+                    <td><code>git init</code></td>
+                </tr>
+                <tr>
+                    <td><code>git clone</code></td>
+                    <td>克隆远程仓库</td>
+                    <td><code>git clone git@github.com:user/repo.git</code></td>
+                </tr>
+                <tr>
+                    <td><code>git status</code></td>
+                    <td>查看状态</td>
+                    <td><code>git status</code></td>
+                </tr>
+                <tr>
+                    <td><code>git add</code></td>
+                    <td>添加到暂存区</td>
+                    <td><code>git add .</code> (全部) / <code>git add file.py</code></td>
+                </tr>
+                <tr>
+                    <td><code>git commit</code></td>
+                    <td>提交到本地仓库</td>
+                    <td><code>git commit -m "描述信息"</code></td>
+                </tr>
+                <tr>
+                    <td><code>git push</code></td>
+                    <td>推送到远程</td>
+                    <td><code>git push origin main</code></td>
+                </tr>
+                <tr>
+                    <td><code>git pull</code></td>
+                    <td>拉取远程更新</td>
+                    <td><code>git pull origin main</code></td>
+                </tr>
+                <tr>
+                    <td><code>git log</code></td>
+                    <td>查看提交历史</td>
+                    <td><code>git log --oneline --graph</code></td>
+                </tr>
+                <tr>
+                    <td><code>git branch</code></td>
+                    <td>分支管理</td>
+                    <td><code>git branch dev</code> / <code>git checkout dev</code></td>
+                </tr>
+                <tr>
+                    <td><code>git merge</code></td>
+                    <td>合并分支</td>
+                    <td><code>git merge dev</code> (把dev合并到当前分支)</td>
+                </tr>
+                <tr>
+                    <td><code>git diff</code></td>
+                    <td>查看差异</td>
+                    <td><code>git diff</code> (未暂存的) / <code>git diff --cached</code> (已暂存的)</td>
+                </tr>
+                <tr>
+                    <td><code>git remote</code></td>
+                    <td>管理远程仓库</td>
+                    <td><code>git remote add origin git@github.com:user/repo.git</code></td>
+                </tr>
+                <tr>
+                    <td><code>git config</code></td>
+                    <td>配置</td>
+                    <td><code>git config --global user.name "GEIST"</code></td>
+                </tr>
+                <tr>
+                    <td><code>git stash</code></td>
+                    <td>暂存当前修改</td>
+                    <td><code>git stash</code> / <code>git stash pop</code> (恢复)</td>
+                </tr>
+                <tr>
+                    <td><code>git reset</code></td>
+                    <td>回退版本</td>
+                    <td><code>git reset --hard HEAD~1</code> (退回上个版本)</td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">Git 工作流程</div>
+                <div class="pipeline">
+                    <span class="step">工作区</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">git add</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">暂存区</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">git commit</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">本地仓库</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">git push</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="step">远程仓库</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 组合技 ===================== -->
+    <div class="section" id="nav-combo">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(232,135,58,0.15);color:#e8873a;">&#9889;</div>
+            <h2>实战组合技</h2>
+            <span class="badge">面试加分</span>
+        </div>
+        <div class="section-body">
+            <div class="code-block">
+<span class="comment"># ============ 1. 部署 Flask 服务器 ============</span>
+<span class="cmd">cd</span> ~/projects/my_first_server
+<span class="cmd">source</span> ~/projects/venv/bin/activate    <span class="comment"># 激活虚拟环境</span>
+<span class="cmd">python</span> app.py                              <span class="comment"># 启动开发服务器</span>
+<span class="cmd">nohup</span> python app.py <span class="arg">&amp;</span>                    <span class="comment"># 后台运行（退出终端不中断）</span>
+
+<span class="comment"># ============ 2. 查看服务器日志 ============</span>
+<span class="cmd">tail</span> <span class="flag">-f</span> app.log                           <span class="comment"># 实时看日志</span>
+<span class="cmd">tail</span> <span class="flag">-100f</span> app.log                       <span class="comment"># 先看最后100行再实时</span>
+<span class="cmd">grep</span> <span class="flag">-rn</span> <span class="arg">"ERROR"</span> app.log                <span class="comment"># 搜索错误信息</span>
+
+<span class="comment"># ============ 3. 检查端口占用 ============</span>
+<span class="cmd">ss</span> <span class="flag">-tlnp</span> <span class="pipe">|</span> <span class="cmd">grep</span> <span class="arg">5000</span>              <span class="comment"># 看5000端口被谁占用</span>
+<span class="cmd">lsof</span> <span class="flag">-i</span>:5000                              <span class="comment"># 另一种方式</span>
+
+<span class="comment"># ============ 4. 杀掉占用端口的进程 ============</span>
+<span class="cmd">ss</span> <span class="flag">-tlnp</span> <span class="pipe">|</span> <span class="cmd">grep</span> <span class="arg">5000</span>              <span class="comment"># 找到PID</span>
+<span class="cmd">kill</span> <span class="flag">-9</span> <span class="arg">PID</span>                               <span class="comment"># 杀掉进程</span>
+<span class="cmd">fuser</span> <span class="flag">-k</span> 5000/tcp                           <span class="comment"># 一键杀掉占用5000的进程</span>
+
+<span class="comment"># ============ 5. 批量重命名文件 ============</span>
+<span class="cmd">for</span> f <span class="cmd">in</span> *.txt; <span class="cmd">do</span> mv <span class="arg">"$f"</span> <span class="arg">"${f%.txt}.md"</span>; <span class="cmd">done</span>  <span class="comment"># txt→md</span>
+
+<span class="comment"># ============ 6. 快速备份 ============</span>
+<span class="cmd">cp</span> app.py app.py.bak                     <span class="comment"># 简单备份</span>
+<span class="cmd">tar</span> <span class="flag">-zcvf</span> backup_$(<span class="cmd">date</span> +%Y%m%d).tar.gz ~/projects/  <span class="comment"># 带日期打包</span>
+
+<span class="comment"># ============ 7. 查看系统资源 ============</span>
+<span class="cmd">df</span> <span class="flag">-h</span>                                    <span class="comment"># 磁盘使用</span>
+<span class="cmd">free</span> <span class="flag">-h</span>                                   <span class="comment"># 内存使用</span>
+<span class="cmd">uptime</span>                                     <span class="comment"># 运行时间和负载</span>
+<span class="cmd">top</span>                                        <span class="comment"># 实时进程</span>
+
+<span class="comment"># ============ 8. 批量安装软件 ============</span>
+<span class="cmd">sudo apt update</span> <span class="arg">&amp;&amp;</span> <span class="cmd">sudo apt install</span> <span class="flag">-y</span> nginx mysql-server redis-server
+
+<span class="comment"># ============ 9. 一键部署（Git拉取+重启服务） ============</span>
+<span class="cmd">cd</span> ~/projects/myapp <span class="arg">&amp;&amp;</span> <span class="cmd">git pull</span> <span class="arg">&amp;&amp;</span> <span class="cmd">pip install</span> <span class="flag">-r</span> requirements.txt <span class="arg">&amp;&amp;</span> <span class="cmd">sudo systemctl restart</span> myapp
+
+<span class="comment"># ============ 10. 定时任务（crontab） ============</span>
+<span class="cmd">crontab</span> <span class="flag">-e</span>                                <span class="comment"># 编辑定时任务</span>
+<span class="comment"># 每天凌晨3点备份数据库</span>
+<span class="arg">0 3 * * * mysqldump -u root mydb > /backup/db_$(date +\%Y\%m\%d).sql</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试常考 ===================== -->
+    <div class="section">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>怎么查看端口被谁占用了？</td>
+                    <td><code>ss -tlnp | grep 端口号</code> 或 <code>lsof -i:端口号</code></td>
+                </tr>
+                <tr>
+                    <td>怎么查看系统资源？</td>
+                    <td><code>top/htop</code>(进程) <code>free -h</code>(内存) <code>df -h</code>(磁盘) <code>uptime</code>(负载)</td>
+                </tr>
+                <tr>
+                    <td>怎么查看实时日志？</td>
+                    <td><code>tail -f logfile</code> 配合 <code>grep</code> 过滤关键词</td>
+                </tr>
+                <tr>
+                    <td>怎么查找7天内修改过的文件？</td>
+                    <td><code>find . -mtime -7 -type f</code></td>
+                </tr>
+                <tr>
+                    <td>怎么杀掉卡住的进程？</td>
+                    <td>先 <code>ps aux | grep 名称</code> 找PID，再 <code>kill -9 PID</code></td>
+                </tr>
+                <tr>
+                    <td>软链接和硬链接的区别？</td>
+                    <td>软链接(<code>ln -s</code>)是快捷方式，可以跨文件系统，删除源文件后失效；硬链接(<code>ln</code>)是同一个inode，不能跨文件系统，删除源文件后仍可用</td>
+                </tr>
+                <tr>
+                    <td>怎么设置开机自启服务？</td>
+                    <td><code>sudo systemctl enable 服务名</code>（基于systemd）</td>
+                </tr>
+                <tr>
+                    <td>怎么在文件中搜索并替换文本？</td>
+                    <td><code>sed -i 's/旧文本/新文本/g' 文件名</code></td>
+                </tr>
+                <tr>
+                    <td>怎么查看一个命令的详细用法？</td>
+                    <td><code>man 命令</code> 或 <code>命令 --help</code></td>
+                </tr>
+                <tr>
+                    <td>环境变量怎么设置？</td>
+                    <td><code>export VAR=value</code>(临时) / 写入 <code>~/.bashrc</code> 或 <code>~/.zshrc</code>(永久)</td>
+                </tr>
+                <tr>
+                    <td>怎么在后台运行程序？</td>
+                    <td><code>nohup command &amp;</code> 退出终端不中断，输出默认到 nohup.out</td>
+                </tr>
+                <tr>
+                    <td>chmod 755 是什么意思？</td>
+                    <td>所有者=rwx(7)，组=r-x(5)，其他=r-x(5)。常用于脚本和目录</td>
+                </tr>
+                <tr>
+                    <td>怎么查看当前网络IP？</td>
+                    <td><code>ip addr</code>(内网) / <code>curl ifconfig.me</code>(公网)</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST Linux 学习笔记 &nbsp;|&nbsp; WSL Ubuntu 22.04 &nbsp;|&nbsp; 2026-09-20</p>
+    <p>从 WSL + FinalShell 远程连接开始，到 Vim/Python/Git 环境配置，完整学习路径</p>
+</div>
+
+</body>
+</html>
