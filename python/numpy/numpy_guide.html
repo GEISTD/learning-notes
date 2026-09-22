@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumPy 入门完全指南 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --heading: #f0f6fc;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --yellow: #d29922;
+            --red: #f85149;
+            --purple: #bc8cff;
+            --orange: #e8873a;
+            --code-bg: #1c2128;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+        .header {
+            text-align: center;
+            padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.85em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+
+        .section {
+            margin-bottom: 48px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 20px 28px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.5em; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.3em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8em;
+        }
+        .section-body { padding: 24px 28px; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th {
+            text-align: left; padding: 10px 14px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.85em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.88em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px 20px; margin: 12px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85em; line-height: 1.6; color: var(--text); white-space: pre;
+        }
+        .code-block .kw { color: var(--purple); }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .var { color: var(--yellow); }
+        .code-block .op { color: var(--red); }
+        .code-block .out { color: #8b949e; }
+
+        .callout {
+            border-left: 4px solid; padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.78em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .tag-essential { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px; margin: 16px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 8px; font-size: 0.95em; }
+        .card .card-desc { color: #8b949e; font-size: 0.85em; margin-bottom: 8px; }
+
+        .stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px; margin: 24px 0;
+        }
+        .stat-card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 20px; text-align: center;
+        }
+        .stat-card .num { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-card .label { color: #8b949e; font-size: 0.85em; margin-top: 4px; }
+
+        .compare-table th { background: var(--code-bg); }
+        .compare-table .vs { color: var(--orange); text-align: center; font-weight: bold; }
+
+        .pipeline {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            margin: 16px 0; padding: 16px; background: var(--code-bg);
+            border-radius: 8px; border: 1px solid var(--border);
+        }
+        .pipeline .step {
+            background: var(--card); border: 1px solid var(--accent);
+            padding: 6px 14px; border-radius: 6px; color: var(--accent); font-size: 0.85em;
+        }
+        .pipeline .arrow { color: var(--orange); font-size: 1.2em; }
+
+        .footer {
+            text-align: center; padding: 40px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>NumPy 入门完全指南</h1>
+    <div class="meta">Python 数据科学基石 &nbsp;|&nbsp; 2026-09-22 &nbsp;|&nbsp; 从零到实战</div>
+</div>
+
+<div class="nav">
+    <a href="#nav-intro">什么是NumPy</a>
+    <a href="#nav-install">安装与导入</a>
+    <a href="#nav-create">创建数组</a>
+    <a href="#nav-attr">数组属性</a>
+    <a href="#nav-index">索引与切片</a>
+    <a href="#nav-shape">形状操作</a>
+    <a href="#nav-math">数学运算</a>
+    <a href="#nav-broadcast">广播机制</a>
+    <a href="#nav-stats">统计函数</a>
+    <a href="#nav-linear">线性代数</a>
+    <a href="#nav-random">随机数</a>
+    <a href="#nav-io">文件读写</a>
+    <a href="#nav-vs">vs Python列表</a>
+    <a href="#nav-tips">性能技巧</a>
+    <a href="#nav-interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat-card"><div class="num">12</div><div class="label">核心模块</div></div>
+        <div class="stat-card"><div class="num">80+</div><div class="label">常用API</div></div>
+        <div class="stat-card"><div class="num">30+</div><div class="label">代码示例</div></div>
+        <div class="stat-card"><div class="num">15</div><div class="label">面试题</div></div>
+    </div>
+
+    <!-- ===================== 什么是 NumPy ===================== -->
+    <div class="section" id="nav-intro">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#129518;</div>
+            <h2>什么是 NumPy</h2>
+            <span class="badge">基础概念</span>
+        </div>
+        <div class="section-body">
+            <p style="margin-bottom:16px;">NumPy（Numerical Python）是 Python 科学计算的基础库，提供了高性能的多维数组对象和用于操作这些数组的工具。它是 Pandas、Matplotlib、Scikit-learn、TensorFlow 等几乎所有 Python 数据科学库的底层依赖。</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">核心对象：ndarray</div>
+                    <div class="card-desc">N 维数组，所有元素必须是相同类型，存储在一块连续内存中</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">速度快</div>
+                    <div class="card-desc">底层 C 实现，比 Python 列表快 10-100 倍</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">内存省</div>
+                    <div class="card-desc">连续内存存储，没有 Python 对象的额外开销</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">矢量化</div>
+                    <div class="card-desc">不需要写 for 循环，直接对整个数组做运算</div>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">为什么 NumPy 比 Python 列表快？</div>
+                <strong>1. 连续内存</strong>：NumPy 数组存储在一块连续的内存中，CPU 缓存命中率高<br>
+                <strong>2. 类型固定</strong>：所有元素同类型（如 float64），不需要每次检查类型<br>
+                <strong>3. 矢量化操作</strong>：底层用 C 循环，省去 Python 解释器的开销<br>
+                <strong>4. SIMD 指令</strong>：利用 CPU 的并行指令集同时处理多个数据
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 安装与导入 ===================== -->
+    <div class="section" id="nav-install">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128230;</div>
+            <h2>安装与导入</h2>
+            <span class="badge">准备工作</span>
+        </div>
+        <div class="section-body">
+            <div class="code-block"><span class="com"># 安装（在虚拟环境中）</span>
+<span class="var">pip</span> install numpy
+
+<span class="com"># 导入（约定俗成的别名 np）</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="com"># 查看版本</span>
+<span class="kw">print</span>(np.<span class="var">__version__</span>)
+<span class="out"># 2.1.1</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">约定</div>
+                全世界都用 <code>import numpy as np</code>，不要用别的别名。面试和开源项目里都是这样写的。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 创建数组 ===================== -->
+    <div class="section" id="nav-create">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128221;</div>
+            <h2>创建数组</h2>
+            <span class="badge">最常用</span>
+        </div>
+        <div class="section-body">
+            <h3 style="color:var(--accent);margin-bottom:12px;">从列表/元组创建</h3>
+            <div class="code-block"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="com"># 一维数组</span>
+a = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>])
+<span class="com"># array([1, 2, 3, 4, 5])</span>
+
+<span class="com"># 二维数组（矩阵）</span>
+b = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+              [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+<span class="com"># array([[1, 2, 3],
+#        [4, 5, 6]])</span>
+
+<span class="com"># 三维数组</span>
+c = np.<span class="fn">array</span>([[[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]],
+              [[<span class="num">5</span>, <span class="num">6</span>], [<span class="num">7</span>, <span class="num">8</span>]]])
+
+<span class="com"># 指定数据类型</span>
+d = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], dtype=np.float64)
+<span class="com"># array([1., 2., 3.])</span></div>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">快速创建特殊数组</h3>
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例</th><th>结果</th></tr>
+                <tr>
+                    <td><code>np.zeros(shape)</code></td>
+                    <td>全零数组</td>
+                    <td><code>np.zeros((2,3))</code></td>
+                    <td>2x3 的全零矩阵</td>
+                </tr>
+                <tr>
+                    <td><code>np.ones(shape)</code></td>
+                    <td>全一数组</td>
+                    <td><code>np.ones((3,))</code></td>
+                    <td>[1. 1. 1.]</td>
+                </tr>
+                <tr>
+                    <td><code>np.full(shape, val)</code></td>
+                    <td>填充固定值</td>
+                    <td><code>np.full((2,2), 7)</code></td>
+                    <td>2x2 全是 7</td>
+                </tr>
+                <tr>
+                    <td><code>np.zeros_like(a)</code></td>
+                    <td>同形状全零</td>
+                    <td><code>np.zeros_like(b)</code></td>
+                    <td>和 b 同形状的全零数组</td>
+                </tr>
+                <tr>
+                    <td><code>np.eye(n)</code></td>
+                    <td>单位矩阵</td>
+                    <td><code>np.eye(3)</code></td>
+                    <td>3x3 对角线为1</td>
+                </tr>
+                <tr>
+                    <td><code>np.arange(start, stop, step)</code></td>
+                    <td>等差数列（不包含stop）</td>
+                    <td><code>np.arange(0, 10, 2)</code></td>
+                    <td>[0 2 4 6 8]</td>
+                </tr>
+                <tr>
+                    <td><code>np.linspace(start, stop, num)</code></td>
+                    <td>等差数列（包含stop）</td>
+                    <td><code>np.linspace(0, 1, 5)</code></td>
+                    <td>[0. 0.25 0.5 0.75 1.]</td>
+                </tr>
+                <tr>
+                    <td><code>np.logspace(start, stop, num)</code></td>
+                    <td>对数等差数列</td>
+                    <td><code>np.logspace(0, 2, 3)</code></td>
+                    <td>[1. 10. 100.]</td>
+                </tr>
+                <tr>
+                    <td><code>np.empty(shape)</code></td>
+                    <td>未初始化（最快）</td>
+                    <td><code>np.empty((2,2))</code></td>
+                    <td>随机垃圾值</td>
+                </tr>
+            </table>
+
+            <div class="code-block"><span class="com"># 实战示例</span>
+<span class="var">zeros</span> = np.<span class="fn">zeros</span>((<span class="num">3</span>, <span class="num">4</span>))       <span class="com"># 3行4列全零</span>
+<span class="var">ones</span>  = np.<span class="fn">ones</span>((<span class="num">2</span>, <span class="num">5</span>))        <span class="com"># 2行5列全一</span>
+<span class="var">eye</span>   = np.<span class="fn">eye</span>(<span class="num">4</span>)               <span class="com"># 4x4单位矩阵</span>
+<span class="var">seq</span>   = np.<span class="fn">arange</span>(<span class="num">0</span>, <span class="num">20</span>, <span class="num">5</span>)       <span class="com"># [0 5 10 15]</span>
+<span class="var">lin</span>   = np.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">10</span>, <span class="num">5</span>)     <span class="com"># [ 0.   2.5  5.   7.5 10. ]</span>
+
+<span class="com"># 创建随机数组</span>
+<span class="var">rand</span>  = np.<span class="fn">random</span>.rand(<span class="num">3</span>, <span class="num">3</span>)     <span class="com"># 0~1均匀分布, 3x3</span>
+<span class="var">randn</span> = np.<span class="fn">random</span>.randn(<span class="num">3</span>, <span class="num">3</span>)    <span class="com"># 标准正态分布, 3x3</span>
+<span class="var">randint</span> = np.<span class="fn">random</span>.randint(<span class="num">0</span>, <span class="num">10</span>, size=(<span class="num">2</span>,<span class="num">3</span>))  <span class="com"># 0~9随机整数</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">arange vs linspace 的区别</div>
+                <strong>arange</strong>：指定步长，自动算个数。<code>np.arange(0, 10, 2)</code> → [0 2 4 6 8]<br>
+                <strong>linspace</strong>：指定个数，自动算步长。<code>np.linspace(0, 10, 5)</code> → [0. 2.5 5. 7.5 10.]<br>
+                记忆：arange 像 Python range，linspace 适合需要等分场景。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 数组属性 ===================== -->
+    <div class="section" id="nav-attr">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#128221;</div>
+            <h2>数组属性</h2>
+            <span class="badge">基础必会</span>
+        </div>
+        <div class="section-body">
+            <div class="code-block">a = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+              [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+
+a.<span class="var">ndim</span>      <span class="com"># 维度数 → 2</span>
+a.<span class="var">shape</span>     <span class="com"># 形状 → (2, 3)  即2行3列</span>
+a.<span class="var">size</span>      <span class="com"># 元素总数 → 6</span>
+a.<span class="var">dtype</span>     <span class="com"># 数据类型 → int64</span>
+a.<span class="var">itemsize</span>  <span class="com"># 每个元素字节数 → 8</span>
+a.<span class="var">nbytes</span>    <span class="com"># 总字节数 → 48 (6*8)</span>
+a.<span class="var">T</span>         <span class="com"># 转置 → shape变为(3,2)</span></div>
+
+            <table>
+                <tr><th>属性</th><th>说明</th><th>示例结果</th></tr>
+                <tr><td><code>ndim</code></td><td>维度数（轴的个数）</td><td>2</td></tr>
+                <tr><td><code>shape</code></td><td>每个维度的大小（元组）</td><td>(2, 3)</td></tr>
+                <tr><td><code>size</code></td><td>元素总数 = 各维度乘积</td><td>6</td></tr>
+                <tr><td><code>dtype</code></td><td>元素数据类型</td><td>int64 / float64</td></tr>
+                <tr><td><code>itemsize</code></td><td>单个元素字节数</td><td>8（int64）</td></tr>
+                <tr><td><code>nbytes</code></td><td>总字节数 = size * itemsize</td><td>48</td></tr>
+                <tr><td><code>T</code></td><td>转置（行变列）</td><td>shape (3,2)</td></tr>
+                <tr><td><code>flat</code></td><td>迭代器（展平访问）</td><td>—</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">常见数据类型</h3>
+            <table>
+                <tr><th>类型</th><th>说明</th><th>范围</th></tr>
+                <tr><td><code>np.int8</code></td><td>8位整数</td><td>-128 ~ 127</td></tr>
+                <tr><td><code>np.int32</code></td><td>32位整数</td><td>-2^31 ~ 2^31-1</td></tr>
+                <tr><td><code>np.int64</code></td><td>64位整数（默认）</td><td>-2^63 ~ 2^63-1</td></tr>
+                <tr><td><code>np.float32</code></td><td>32位浮点</td><td>~7位有效数字</td></tr>
+                <tr><td><code>np.float64</code></td><td>64位浮点（默认）</td><td>~15位有效数字</td></tr>
+                <tr><td><code>np.bool_</code></td><td>布尔型</td><td>True / False</td></tr>
+                <tr><td><code>np.complex128</code></td><td>复数</td><td>实部+虚部</td></tr>
+                <tr><td><code>np.str_</code></td><td>字符串</td><td>—</td></tr>
+            </table>
+
+            <div class="code-block"><span class="com"># 类型转换</span>
+a = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+a.<span class="fn">astype</span>(np.float64)     <span class="com"># int64 → float64</span>
+<span class="com"># array([1., 2., 3.])</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 索引与切片 ===================== -->
+    <div class="section" id="nav-index">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#128269;</div>
+            <h2>索引与切片</h2>
+            <span class="badge">核心技能</span>
+        </div>
+        <div class="section-body">
+            <h3 style="color:var(--accent);margin-bottom:12px;">一维数组索引</h3>
+            <div class="code-block">a = np.<span class="fn">arange</span>(<span class="num">10</span>)
+<span class="com"># array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])</span>
+
+a[<span class="num">0</span>]            <span class="com"># 第一个 → 0</span>
+a[<span class="num">-1</span>]           <span class="com"># 最后一个 → 9</span>
+a[<span class="num">2</span>:<span class="num">5</span>]          <span class="com"># 切片 [2,3,4]</span>
+a[<span class="num">0</span>:<span class="num">10</span>:<span class="num">2</span>]       <span class="com"># 步长2 [0,2,4,6,8]</span>
+a[::<span class="num">-1</span>]          <span class="com"># 反转 [9,8,7,...,0]</span></div>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">二维数组索引</h3>
+            <div class="code-block">b = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+              [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>],
+              [<span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>]])
+
+<span class="com"># b[row, col]  或  b[row][col]</span>
+b[<span class="num">0</span>, <span class="num">0</span>]          <span class="com"># 左上角 → 1</span>
+b[<span class="num">2</span>, <span class="num">2</span>]          <span class="com"># 右下角 → 9</span>
+b[<span class="num">-1</span>, <span class="num">-1</span>]         <span class="com"># 右下角 → 9</span>
+b[<span class="num">0</span>]             <span class="com"># 第0行 → [1, 2, 3]</span>
+b[:, <span class="num">0</span>]          <span class="com"># 第0列 → [1, 4, 7]</span>
+b[<span class="num">0</span>:<span class="num">2</span>, <span class="num">1</span>:<span class="num">3</span>]       <span class="com"># 前2行, 第1-2列 → [[2,3],[5,6]]</span>
+b[<span class="num">::</span><span class="num">-1</span>]           <span class="com"># 行反转 → [[7,8,9],[4,5,6],[1,2,3]]</span></div>
+
+            <div class="pipeline">
+                <span class="step">行索引</span>
+                <span class="arrow">,</span>
+                <span class="step">列索引</span>
+                <span class="arrow">→</span>
+                <span class="step">b[row, col]</span>
+            </div>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">花式索引（用列表/数组索引）</h3>
+            <div class="code-block">a = np.<span class="fn">arange</span>(<span class="num">10</span>)
+
+<span class="com"># 用列表选多个元素</span>
+a[[<span class="num">1</span>, <span class="num">3</span>, <span class="num">5</span>]]       <span class="com"># → [1, 3, 5]</span>
+
+<span class="com"># 二维花式索引</span>
+b = np.<span class="fn">arange</span>(<span class="num">12</span>).<span class="fn">reshape</span>(<span class="num">3</span>, <span class="num">4</span>)
+b[[<span class="num">0</span>, <span class="num">2</span>]]           <span class="com"># 选第0行和第2行</span>
+b[:, [<span class="num">0</span>, <span class="num">2</span>]]        <span class="com"># 选第0列和第2列</span>
+b[[<span class="num">0</span>, <span class="num">1</span>], [<span class="num">0</span>, <span class="num">1</span>]]     <span class="com"># → [0, 5]  (取 (0,0) 和 (1,1))</span></div>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">布尔索引（条件筛选）</h3>
+            <div class="code-block">a = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>])
+
+<span class="com"># 条件筛选</span>
+a[a > <span class="num">3</span>]             <span class="com"># → [4, 5, 6]</span>
+a[a <span class="op">%</span> <span class="num">2</span> == <span class="num">0</span>]        <span class="com"># → [2, 4, 6]  偶数</span>
+a[(a > <span class="num">2</span>) <span class="op">&amp;</span> (a < <span class="num">6</span>)]   <span class="com"># → [3, 4, 5]  注意用 & 而不是 and</span>
+
+<span class="com"># 布尔数组</span>
+mask = a > <span class="num">3</span>
+<span class="com"># array([False, False, False, True, True, True])</span>
+a[mask]                 <span class="com"># → [4, 5, 6]</span>
+
+<span class="com"># 条件赋值</span>
+a[a > <span class="num">3</span>] = <span class="num">0</span>           <span class="com"># 大于3的都变成0 → [1, 2, 3, 0, 0, 0]</span></div>
+
+            <div class="callout warn">
+                <div class="callout-title">注意：& | ~ 而不是 and or not</div>
+                布尔索引中多条件组合必须用 <code>&amp;</code>(与) <code>|</code>(或) <code>~</code>(非)，不能用 Python 的 <code>and</code> <code>or</code> <code>not</code>。而且每个条件要加括号。
+            </div>
+
+            <div class="callout danger">
+                <div class="callout-title">切片是视图，不是副本！</div>
+                <div class="code-block">a = np.<span class="fn">arange</span>(<span class="num">5</span>)     <span class="com"># [0, 1, 2, 3, 4]</span>
+b = a[<span class="num">1</span>:<span class="num">4</span>]          <span class="com"># b 是 a 的视图，不是副本！</span>
+b[<span class="num">0</span>] = <span class="num">99</span>           <span class="com"># 修改 b 会影响 a</span>
+<span class="kw">print</span>(a)            <span class="com"># [0, 99, 2, 3, 4]  ← a 也变了！</span>
+
+<span class="com"># 如果要副本，必须显式 copy</span>
+c = a[<span class="num">1</span>:<span class="num">4</span>].<span class="fn">copy</span>()    <span class="com"># 现在 c 是独立的</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 形状操作 ===================== -->
+    <div class="section" id="nav-shape">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128208;</div>
+            <h2>形状操作</h2>
+            <span class="badge">高频使用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例</th><th>是否返回副本</th></tr>
+                <tr>
+                    <td><code>reshape(shape)</code></td>
+                    <td>改变形状（元素总数不变）</td>
+                    <td><code>a.reshape(2, 3)</code></td>
+                    <td>视图（可能时）</td>
+                </tr>
+                <tr>
+                    <td><code>resize(shape)</code></td>
+                    <td>改变形状（原地修改）</td>
+                    <td><code>a.resize(2, 3)</code></td>
+                    <td>原地</td>
+                </tr>
+                <tr>
+                    <td><code>ravel()</code></td>
+                    <td>展平为一维</td>
+                    <td><code>a.ravel()</code></td>
+                    <td>视图</td>
+                </tr>
+                <tr>
+                    <td><code>flatten()</code></td>
+                    <td>展平为一维</td>
+                    <td><code>a.flatten()</code></td>
+                    <td>副本</td>
+                </tr>
+                <tr>
+                    <td><code>transpose()</code> / <code>.T</code></td>
+                    <td>转置</td>
+                    <td><code>a.T</code></td>
+                    <td>视图</td>
+                </tr>
+                <tr>
+                    <td><code>swapaxes(ax1, ax2)</code></td>
+                    <td>交换两个轴</td>
+                    <td><code>a.swapaxes(0, 1)</code></td>
+                    <td>视图</td>
+                </tr>
+                <tr>
+                    <td><code>np.concatenate()</code></td>
+                    <td>拼接数组</td>
+                    <td><code>np.concatenate([a, b])</code></td>
+                    <td>新数组</td>
+                </tr>
+                <tr>
+                    <td><code>np.vstack()</code></td>
+                    <td>垂直拼接（上下）</td>
+                    <td><code>np.vstack([a, b])</code></td>
+                    <td>新数组</td>
+                </tr>
+                <tr>
+                    <td><code>np.hstack()</code></td>
+                    <td>水平拼接（左右）</td>
+                    <td><code>np.hstack([a, b])</code></td>
+                    <td>新数组</td>
+                </tr>
+                <tr>
+                    <td><code>np.split()</code></td>
+                    <td>分割数组</td>
+                    <td><code>np.split(a, 3)</code></td>
+                    <td>列表</td>
+                </tr>
+                <tr>
+                    <td><code>np.squeeze()</code></td>
+                    <td>去掉长度为1的维度</td>
+                    <td><code>np.squeeze(a)</code></td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>np.expand_dims()</code></td>
+                    <td>增加一个维度</td>
+                    <td><code>np.expand_dims(a, 0)</code></td>
+                    <td>—</td>
+                </tr>
+            </table>
+
+            <div class="code-block"><span class="com"># reshape 最常用</span>
+a = np.<span class="fn">arange</span>(<span class="num">12</span>)
+a.<span class="fn">reshape</span>(<span class="num">3</span>, <span class="num">4</span>)      <span class="com"># 3行4列</span>
+<span class="com"># array([[ 0,  1,  2,  3],
+#        [ 4,  5,  6,  7],
+#        [ 8,  9, 10, 11]])</span>
+
+a.<span class="fn">reshape</span>(<span class="num">-1</span>, <span class="num">4</span>)     <span class="com"># -1表示自动计算 → 3行4列</span>
+a.<span class="fn">reshape</span>(<span class="num">2</span>, <span class="num">-1</span>)     <span class="com"># → 2行6列</span>
+a.<span class="fn">reshape</span>(<span class="num">-1</span>)         <span class="com"># 展平 → 一维</span>
+
+<span class="com"># 拼接</span>
+a = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]])
+b = np.<span class="fn">array</span>([[<span class="num">5</span>, <span class="num">6</span>]])
+
+np.<span class="fn">vstack</span>([a, b])      <span class="com"># 上下拼 → [[1,2],[3,4],[5,6]]</span>
+np.<span class="fn">hstack</span>([a, b.T])   <span class="com"># 左右拼 → [[1,2,5],[3,4,6]]</span>
+
+<span class="com"># 分割</span>
+c = np.<span class="fn">arange</span>(<span class="num">12</span>).<span class="fn">reshape</span>(<span class="num">2</span>, <span class="num">6</span>)
+np.<span class="fn">hsplit</span>(c, <span class="num">3</span>)        <span class="com"># 水平分3份 → 3个(2,2)数组</span>
+np.<span class="fn">vsplit</span>(c, <span class="num">2</span>)        <span class="com"># 垂直分2份 → 2个(1,6)数组</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">reshape 中的 -1</div>
+                <code>-1</code> 表示"自动计算这个维度"。例如 12 个元素 reshape(3, -1)，NumPy 自动算出 -1 = 4。只能有一个 -1。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 数学运算 ===================== -->
+    <div class="section" id="nav-math">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#9881;</div>
+            <h2>数学运算</h2>
+            <span class="badge">核心功能</span>
+        </div>
+        <div class="section-body">
+            <h3 style="color:var(--accent);margin-bottom:12px;">逐元素运算</h3>
+            <div class="code-block">a = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+b = np.<span class="fn">array</span>([<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>])
+
+<span class="com"># 算术运算（逐元素）</span>
+a + b          <span class="com"># [5, 7, 9]</span>
+a - b          <span class="com"># [-3, -3, -3]</span>
+a * b          <span class="com"># [4, 10, 18]   注意：这不是矩阵乘法！</span>
+a / b          <span class="com"># [0.25, 0.4, 0.5]</span>
+a <span class="op">**</span> <span class="num">2</span>        <span class="com"># [1, 4, 9]   幂运算</span>
+a <span class="op">%</span> b          <span class="com"># [1, 2, 3]   取余</span>
+<span class="num">1</span> / a          <span class="com"># [1., 0.5, 0.333]</span>
+
+<span class="com"># 标量运算（每个元素都参与）</span>
+a * <span class="num">10</span>         <span class="com"># [10, 20, 30]</span>
+a + <span class="num">100</span>        <span class="com"># [101, 102, 103]</span></div>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">通用数学函数</h3>
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例</th></tr>
+                <tr><td><code>np.sqrt(a)</code></td><td>平方根</td><td>→ [1.41, 1.41, 1.73]</td></tr>
+                <tr><td><code>np.abs(a)</code></td><td>绝对值</td><td>→ [1, 2, 3]</td></tr>
+                <tr><td><code>np.exp(a)</code></td><td>e的幂</td><td>→ [2.72, 7.39, 20.09]</td></tr>
+                <tr><td><code>np.log(a)</code></td><td>自然对数</td><td>→ [0, 0.69, 1.10]</td></tr>
+                <tr><td><code>np.log2(a)</code></td><td>以2为底对数</td><td>—</td></tr>
+                <tr><td><code>np.log10(a)</code></td><td>以10为底对数</td><td>—</td></tr>
+                <tr><td><code>np.sin(a)</code></td><td>正弦</td><td>—</td></tr>
+                <tr><td><code>np.cos(a)</code></td><td>余弦</td><td>—</td></tr>
+                <tr><td><code>np.tan(a)</code></td><td>正切</td><td>—</td></tr>
+                <tr><td><code>np.ceil(a)</code></td><td>向上取整</td><td>—</td></tr>
+                <tr><td><code>np.floor(a)</code></td><td>向下取整</td><td>—</td></tr>
+                <tr><td><code>np.round(a)</code></td><td>四舍五入</td><td>—</td></tr>
+                <tr><td><code>np.clip(a, min, max)</code></td><td>截断到范围</td><td><code>np.clip(a, 2, 5)</code></td></tr>
+                <tr><td><code>np.maximum(a, b)</code></td><td>逐元素取最大</td><td>→ [4, 5, 6]</td></tr>
+                <tr><td><code>np.minimum(a, b)</code></td><td>逐元素取最小</td><td>→ [1, 2, 3]</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">矩阵乘法</h3>
+            <div class="code-block">a = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]])
+b = np.<span class="fn">array</span>([[<span class="num">5</span>, <span class="num">6</span>], [<span class="num">7</span>, <span class="num">8</span>]])
+
+<span class="com"># 矩阵乘法（三种等价写法）</span>
+a <span class="op">@</span> b              <span class="com"># Python 3.5+ 推荐写法</span>
+np.<span class="fn">dot</span>(a, b)        <span class="com"># 传统写法</span>
+a.<span class="fn">dot</span>(b)           <span class="com"># 方法写法</span>
+<span class="com"># 结果: [[19, 22], [43, 50]]</span>
+
+<span class="com"># 注意区分：</span>
+a * b              <span class="com"># 逐元素相乘 → [[5,12],[21,32]]  不是矩阵乘法！</span></div>
+
+            <div class="callout warn">
+                <div class="callout-title">*</code> vs @ 的区别</div>
+                <code>*</code> 是逐元素相乘（element-wise），<code>@</code> 是矩阵乘法（matrix multiplication）。<br>
+                这是初学者最常犯的错误！面试必考。
+            </div>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">比较运算</h3>
+            <div class="code-block">a = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>])
+b = np.<span class="fn">array</span>([<span class="num">4</span>, <span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>])
+
+a > b              <span class="com"># [False, False, True, True]</span>
+a == b             <span class="com"># [False, False, False, False]</span>
+a < b              <span class="com"># [True, True, False, False]</span>
+np.<span class="fn">array_equal</span>(a, b)  <span class="com"># False  判断两个数组是否完全相同</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 广播机制 ===================== -->
+    <div class="section" id="nav-broadcast">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(232,135,58,0.15);color:#e8873a;">&#128225;</div>
+            <h2>广播机制（Broadcasting）</h2>
+            <span class="badge">面试必考</span>
+        </div>
+        <div class="section-body">
+            <p style="margin-bottom:16px;">广播是 NumPy 最强大的特性之一：当两个数组形状不同时，NumPy 会自动"扩展"较小的数组，使运算可以进行，而不需要真正复制数据。</p>
+
+            <h3 style="color:var(--accent);margin-bottom:12px;">广播规则</h3>
+            <div class="callout tip">
+                <div class="callout-title">三条规则</div>
+                <strong>规则1</strong>：如果维度数不同，在较小数组的形状前面补 1<br>
+                <strong>规则2</strong>：如果某个维度为 1，则扩展到和另一个数组相同<br>
+                <strong>规则3</strong>：如果两个数组在某个维度既不相同也不为 1，则报错
+            </div>
+
+            <div class="code-block"><span class="com"># 示例1：数组 + 标量</span>
+a = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+a + <span class="num">10</span>              <span class="com"># [11, 12, 13]</span>
+<span class="com"># 标量 10 被广播为 [10, 10, 10]</span>
+
+<span class="com"># 示例2：二维 + 一维</span>
+a = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+              [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])     <span class="com"># shape (2, 3)</span>
+b = np.<span class="fn">array</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>])       <span class="com"># shape (3,)</span>
+
+a + b              <span class="com"># b 广播为 [[10,20,30],[10,20,30]]</span>
+<span class="com"># [[11, 22, 33],</span>
+<span class="com">#  [14, 25, 36]]</span>
+
+<span class="com"># 示例3：列向量 + 行向量</span>
+a = np.<span class="fn">array</span>([[<span class="num">1</span>], [<span class="num">2</span>,], [<span class="num">3</span>]])  <span class="com"># shape (3, 1)</span>
+b = np.<span class="fn">array</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>])      <span class="com"># shape (3,)</span>
+
+a + b
+<span class="com"># a 广播为 (3,3), b 广播为 (3,3)</span>
+<span class="com"># [[11, 21, 31],</span>
+<span class="com">#  [12, 22, 32],</span>
+<span class="com">#  [13, 23, 33]]</span>
+
+<span class="com"># 示例4：不兼容（报错）</span>
+a = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]])  <span class="com"># shape (2, 2)</span>
+b = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])          <span class="com"># shape (3,)</span>
+a + b              <span class="com"># ValueError! 2 != 3 且都不为1</span></div>
+
+            <div class="callout warn">
+                <div class="callout-title">广播的直觉理解</div>
+                想象你在 Excel 里操作：<br>
+                - 一个数字加到整列 → 标量广播<br>
+                - 一行加到整个表 → 行广播<br>
+                - 一列加到整个表 → 列广播<br>
+                只要"对得上"就能自动扩展。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 统计函数 ===================== -->
+    <div class="section" id="nav-stats">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128202;</div>
+            <h2>统计函数</h2>
+            <span class="badge">数据分析必备</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例</th></tr>
+                <tr><td><code>np.sum(a)</code></td><td>求和</td><td><code>a.sum()</code> 或 <code>np.sum(a)</code></td></tr>
+                <tr><td><code>np.mean(a)</code></td><td>平均值</td><td><code>a.mean()</code></td></tr>
+                <tr><td><code>np.median(a)</code></td><td>中位数</td><td><code>np.median(a)</code></td></tr>
+                <tr><td><code>np.std(a)</code></td><td>标准差</td><td><code>a.std()</code></td></tr>
+                <tr><td><code>np.var(a)</code></td><td>方差</td><td><code>a.var()</code></td></tr>
+                <tr><td><code>np.min(a)</code></td><td>最小值</td><td><code>a.min()</code></td></tr>
+                <tr><td><code>np.max(a)</code></td><td>最大值</td><td><code>a.max()</code></td></tr>
+                <tr><td><code>np.argmin(a)</code></td><td>最小值的索引</td><td><code>a.argmin()</code></td></tr>
+                <tr><td><code>np.argmax(a)</code></td><td>最大值的索引</td><td><code>a.argmax()</code></td></tr>
+                <tr><td><code>np.percentile(a, p)</code></td><td>百分位数</td><td><code>np.percentile(a, 50)</code></td></tr>
+                <tr><td><code>np.cumsum(a)</code></td><td>累加</td><td><code>np.cumsum([1,2,3])</code> → [1,3,6]</td></tr>
+                <tr><td><code>np.cumprod(a)</code></td><td>累乘</td><td><code>np.cumprod([1,2,3])</code> → [1,2,6]</td></tr>
+                <tr><td><code>np.unique(a)</code></td><td>去重并排序</td><td>—</td></tr>
+                <tr><td><code>np.sort(a)</code></td><td>排序（返回副本）</td><td>—</td></tr>
+                <tr><td><code>np.argsort(a)</code></td><td>返回排序后的索引</td><td>—</td></tr>
+            </table>
+
+            <h3 style="color:var(--accent);margin:20px 0 12px;">按轴统计（axis 参数）</h3>
+            <div class="code-block">a = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+              [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+<span class="com"># shape (2, 3)  → 2行3列</span>
+
+<span class="com"># axis=0：沿行方向操作（即对每列求值）</span>
+np.<span class="fn">sum</span>(a, axis=<span class="num">0</span>)     <span class="com"># [5, 7, 9]   每列求和</span>
+
+<span class="com"># axis=1：沿列方向操作（即对每行求值）</span>
+np.<span class="fn">sum</span>(a, axis=<span class="num">1</span>)     <span class="com"># [6, 15]    每行求和</span>
+
+<span class="com"># 不传axis：全局</span>
+np.<span class="fn">sum</span>(a)             <span class="com"># 21         所有元素求和</span>
+
+<span class="com"># 同理适用其他函数</span>
+a.<span class="fn">mean</span>(axis=<span class="num">0</span>)       <span class="com"># [2.5, 3.5, 4.5]  每列均值</span>
+a.<span class="fn">max</span>(axis=<span class="num">1</span>)        <span class="com"># [3, 6]    每行最大值</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">axis 记忆技巧</div>
+                <strong>axis=0</strong>：沿着行的方向"压扁" → 结果少了一个行维度 → 对每列操作<br>
+                <strong>axis=1</strong>：沿着列的方向"压扁" → 结果少了一个列维度 → 对每行操作<br>
+                口诀：<strong>"axis=0 往下压，axis=1 往右压"</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 线性代数 ===================== -->
+    <div class="section" id="nav-linear">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128208;</div>
+            <h2>线性代数（np.linalg）</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例</th></tr>
+                <tr><td><code>np.dot(a, b)</code></td><td>矩阵乘法</td><td>或 <code>a @ b</code></td></tr>
+                <tr><td><code>np.linalg.inv(a)</code></td><td>逆矩阵</td><td>—</td></tr>
+                <tr><td><code>np.linalg.det(a)</code></td><td>行列式</td><td>—</td></tr>
+                <tr><td><code>np.linalg.eig(a)</code></td><td>特征值和特征向量</td><td>返回 (特征值, 特征向量)</td></tr>
+                <tr><td><code>np.linalg.solve(a, b)</code></td><td>解线性方程组 Ax=b</td><td>—</td></tr>
+                <tr><td><code>np.linalg.norm(a)</code></td><td>矩阵/向量范数</td><td>—</td></tr>
+                <tr><td><code>np.linalg.qr(a)</code></td><td>QR 分解</td><td>—</td></tr>
+                <tr><td><code>np.linalg.svd(a)</code></td><td>奇异值分解</td><td>—</td></tr>
+                <tr><td><code>np.trace(a)</code></td><td>矩阵的迹（对角线之和）</td><td>—</td></tr>
+            </table>
+
+            <div class="code-block"><span class="com"># 解线性方程组</span>
+<span class="com"># 2x + y = 5</span>
+<span class="com"># x + 3y = 10</span>
+A = np.<span class="fn">array</span>([[<span class="num">2</span>, <span class="num">1</span>], [<span class="num">1</span>, <span class="num">3</span>]])
+b = np.<span class="fn">array</span>([<span class="num">5</span>, <span class="num">10</span>])
+x = np.linalg.<span class="fn">solve</span>(A, b)
+<span class="com"># x = [1., 3.]  → x=1, y=3</span>
+
+<span class="com"># 逆矩阵</span>
+A_inv = np.linalg.<span class="fn">inv</span>(A)
+A <span class="op">@</span> A_inv            <span class="com"># 应该接近单位矩阵</span>
+
+<span class="com"># 行列式</span>
+np.linalg.<span class="fn">det</span>(A)      <span class="com"># 5.0  (不为0说明可逆)</span>
+
+<span class="com"># 特征值</span>
+eigenvalues, eigenvectors = np.linalg.<span class="fn">eig</span>(A)</div>
+        </div>
+    </div>
+
+    <!-- ===================== 随机数 ===================== -->
+    <div class="section" id="nav-random">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(232,135,58,0.15);color:#e8873a;">&#127922;</div>
+            <h2>随机数（np.random）</h2>
+            <span class="badge">常用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例</th></tr>
+                <tr><td><code>np.random.rand(d0, d1, ...)</code></td><td>[0,1) 均匀分布</td><td><code>np.random.rand(3, 3)</code></td></tr>
+                <tr><td><code>np.random.randn(d0, d1, ...)</code></td><td>标准正态分布</td><td><code>np.random.randn(100)</code></td></tr>
+                <tr><td><code>np.random.randint(low, high, size)</code></td><td>随机整数</td><td><code>np.random.randint(0, 10, 5)</code></td></tr>
+                <tr><td><code>np.random.choice(a, size)</code></td><td>从数组中随机选</td><td><code>np.random.choice([1,2,3], 2)</code></td></tr>
+                <tr><td><code>np.random.shuffle(a)</code></td><td>原地打乱</td><td><code>np.random.shuffle(a)</code></td></tr>
+                <tr><td><code>np.random.permutation(a)</code></td><td>返回打乱的副本</td><td>—</td></tr>
+                <tr><td><code>np.random.seed(n)</code></td><td>设置随机种子</td><td><code>np.random.seed(42)</code></td></tr>
+                <tr><td><code>np.random.normal(mu, sigma, size)</code></td><td>正态分布</td><td><code>np.random.normal(0, 1, 100)</code></td></tr>
+                <tr><td><code>np.random.uniform(low, high, size)</code></td><td>均匀分布</td><td>—</td></tr>
+                <tr><td><code>np.random.binomial(n, p, size)</code></td><td>二项分布</td><td>—</td></tr>
+            </table>
+
+            <div class="code-block"><span class="com"># 设置随机种子（可复现）</span>
+np.random.<span class="fn">seed</span>(<span class="num">42</span>)
+np.random.<span class="fn">rand</span>(<span class="num">3</span>)       <span class="com"># 每次运行结果相同</span>
+
+<span class="com"># 打乱数据（机器学习常用）</span>
+data = np.<span class="fn">arange</span>(<span class="num">10</span>)
+np.random.<span class="fn">shuffle</span>(data)    <span class="com"># 原地打乱</span>
+
+<span class="com"># 随机采样</span>
+np.random.<span class="fn">choice</span>([<span class="str">'A'</span>, <span class="str">'B'</span>, <span class="str">'C'</span>, <span class="str">'D'</span>], size=<span class="num">10</span>, p=[<span class="num">0.1</span>, <span class="num">0.3</span>, <span class="num">0.4</span>, <span class="num">0.2</span>])
+<span class="com"># 按概率随机选10个</span>
+
+<span class="com"># 新版推荐写法（NumPy >= 1.17）</span>
+rng = np.random.<span class="fn">default_rng</span>(<span class="num">42</span>)
+rng.<span class="fn">random</span>((<span class="num">3</span>, <span class="num">3</span>))        <span class="com"># 等价于 rand</span>
+rng.<span class="fn">standard_normal</span>(<span class="num">100</span>)  <span class="com"># 等价于 randn</span>
+rng.<span class="fn">integers</span>(<span class="num">0</span>, <span class="num">10</span>, size=<span class="num">5</span>)  <span class="com"># 等价于 randint</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">面试加分：随机种子</div>
+                <code>np.random.seed(42)</code> 确保结果可复现。42 是程序员的"终极答案"（来自《银河系漫游指南》），所以经常用。做实验、写教程时一定要设种子，否则别人没法复现你的结果。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 文件读写 ===================== -->
+    <div class="section" id="nav-io">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128190;</div>
+            <h2>文件读写</h2>
+            <span class="badge">实用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>函数</th><th>说明</th><th>格式</th></tr>
+                <tr><td><code>np.save(path, a)</code></td><td>保存单个数组</td><td>.npy（二进制）</td></tr>
+                <tr><td><code>np.load(path)</code></td><td>加载数组</td><td>.npy</td></tr>
+                <tr><td><code>np.savez(path, a=..., b=...)</code></td><td>保存多个数组</td><td>.npz（压缩）</td></tr>
+                <tr><td><code>np.savetxt(path, a, fmt, delimiter)</code></td><td>保存为文本</td><td>.csv / .txt</td></tr>
+                <tr><td><code>np.loadtxt(path, delimiter, skiprows)</code></td><td>加载文本</td><td>.csv / .txt</td></tr>
+                <tr><td><code>np.genfromtxt(path, delimiter, missing_values)</code></td><td>加载（支持缺失值）</td><td>.csv</td></tr>
+            </table>
+
+            <div class="code-block"><span class="com"># 保存/加载 .npy（二进制，最快）</span>
+a = np.<span class="fn">arange</span>(<span class="num">12</span>).<span class="fn">reshape</span>(<span class="num">3</span>, <span class="num">4</span>)
+np.<span class="fn">save</span>(<span class="str">'array.npy'</span>, a)
+b = np.<span class="fn">load</span>(<span class="str">'array.npy'</span>)
+
+<span class="com"># 保存多个数组</span>
+np.<span class="fn">savez</span>(<span class="str">'data.npz'</span>, train=X_train, test=X_test)
+data = np.<span class="fn">load</span>(<span class="str">'data.npz'</span>)
+X_train = data[<span class="str">'train'</span>]
+X_test = data[<span class="str">'test'</span>]
+
+<span class="com"># CSV 读写</span>
+np.<span class="fn">savetxt</span>(<span class="str">'data.csv'</span>, a, delimiter=<span class="str">','</span>, fmt=<span class="str">'%d'</span>)
+b = np.<span class="fn">loadtxt</span>(<span class="str">'data.csv'</span>, delimiter=<span class="str">','</span>, dtype=<span class="kw">int</span>)</div>
+        </div>
+    </div>
+
+    <!-- ===================== vs Python列表 ===================== -->
+    <div class="section" id="nav-vs">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9878;</div>
+            <h2>NumPy vs Python 列表</h2>
+            <span class="badge">对比理解</span>
+        </div>
+        <div class="section-body">
+            <table class="compare-table">
+                <tr><th>特性</th><th>Python 列表</th><th class="vs">vs</th><th>NumPy 数组</th></tr>
+                <tr>
+                    <td>元素类型</td>
+                    <td>可以混合不同类型</td>
+                    <td class="vs">→</td>
+                    <td><strong>必须同类型</strong></td>
+                </tr>
+                <tr>
+                    <td>内存</td>
+                    <td>分散存储，每个元素是独立对象</td>
+                    <td class="vs">→</td>
+                    <td><strong>连续内存</strong>，省空间</td>
+                </tr>
+                <tr>
+                    <td>速度</td>
+                    <td>慢（10-100倍差距）</td>
+                    <td class="vs">→</td>
+                    <td><strong>快</strong>（C底层+SIMD）</td>
+                </tr>
+                <tr>
+                    <td>运算</td>
+                    <td><code>[1,2] + [3,4]</code> → [1,2,3,4]（拼接）</td>
+                    <td class="vs">→</td>
+                    <td><code>np.array([1,2]) + np.array([3,4])</code> → [4,6]（逐元素加）</td>
+                </tr>
+                <tr>
+                    <td>多维</td>
+                    <td>嵌套列表 [[1,2],[3,4]]</td>
+                    <td class="vs">→</td>
+                    <td><strong>原生多维</strong>，shape/ndim 属性</td>
+                </tr>
+                <tr>
+                    <td>切片</td>
+                    <td>返回副本</td>
+                    <td class="vs">→</td>
+                    <td><strong>返回视图</strong>（省内存）</td>
+                </tr>
+                <tr>
+                    <td>广播</td>
+                    <td>不支持</td>
+                    <td class="vs">→</td>
+                    <td><strong>支持广播</strong></td>
+                </tr>
+                <tr>
+                    <td>数学函数</td>
+                    <td>需要 for 循环</td>
+                    <td class="vs">→</td>
+                    <td><strong>矢量化</strong>，np.sin(a) 一行搞定</td>
+                </tr>
+                <tr>
+                    <td>适用场景</td>
+                    <td>通用数据容器</td>
+                    <td class="vs">→</td>
+                    <td><strong>数值计算</strong></td>
+                </tr>
+            </table>
+
+            <div class="code-block"><span class="com"># 速度对比</span>
+<span class="kw">import</span> time
+
+<span class="com"># Python 列表</span>
+a_list = <span class="fn">list</span>(<span class="fn">range</span>(<span class="num">1000000</span>))
+b_list = <span class="fn">list</span>(<span class="num">10**9 + i</span> <span class="kw">for</span> i <span class="kw">in</span> a_list)
+
+start = time.<span class="fn">time</span>()
+c_list = [x + y <span class="kw">for</span> x, y <span class="kw">in</span> <span class="fn">zip</span>(a_list, b_list)]
+<span class="kw">print</span>(<span class="str">f"Python列表: {time.time()-start:.4f}秒"</span>)
+<span class="out"># Python列表: 0.1523秒</span>
+
+<span class="com"># NumPy 数组</span>
+a_np = np.<span class="fn">arange</span>(<span class="num">1000000</span>)
+b_np = a_np + <span class="num">10**9</span>
+
+start = time.<span class="fn">time</span>()
+c_np = a_np + b_np
+<span class="kw">print</span>(<span class="str">f"NumPy数组: {time.time()-start:.4f}秒"</span>)
+<span class="out"># NumPy数组: 0.0031秒  ← 快50倍！</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 性能技巧 ===================== -->
+    <div class="section" id="nav-tips">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#9889;</div>
+            <h2>性能优化技巧</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">1. 避免循环，用矢量化</div>
+                    <div class="card-desc">不要 for 循环遍历数组，用 NumPy 内置函数</div>
+                    <code>sum(a) → np.sum(a)</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. 用花式索引代替循环</div>
+                    <div class="card-desc">批量操作比逐个操作快得多</div>
+                    <code>a[a > 0] = 0</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. 预分配数组</div>
+                    <div class="card-desc">不要在循环中 append，先建好空数组</div>
+                    <code>result = np.zeros(n)</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. 用 views 代替 copies</div>
+                    <div class="card-desc">切片返回视图，不复制数据</div>
+                    <code>a[1:5] 而不是 a[1:5].copy()</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. 选对数据类型</div>
+                    <div class="card-desc">不需要精度时用 float32 省一半内存</div>
+                    <code>dtype=np.float32</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">6. 用 np.where 代替 if</div>
+                    <div class="card-desc">条件操作矢量化</div>
+                    <code>np.where(a > 0, a, 0)</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">7. 合理使用 axis</div>
+                    <div class="card-desc">一次计算代替循环</div>
+                    <code>a.sum(axis=0)</code>
+                </div>
+                <div class="card">
+                    <div class="card-title">8. 用 @ 代替 dot</div>
+                    <div class="card-desc">更清晰，也稍快</div>
+                    <code>a @ b</code>
+                </div>
+            </div>
+
+            <div class="code-block"><span class="com"># 技巧1：np.where（条件矢量化）</span>
+a = np.<span class="fn">array</span>([<span class="num">-1</span>, <span class="num">2</span>, <span class="num">-3</span>, <span class="num">4</span>, <span class="num">-5</span>])
+np.<span class="fn">where</span>(a > <span class="num">0</span>, a, <span class="num">0</span>)      <span class="com"># 正数保留，负数变0 → [0, 2, 0, 4, 0]</span>
+np.<span class="fn">where</span>(a > <span class="num">0</span>, <span class="num">1</span>, <span class="num">-1</span>)    <span class="com"># 正数变1，负数变-1 → [-1, 1, -1, 1, -1]</span>
+
+<span class="com"># 技巧2：布尔数组转整数</span>
+(a > <span class="num">0</span>).<span class="fn">astype</span>(np.int32)  <span class="com"># [0, 1, 0, 1, 0]</span>
+
+<span class="com"># 技巧3：高效拼接（预分配）</span>
+<span class="com"># 不推荐：循环 append</span>
+<span class="com"># result = np.array([])</span>
+<span class="com"># for i in range(100): result = np.append(result, i)  ← 很慢！</span>
+
+<span class="com"># 推荐：预分配</span>
+result = np.<span class="fn">empty</span>(<span class="num">100</span>)
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">100</span>): result[i] = i
+
+<span class="com"># 技巧4：einsum（爱因斯坦求和，高级但极强）</span>
+a = np.<span class="fn">random</span>.rand(<span class="num">3</span>, <span class="num">4</span>)
+b = np.<span class="fn">random</span>.rand(<span class="num">4</span>, <span class="num">5</span>)
+c = np.<span class="fn">einsum</span>(<span class="str">'ij,jk->ik'</span>, a, b)  <span class="com"># 等价于 a @ b</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="nav-interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>NumPy 数组和 Python 列表有什么区别？</td>
+                    <td>NumPy 数组：元素同类型、连续内存、支持矢量化运算、速度快10-100倍；Python 列表：可混合类型、分散存储、不支持矢量化</td>
+                </tr>
+                <tr>
+                    <td>什么是广播机制？</td>
+                    <td>当两个数组形状不同时，NumPy 自动将较小数组沿维度为1的方向扩展，使其能进行逐元素运算，无需真正复制数据。规则：维度不同补1，维度为1可扩展，否则报错</td>
+                </tr>
+                <tr>
+                    <td><code>*</code> 和 <code>@</code> 的区别？</td>
+                    <td><code>*</code> 是逐元素相乘（element-wise），<code>@</code> 是矩阵乘法（matmul）。<code>[1,2]*[3,4]</code> → [3,8]；<code>[1,2]@[3,4]</code> → 11</td>
+                </tr>
+                <tr>
+                    <td>axis=0 和 axis=1 的区别？</td>
+                    <td>axis=0 沿行的方向操作（对每列做聚合），axis=1 沿列的方向操作（对每行做聚合）。口诀："0往下压，1往右压"</td>
+                </tr>
+                <tr>
+                    <td>视图和副本的区别？</td>
+                    <td>切片返回视图（共享内存，修改一个会影响另一个），<code>.copy()</code> 返回副本（独立内存）。<code>reshape</code> 返回视图，<code>flatten</code> 返回副本</td>
+                </tr>
+                <tr>
+                    <td>reshape(-1) 是什么意思？</td>
+                    <td>-1 表示自动计算该维度。如 12 个元素 reshape(3, -1) → (3, 4)。只能有一个 -1</td>
+                </tr>
+                <tr>
+                    <td>如何判断两个数组是否共享内存？</td>
+                    <td><code>np.shares_memory(a, b)</code> 返回 True/False</td>
+                </tr>
+                <tr>
+                    <td>np.arange 和 np.linspace 的区别？</td>
+                    <td>arange 指定步长自动算个数（不含 stop）；linspace 指定个数自动算步长（含 stop）</td>
+                </tr>
+                <tr>
+                    <td>什么是矢量化？</td>
+                    <td>不用写 for 循环，直接对整个数组做运算。底层是 C 实现，比 Python 循环快得多。<code>a + b</code> 而不是 <code>[x+y for x,y in zip(a,b)]</code></td>
+                </tr>
+                <tr>
+                    <td>如何处理数组中的缺失值？</td>
+                    <td>用 <code>np.nan</code> 表示缺失，<code>np.isnan(a)</code> 检测，<code>np.nanmean(a)</code> 计算时自动忽略 nan</td>
+                </tr>
+                <tr>
+                    <td>flatten 和 ravel 的区别？</td>
+                    <td>flatten 返回副本（修改不影响原数组），ravel 返回视图（修改会影响原数组）。ravel 更省内存</td>
+                </tr>
+                <tr>
+                    <td>如何把多维数组转成一维？</td>
+                    <td>三种方式：<code>a.flatten()</code>（副本）、<code>a.ravel()</code>（视图）、<code>a.reshape(-1)</code>（视图）</td>
+                </tr>
+                <tr>
+                    <td>np.random.seed(42) 为什么用42？</td>
+                    <td>42 是《银河系漫游指南》中"生命、宇宙及一切的终极答案"，是程序员常用梗。作用是设置随机种子确保结果可复现</td>
+                </tr>
+                <tr>
+                    <td>如何拼接两个数组？</td>
+                    <td>上下拼：<code>np.vstack([a, b])</code> 或 <code>np.concatenate([a, b], axis=0)</code>；左右拼：<code>np.hstack([a, b])</code> 或 <code>np.concatenate([a, b], axis=1)</code></td>
+                </tr>
+                <tr>
+                    <td>什么是布尔索引？</td>
+                    <td>用布尔数组作为索引筛选元素。<code>a[a > 3]</code> 返回所有大于3的元素。多条件用 <code>&amp; | ~</code>（不是 and or not），每个条件要加括号</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST NumPy 学习笔记 &nbsp;|&nbsp; 2026-09-22</p>
+    <p>从零到实战：创建数组 → 索引切片 → 数学运算 → 广播机制 → 线性代数 → 面试速答</p>
+</div>
+
+</body>
+</html>
