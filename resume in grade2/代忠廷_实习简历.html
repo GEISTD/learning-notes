@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代忠廷 - 实习简历</title>
+<style>
+  :root {
+    --primary: #1a3c5e;
+    --accent: #2563eb;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --bg: #f8fafc;
+    --border: #e2e8f0;
+    --tag-bg: #eff6ff;
+    --tag-border: #bfdbfe;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    background: #e9eef4;
+    color: var(--text);
+    line-height: 1.6;
+    padding: 30px 15px;
+    font-size: 15px;
+  }
+
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* ========== Header ========== */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, #2d5a87 100%);
+    color: #fff;
+    padding: 36px 40px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .header-left h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+
+  .header-left .subtitle {
+    font-size: 14px;
+    opacity: 0.85;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .header-left .subtitle span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 13px;
+    text-align: right;
+  }
+
+  .header-right a {
+    color: #bfdbfe;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .header-right a:hover { color: #fff; }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  /* ========== Body ========== */
+  .body {
+    padding: 28px 40px 36px;
+  }
+
+  .section {
+    margin-bottom: 26px;
+  }
+
+  .section:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary);
+    border-left: 4px solid var(--accent);
+    padding-left: 10px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ========== Education ========== */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 16px;
+    align-items: baseline;
+  }
+
+  .edu-school {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .edu-period {
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  .edu-details {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
+  .edu-details strong {
+    color: var(--text);
+  }
+
+  .edu-stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .stat-badge {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* ========== Skills ========== */
+  .skill-group {
+    margin-bottom: 12px;
+  }
+
+  .skill-group:last-child { margin-bottom: 0; }
+
+  .skill-category {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 5px;
+    display: inline-block;
+    min-width: 100px;
+  }
+
+  .skill-items {
+    display: inline;
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  .skill-items strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ========== Projects ========== */
+  .project {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .project:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .project-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .project-tech {
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  .project-desc {
+    font-size: 13.5px;
+    color: var(--text-light);
+    margin-bottom: 4px;
+  }
+
+  .project-points {
+    list-style: none;
+    padding: 0;
+  }
+
+  .project-points li {
+    font-size: 13.5px;
+    color: var(--text-light);
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 3px;
+    line-height: 1.65;
+  }
+
+  .project-points li::before {
+    content: "▸";
+    position: absolute;
+    left: 2px;
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  .project-points li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ========== Course Highlights ========== */
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .course-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background: var(--bg);
+    border-radius: 6px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+  }
+
+  .course-item .course-name {
+    color: var(--text);
+  }
+
+  .course-item .course-score {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* ========== Self-learning ========== */
+  .learning-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .learning-list li {
+    font-size: 14px;
+    color: var(--text-light);
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 6px;
+    line-height: 1.7;
+  }
+
+  .learning-list li::before {
+    content: "▸";
+    position: absolute;
+    left: 2px;
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  .learning-list li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ========== Print ========== */
+  @media print {
+    body { background: #fff; padding: 0; font-size: 14px; }
+    .page { box-shadow: none; border-radius: 0; max-width: 100%; }
+    .header { padding: 24px 30px 20px; }
+    .body { padding: 20px 30px 24px; }
+  }
+
+  @media (max-width: 600px) {
+    .header { flex-direction: column; align-items: flex-start; }
+    .header-right { text-align: left; align-items: flex-start; }
+    .contact-item { justify-content: flex-start; }
+    .course-grid { grid-template-columns: 1fr; }
+    .body { padding: 20px; }
+    .header { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- ========== Header ========== -->
+  <div class="header">
+    <div class="header-left">
+      <h1>代忠廷</h1>
+      <div class="subtitle">
+        <span>男 / 2007.03</span>
+        <span>西南交通大学</span>
+        <span>计算机科学与技术</span>
+        <span>大二在读</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="contact-item">手机：17390416653</div>
+      <div class="contact-item">邮箱：2968172781@qq.com</div>
+      <div class="contact-item">GitHub：<a href="https://github.com/GEISTD" target="_blank">github.com/GEISTD</a></div>
+    </div>
+  </div>
+
+  <!-- ========== Body ========== -->
+  <div class="body">
+
+    <!-- ===== 教育背景 ===== -->
+    <div class="section">
+      <div class="section-title">教育背景</div>
+      <div class="edu-grid">
+        <div>
+          <div class="edu-school">西南交通大学 · 计算机与人工智能学院</div>
+          <div class="edu-details">
+            <strong>计算机科学与技术</strong>（本科） | 2025.09 - 2029.06（4年制）
+          </div>
+        </div>
+        <div class="edu-period">2025.09 - 至今</div>
+      </div>
+      <div class="edu-stats">
+        <span class="stat-badge">均分 83.05</span>
+        <span class="stat-badge">GPA 3.18 / 4.0</span>
+        <span class="stat-badge">CET-4 529</span>
+        <span class="stat-badge">CET-6 449</span>
+      </div>
+    </div>
+
+    <!-- ===== 专业技能 ===== -->
+    <div class="section">
+      <div class="section-title">专业技能</div>
+
+      <div class="skill-group">
+        <span class="skill-category">编程语言</span>
+        <span class="skill-items"><strong>C++</strong>（主力，面向对象、STL、Qt框架开发）、<strong>Python</strong>（基础语法、NumPy科学计算）</span>
+      </div>
+
+      <div class="skill-group">
+        <span class="skill-category">开发框架</span>
+        <span class="skill-items"><strong>Qt</strong>（信号槽机制、对象树内存管理、UI设计、定时器、文件IO、QSS样式、自定义控件、QPainter绘图）</span>
+      </div>
+
+      <div class="skill-group">
+        <span class="skill-category">网络编程</span>
+        <span class="skill-items">TCP/IP协议、<strong>Qt Socket编程</strong>（QTcpServer/QTcpSocket）、C/S架构设计与实现、多客户端并发处理、自定义通信协议</span>
+      </div>
+
+      <div class="skill-group">
+        <span class="skill-category">软件设计</span>
+        <span class="skill-items"><strong>DAO设计模式</strong>（Data Access Object）、分层架构（数据层/业务逻辑层/UI层）、数据库管理（SQLite/Qt SQL）、文件导出</span>
+      </div>
+
+      <div class="skill-group">
+        <span class="skill-category">工具平台</span>
+        <span class="skill-items"><strong>Git</strong>（分支管理、版本回退、协作流程）、<strong>Linux/WSL2</strong>（系统配置、SSH服务、systemd管理、Shell命令）、CMake构建系统、FinalShell远程连接</span>
+      </div>
+
+      <div class="skill-group">
+        <span class="skill-category">计算机基础</span>
+        <span class="skill-items">数据结构与算法、离散数学、操作系统原理、计算机网络、面向对象设计原则</span>
+      </div>
+    </div>
+
+    <!-- ===== 项目经历 ===== -->
+    <div class="section">
+      <div class="section-title">项目经历</div>
+
+      <!-- Project 1: Student Management System -->
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">C/S架构学生信息管理系统 <a href="https://github.com/GEISTD/student-management-system" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
+          <span class="project-tech">C++ / Qt / TCP / SQLite / DAO</span>
+        </div>
+        <div class="project-desc">独立设计并开发的C/S（客户端/服务端）架构学生信息管理系统，支持用户认证、学生管理、成绩管理、数据导出等完整业务流程。</div>
+        <ul class="project-points">
+          <li>采用<strong>分层架构</strong>设计：数据层（DatabaseManager + DAO）→ 业务逻辑层（BusinessLogic）→ UI层（UIManager），各层职责清晰</li>
+          <li>使用<strong>DAO设计模式</strong>封装 StudentDAO、UserDAO、ScoreDAO，将数据访问与业务逻辑解耦，便于维护和扩展</li>
+          <li>基于<strong>QTcpServer</strong>实现服务端，支持多客户端并发连接，自定义TCP通信协议完成增删改查请求的解析与响应</li>
+          <li>客户端通过<strong>NetworkManager</strong>管理TCP连接，基于信号槽实现异步数据收发，UI操作零阻塞</li>
+          <li>实现<strong>文件导出模块</strong>（FileExporter），支持将学生成绩数据批量导出</li>
+          <li>服务端与客户端各自独立编译，代码总量超过 <strong>200KB</strong>，UIManager单文件达110KB</li>
+        </ul>
+      </div>
+
+      <!-- Project 2: Gomoku -->
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">网络五子棋对弈系统（含AI对手） <a href="https://github.com/GEISTD/gomoku" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
+          <span class="project-tech">C++ / Qt / TCP / AI / QPainter</span>
+        </div>
+        <div class="project-desc">基于Qt开发的五子棋游戏，支持人机AI对弈与TCP联机对战两种模式，自定义棋盘控件实现图形渲染。</div>
+        <ul class="project-points">
+          <li>设计并实现<strong>AI对弈引擎</strong>（ai.cpp），基于棋型评估函数进行局面打分与最优落子决策</li>
+          <li>通过<strong>BoardWidget</strong>自定义控件，使用QPainter绘制棋盘与棋子，支持鼠标交互落子</li>
+          <li>基于<strong>NetManager</strong>封装TCP通信，实现联机对战模式，双方落子通过socket实时同步</li>
+          <li>编写<strong>联机部署说明</strong>文档，涵盖服务端启动、端口配置、客户端连接完整流程</li>
+          <li>同时支持<strong>CMake和qmake</strong>两套构建系统，兼容不同开发环境</li>
+        </ul>
+      </div>
+
+      <!-- Project 3: WSL2 Environment -->
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">WSL2 + SSH Linux远程开发环境</span>
+          <span class="project-tech">Linux / WSL2 / SSH / systemd</span>
+        </div>
+        <div class="project-desc">从零搭建Windows + WSL2 Ubuntu远程开发环境，解决多项网络与服务配置问题。</div>
+        <ul class="project-points">
+          <li>部署WSL2 Ubuntu 22.04，配置<strong>/etc/wsl.conf</strong>实现systemd服务管理与默认用户设置</li>
+          <li>排查并解决SSH端口非默认(2222)、WSL2 IP动态变化、SSH服务未自启等实际问题</li>
+          <li>利用WSL2 <strong>localhost自动转发机制</strong>，实现Windows→WSL的稳定远程连接</li>
+          <li>配置SSH密钥认证，实现FinalShell免密远程登录开发工作流</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== 核心课程 ===== -->
+    <div class="section">
+      <div class="section-title">核心课程成绩</div>
+      <div class="course-grid">
+        <div class="course-item"><span class="course-name">离散数学</span><span class="course-score">87</span></div>
+        <div class="course-item"><span class="course-name">计算机科学前沿</span><span class="course-score">89</span></div>
+        <div class="course-item"><span class="course-name">面向对象程序设计</span><span class="course-score">84</span></div>
+        <div class="course-item"><span class="course-name">软件设计实践</span><span class="course-score">84</span></div>
+        <div class="course-item"><span class="course-name">高等数学I</span><span class="course-score">86</span></div>
+        <div class="course-item"><span class="course-name">线性代数B</span><span class="course-score">83</span></div>
+        <div class="course-item"><span class="course-name">英语II</span><span class="course-score">84</span></div>
+        <div class="course-item"><span class="course-name">军事理论</span><span class="course-score">88</span></div>
+        <div class="course-item"><span class="course-name">形势与政策II</span><span class="course-score">90</span></div>
+      </div>
+    </div>
+
+    <!-- ===== 自学经历 ===== -->
+    <div class="section">
+      <div class="section-title">自学经历与技术沉淀</div>
+      <ul class="learning-list">
+        <li>系统学习<strong>C++/Qt框架开发</strong>，涵盖信号槽机制、对象树内存管理、定时器、文件IO、网络编程等核心模块，并整理完整技术笔记</li>
+        <li>系统学习<strong>Git版本控制</strong>，掌握分支管理、版本回退(reset/revert/checkout)、远程协作(push/pull/rebase)等完整工作流</li>
+        <li>搭建<strong>WSL2 + Linux开发环境</strong>，掌握Ubuntu系统配置、SSH服务管理、systemd服务自启，具备Linux环境排查问题能力</li>
+        <li>学习<strong>Python编程</strong>，掌握基础语法与NumPy科学计算库，完成从C++到Python的技术迁移</li>
+        <li>制定<strong>AI工程师方向学习计划</strong>，持续跟进计算机科学与人工智能领域的前沿技术发展</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
