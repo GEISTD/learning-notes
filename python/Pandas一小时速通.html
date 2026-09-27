@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pandas 1小时速通 - 实操指南</title>
+<style>
+  :root{--primary:#1a3c5e;--accent:#2563eb;--text:#1e293b;--text-light:#64748b;--bg:#f8fafc;--border:#e2e8f0;--code-bg:#1e293b;--code-text:#e2e8f0;--tip-bg:#fffbeb;--tip-border:#f59e0b;--ex-bg:#f0fdf4;--ex-border:#16a34a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#e9eef4;color:var(--text);line-height:1.8;font-size:15px;padding:30px 15px}
+  .page{max-width:860px;margin:0 auto;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,0.08);border-radius:10px;overflow:hidden}
+  .header{background:linear-gradient(135deg,var(--primary) 0%,#2d5a87 100%);color:#fff;padding:24px 32px}
+  .header h1{font-size:22px;margin-bottom:4px}
+  .header .subtitle{font-size:13px;opacity:0.85}
+  .body{padding:24px 32px 32px}
+
+  .section{margin-bottom:22px}
+  .section-title{font-size:16px;font-weight:700;color:var(--primary);border-left:4px solid var(--accent);padding-left:10px;margin-bottom:10px}
+
+  pre{background:var(--code-bg);color:var(--code-text);border-radius:8px;padding:14px 16px;font-family:"Cascadia Code","Fira Code","Consolas",monospace;font-size:13px;line-height:1.55;overflow-x:auto;margin-bottom:10px;white-space:pre-wrap;word-wrap:break-word}
+  pre .cm{color:#64748b}
+  pre .kw{color:#7dd3fc}
+  pre .str{color:#86efac}
+  pre .num{color:#fcd34d}
+  pre .fn{color:#c4b5fd}
+
+  .tip{font-size:13.5px;padding:10px 14px;background:var(--tip-bg);border-left:3px solid var(--tip-border);border-radius:0 6px 6px 0;margin-bottom:12px;line-height:1.7}
+  .tip strong{color:#92400e}
+
+  .exercise{font-size:13.5px;padding:10px 14px;background:var(--ex-bg);border-left:3px solid var(--ex-border);border-radius:0 6px 6px 0;margin-bottom:12px;line-height:1.7}
+  .exercise strong{color:#15803d}
+  .exercise .answer{margin-top:8px;display:none}
+  .exercise details{margin-top:8px}
+  .exercise summary{cursor:pointer;color:#15803d;font-size:13px;font-weight:600}
+  .exercise details pre{margin-top:6px}
+
+  .toc{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 18px;margin-bottom:20px;font-size:14px}
+  .toc ol{padding-left:20px}
+  .toc li{margin-bottom:3px}
+  .toc a{color:var(--accent);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+
+  .timer{display:inline-block;background:var(--accent);color:#fff;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;margin-right:6px}
+
+  @media print{body{background:#fff;padding:0}.page{box-shadow:none;border-radius:0;max-width:100%}.header{padding:20px}.body{padding:20px}}
+  @media(max-width:600px){.body{padding:18px}.header{padding:20px}pre{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>Pandas 1小时速通 · 实操指南</h1>
+    <div class="subtitle">跟着敲一遍，最后做完数据清洗练习就算过关 | 完成标准：能独立清洗含缺失值的CSV</div>
+  </div>
+  <div class="body">
+
+    <div class="toc">
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#s1">Series 与 DataFrame（10min）</a></li>
+        <li><a href="#s2">读写 CSV（5min）</a></li>
+        <li><a href="#s3">筛选与定位（15min）</a></li>
+        <li><a href="#s4">groupby 分组聚合（10min）</a></li>
+        <li><a href="#s5">缺失值处理（10min）</a></li>
+        <li><a href="#s6">综合练习：清洗一份脏数据（10min）</a></li>
+      </ol>
+    </div>
+
+    <div class="tip"><strong>前置检查：</strong>确认你能不查文档写出 Python 的 list 推导式 <code>[x*2 for x in range(5)]</code> 和 dict 定义 <code>{'a': 1, 'b': 2}</code>。如果这两行你看不太懂，先花10分钟补一下再继续——Pandas 建立在 dict 和 list 的概念上。</div>
+
+    <!-- ===== 1. Series & DataFrame ===== -->
+    <div class="section" id="s1">
+      <div class="section-title"><span class="timer">10 min</span>Series 与 DataFrame</div>
+      <p style="font-size:14px;color:var(--text-light);margin-bottom:8px">DataFrame 就是一张表格（有行有列），Series 是表格里的一列。</p>
+      <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Series = 一列数据（类似带索引的 list）</span>
+s = pd.Series([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>])
+<span class="fn">print</span>(s)
+<span class="cm"># 输出：
+# 0    10
+# 1    20
+# 2    30
+# 3    40
+# dtype: int64</span>
+
+<span class="cm"># DataFrame = 一张表（类似 Excel / dict 的集合）</span>
+df = pd.DataFrame({
+    <span class="str">'name'</span>:   [<span class="str">'张三'</span>, <span class="str">'李四'</span>, <span class="str">'王五'</span>, <span class="str">'赵六'</span>],
+    <span class="str">'age'</span>:    [<span class="num">20</span>, <span class="num">21</span>, <span class="num">19</span>, <span class="num">22</span>],
+    <span class="str">'score'</span>:   [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">90</span>],
+    <span class="str">'gender'</span>: [<span class="str">'男'</span>, <span class="str">'男'</span>, <span class="str">'女'</span>, <span class="str">'女'</span>]
+})
+<span class="fn">print</span>(df)
+<span class="cm">#    name  age  score gender
+# 0  张三   20     85     男
+# 1  李四   21     92     男
+# 2  王五   19     78     女
+# 3  赵六   22     90     女</span>
+
+<span class="cm"># 核心属性</span>
+<span class="fn">print</span>(df.shape)        <span class="cm"># (4, 4) → 4行4列</span>
+<span class="fn">print</span>(df.columns)      <span class="cm"># 列名列表</span>
+<span class="fn">print</span>(df.index)        <span class="cm"># 行索引（默认0,1,2,3）</span>
+<span class="fn">print</span>(df.dtypes)        <span class="cm"># 每列的数据类型</span>
+<span class="fn">print</span>(df.head(<span class="num">2</span>))       <span class="cm"># 前两行（head默认5行）</span>
+<span class="fn">print</span>(df.info())        <span class="cm"># 整体信息概览（类型+非空数+内存）</span>
+<span class="fn">print</span>(df.describe())    <span class="cm"># 数值列的统计摘要（均值/标准差/最值/分位数）</span></pre>
+
+      <div class="exercise">
+        <strong>练习：</strong>创建一个 DataFrame，包含5个人的 name、height(cm)、weight(kg)，然后打印 shape 和 describe()。
+        <details>
+          <summary>查看参考答案</summary>
+<pre>df = pd.DataFrame({
+    <span class="str">'name'</span>:   [<span class="str">'A'</span>, <span class="str">'B'</span>, <span class="str">'C'</span>, <span class="str">'D'</span>, <span class="str">'E'</span>],
+    <span class="str">'height'</span>: [<span class="num">175</span>, <span class="num">168</span>, <span class="num">180</span>, <span class="num">162</span>, <span class="num">170</span>],
+    <span class="str">'weight'</span>: [<span class="num">70</span>, <span class="num">55</span>, <span class="num">80</span>, <span class="num">50</span>, <span class="num">65</span>]
+})
+<span class="fn">print</span>(df.shape)
+<span class="fn">print</span>(df.describe())</pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- ===== 2. 读写CSV ===== -->
+    <div class="section" id="s2">
+      <div class="section-title"><span class="timer">5 min</span>读写 CSV</div>
+      <pre><span class="cm"># 写入 CSV</span>
+df.to_csv(<span class="str">'students.csv'</span>, index=<span class="kw">False</span>)  <span class="cm"># index=False 不写行号</span>
+
+<span class="cm"># 读取 CSV</span>
+df2 = pd.read_csv(<span class="str">'students.csv'</span>)
+<span class="fn">print</span>(df2.head())
+
+<span class="cm"># 常用参数</span>
+df3 = pd.read_csv(<span class="str">'data.csv'</span>,
+    sep=<span class="str">','</span>,              <span class="cm"># 分隔符（TSV用'\t'）</span>
+    encoding=<span class="str">'utf-8'</span>,         <span class="cm"># 中文用gbk或utf-8</span>
+    nrows=<span class="num">100</span>,              <span class="cm"># 只读前100行（大文件先看结构）</span>
+    na_values=[<span class="str">'N/A'</span>, <span class="str">'NULL'</span>]  <span class="cm"># 把这些值识别为缺失值</span>
+)</pre>
+      <div class="tip"><strong>实战建议：</strong>找一份真实CSV练手。没有的话用上面的 <code>to_csv</code> 生成一份，再 <code>read_csv</code> 读回来。</div>
+    </div>
+
+    <!-- ===== 3. 筛选与定位 ===== -->
+    <div class="section" id="s3">
+      <div class="section-title"><span class="timer">15 min</span>筛选与定位</div>
+      <pre><span class="cm"># === 选列 ===</span>
+df[<span class="str">'name'</span>]           <span class="cm"># 选一列 → 返回 Series</span>
+df[[<span class="str">'name'</span>, <span class="str">'age'</span>]]  <span class="cm"># 选多列 → 返回 DataFrame</span>
+
+<span class="cm"># === 选行 ===</span>
+df[<span class="num">0</span>:<span class="num">2</span>]               <span class="cm"># 切片：前两行</span>
+df.iloc[<span class="num">0</span>]              <span class="cm"># 按位置取第0行 → Series</span>
+df.iloc[<span class="num">0</span>:<span class="num">3</span>]           <span class="cm"># 按位置取0,1,2行</span>
+df.loc[<span class="num">0</span>]              <span class="cm"># 按标签取行（默认索引也是0,1,2...）</span>
+
+<span class="cm"># === 条件筛选（最重要！） ===</span>
+df[df[<span class="str">'age'</span>] &gt; <span class="num">20</span>]                      <span class="cm"># age&gt;20 的所有行</span>
+df[df[<span class="str">'gender'</span>] == <span class="str">'男'</span>]                   <span class="cm"># 性别为男的行</span>
+df[(df[<span class="str">'age'</span>] &gt; <span class="num">20</span>) &amp; (df[<span class="str">'score'</span>] &gt;= <span class="num">85</span>)]  <span class="cm"># 多条件：且（用&amp;）</span>
+df[(df[<span class="str">'gender'</span>] == <span class="str">'男'</span>) | (df[<span class="str">'score'</span>] &gt; <span class="num">85</span>)]   <span class="cm"># 多条件：或（用|）</span>
+
+<span class="cm"># === 常用方法 ===</span>
+df.sort_values(<span class="str">'score'</span>, ascending=<span class="kw">False</span>)  <span class="cm"># 按分数降序排</span>
+df.sort_values([<span class="str">'gender'</span>, <span class="str">'score'</span>], ascending=[<span class="kw">True</span>, <span class="kw">False</span>])  <span class="cm"># 先按性别再按分数</span>
+df[<span class="str">'score'</span>].max()       <span class="cm"># 最高分</span>
+df[<span class="str">'score'</span>].mean()      <span class="cm"># 平均分</span>
+df[<span class="str">'score'</span>].idxmax()    <span class="cm"># 最高分所在行的索引</span>
+df.nlargest(<span class="num">2</span>, <span class="str">'score'</span>)   <span class="cm"># 分数前2名</span>
+df[<span class="str">'name'</span>].unique()     <span class="cm"># 唯一值列表</span>
+df[<span class="str">'name'</span>].value_counts() <span class="cm"># 每个值出现次数</span></pre>
+      <div class="exercise">
+        <strong>练习：</strong>从上面的 df 中找出：①女生中分数最高的；②年龄大于19且分数大于80的人的name。
+        <details>
+          <summary>查看参考答案</summary>
+<pre><span class="cm"># ① 女生中分数最高的</span>
+girls = df[df[<span class="str">'gender'</span>] == <span class="str">'女'</span>]
+<span class="fn">print</span>(girls.nlargest(<span class="num">1</span>, <span class="str">'score'</span>))
+
+<span class="cm"># ② 年龄&gt;19 且 分数&gt;80</span>
+result = df[(df[<span class="str">'age'</span>] &gt; <span class="num">19</span>) &amp; (df[<span class="str">'score'</span>] &gt; <span class="num">80</span>)]
+<span class="fn">print</span>(result[<span class="str">'name'</span>])</pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- ===== 4. groupby ===== -->
+    <div class="section" id="s4">
+      <div class="section-title"><span class="timer">10 min</span>groupby 分组聚合</div>
+      <pre><span class="cm"># 按性别分组，看每组的平均分</span>
+df.groupby(<span class="str">'gender'</span>)[<span class="str">'score'</span>].mean()
+<span class="cm"># gender
+# 女    84.0
+# 男    88.5</span>
+
+<span class="cm"># 按性别分组，看每组的多个统计量</span>
+df.groupby(<span class="str">'gender'</span>)[<span class="str">'score'</span>].agg([<span class="str">'mean'</span>, <span class="str">'max'</span>, <span class="str">'min'</span>, <span class="str">'count'</span>])
+
+<span class="cm"># 按性别分组，同时对多列做不同操作</span>
+df.groupby(<span class="str">'gender'</span>).agg({
+    <span class="str">'age'</span>:   <span class="str">'mean'</span>,
+    <span class="str">'score'</span>: [<span class="str">'max'</span>, <span class="str">'min'</span>]
+})
+
+<span class="cm"># 重置索引（groupby后分组的列变成索引，reset_index变回普通列）</span>
+result = df.groupby(<span class="str">'gender'</span>)[<span class="str">'score'</span>].mean().reset_index()
+<span class="cm"># 现在 result 是一个普通 DataFrame，方便后续操作或导出</span></pre>
+      <div class="exercise">
+        <strong>练习：</strong>按 gender 分组，算出每组的：人数、平均年龄、最高分、最低分。
+        <details>
+          <summary>查看参考答案</summary>
+<pre>result = df.groupby(<span class="str">'gender'</span>).agg({
+    <span class="str">'name'</span>:   <span class="str">'count'</span>,     <span class="cm"># 人数</span>
+    <span class="str">'age'</span>:    <span class="str">'mean'</span>,      <span class="cm"># 平均年龄</span>
+    <span class="str">'score'</span>:  [<span class="str">'max'</span>, <span class="str">'min'</span>]  <span class="cm"># 最高/最低分</span>
+})
+<span class="fn">print</span>(result)</pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- ===== 5. 缺失值 ===== -->
+    <div class="section" id="s5">
+      <div class="section-title"><span class="timer">10 min</span>缺失值处理</div>
+      <pre><span class="cm"># 造一份含缺失值的脏数据</span>
+import numpy <span class="kw">as</span> np
+dirty = pd.DataFrame({
+    <span class="str">'name'</span>:   [<span class="str">'张三'</span>, <span class="str">'李四'</span>, <span class="kw">None</span>, <span class="str">'赵六'</span>, <span class="str">'钱七'</span>],
+    <span class="str">'age'</span>:    [<span class="num">20</span>, np.nan, <span class="num">19</span>, <span class="num">22</span>, <span class="num">21</span>],
+    <span class="str">'score'</span>:   [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, np.nan, <span class="num">90</span>],
+    <span class="str">'gender'</span>: [<span class="str">'男'</span>, <span class="str">'男'</span>, <span class="str">'女'</span>, <span class="str">'女'</span>, <span class="kw">None</span>]
+})
+
+<span class="cm"># 检查缺失值</span>
+dirty.isnull()          <span class="cm"># 每个格子是否为NaN（True/False表）</span>
+dirty.isnull().sum()    <span class="cm"># 每列有多少个缺失值（最常用！）</span>
+dirty.info()            <span class="cm"># 也能看到每列非空数</span>
+
+<span class="cm"># 删除缺失值</span>
+dirty.dropna()              <span class="cm"># 删掉任何含NaN的行</span>
+dirty.dropna(subset=[<span class="str">'age'</span>])   <span class="cm"># 只删age列缺失的行</span>
+dirty.dropna(thresh=<span class="num">3</span>)       <span class="cm"># 至少3个非空值才保留该行</span>
+
+<span class="cm"># 填充缺失值</span>
+dirty[<span class="str">'age'</span>].fillna(dirty[<span class="str">'age'</span>].mean())   <span class="cm"># 用平均年龄填充</span>
+dirty[<span class="str">'score'</span>].fillna(<span class="num">0</span>)                <span class="cm"># 用0填充分数</span>
+dirty[<span class="str">'name'</span>].fillna(<span class="str">'未知'</span>)               <span class="cm"># 用字符串填充</span>
+dirty[<span class="str">'gender'</span>].fillna(dirty[<span class="str">'gender'</span>].mode()[<span class="num">0</span>])  <span class="cm"># 用众数填充</span>
+
+<span class="cm"># 填充后要赋值回去（Pandas操作默认不修改原数据）</span>
+dirty[<span class="str">'age'</span>] = dirty[<span class="str">'age'</span>].fillna(dirty[<span class="str">'age'</span>].mean())</pre>
+      <div class="tip"><strong>易错点：</strong>Pandas 的大多数操作（fillna、dropna、sort_values）都<strong>不会修改原数据</strong>，而是返回新对象。要么赋值回去 <code>df['x'] = df['x'].fillna(...)</code>，要么用 <code>inplace=True</code> 参数。</div>
+    </div>
+
+    <!-- ===== 6. 综合练习 ===== -->
+    <div class="section" id="s6">
+      <div class="section-title"><span class="timer">10 min</span>综合练习：清洗一份脏数据</div>
+      <pre><span class="cm"># 这是一份模拟的"学生成绩脏数据"——直接复制运行</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+dirty_data = pd.DataFrame({
+    <span class="str">'姓名'</span>: [<span class="str">'张三'</span>, <span class="str">'李四'</span>, <span class="kw">None</span>, <span class="str">'赵六'</span>, <span class="str">'钱七'</span>, <span class="str">'孙八'</span>, <span class="str">'周九'</span>, <span class="str">'吴十'</span>, <span class="str">'郑十一'</span>, <span class="str">'王十二'</span>],
+    <span class="str">'年龄'</span>: [<span class="num">20</span>, <span class="num">21</span>, <span class="num">19</span>, np.nan, <span class="num">22</span>, <span class="num">20</span>, <span class="num">21</span>, np.nan, <span class="num">19</span>, <span class="num">23</span>],
+    <span class="str">'成绩'</span>: [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">90</span>, np.nan, <span class="num">88</span>, <span class="num">95</span>, <span class="num">76</span>, <span class="num">82</span>, np.nan],
+    <span class="str">'性别'</span>: [<span class="str">'男'</span>, <span class="str">'男'</span>, <span class="str">'女'</span>, <span class="str">'女'</span>, <span class="str">'男'</span>, <span class="kw">None</span>, <span class="str">'女'</span>, <span class="str">'男'</span>, <span class="str">'女'</span>, <span class="str">'男'</span>],
+    <span class="str">'班级'</span>: [<span class="str">'A班'</span>, <span class="str">'B班'</span>, <span class="str">'A班'</span>, <span class="str">'B班'</span>, <span class="str">'A班'</span>, <span class="str">'B班'</span>, <span class="str">'A班'</span>, <span class="str">'B班'</span>, <span class="str">'A班'</span>, <span class="str">'B班'</span>]
+})</pre>
+
+      <div class="exercise">
+        <strong>任务（限时10分钟，不用AI）：</strong>
+        <ol style="padding-left:20px;margin-top:6px">
+          <li>查看每列有多少缺失值</li>
+          <li>把「姓名」缺失的行删掉</li>
+          <li>把「年龄」缺失值用平均年龄填充</li>
+          <li>把「成绩」缺失值用0填充</li>
+          <li>把「性别」缺失值用众数填充</li>
+          <li>按班级分组，算出每班的平均成绩和人数</li>
+          <li>按成绩降序排序，打印前3名</li>
+          <li>把清洗后的数据导出为 clean_students.csv</li>
+        </ol>
+        <details>
+          <summary>做完后对照参考答案</summary>
+<pre><span class="cm"># 1. 查看缺失值</span>
+<span class="fn">print</span>(dirty_data.isnull().sum())
+
+<span class="cm"># 2. 删除姓名缺失的行</span>
+dirty_data = dirty_data.dropna(subset=[<span class="str">'姓名'</span>])
+
+<span class="cm"># 3. 年龄用均值填充</span>
+dirty_data[<span class="str">'年龄'</span>] = dirty_data[<span class="str">'年龄'</span>].fillna(dirty_data[<span class="str">'年龄'</span>].mean())
+
+<span class="cm"># 4. 成绩用0填充</span>
+dirty_data[<span class="str">'成绩'</span>] = dirty_data[<span class="str">'成绩'</span>].fillna(<span class="num">0</span>)
+
+<span class="cm"># 5. 性别用众数填充</span>
+dirty_data[<span class="str">'性别'</span>] = dirty_data[<span class="str">'性别'</span>].fillna(dirty_data[<span class="str">'性别'</span>].mode()[<span class="num">0</span>])
+
+<span class="cm"># 6. 按班级分组统计</span>
+class_stats = dirty_data.groupby(<span class="str">'班级'</span>).agg({
+    <span class="str">'成绩'</span>: <span class="str">'mean'</span>,
+    <span class="str">'姓名'</span>: <span class="str">'count'</span>
+}).reset_index()
+<span class="fn">print</span>(class_stats)
+
+<span class="cm"># 7. 成绩前3名</span>
+top3 = dirty_data.nlargest(<span class="num">3</span>, <span class="str">'成绩'</span>)
+<span class="fn">print</span>(top3[[<span class="str">'姓名'</span>, <span class="str">'成绩'</span>]])
+
+<span class="cm"># 8. 导出</span>
+dirty_data.to_csv(<span class="str">'clean_students.csv'</span>, index=<span class="kw">False</span>, encoding=<span class="str">'utf-8-sig'</span>)
+<span class="fn">print</span>(<span class="str">'清洗完成，已保存 clean_students.csv'</span>)</pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- ===== 速查表 ===== -->
+    <div class="section">
+      <div class="section-title">Pandas 速查卡（贴在桌前）</div>
+      <pre>导入         import pandas as pd
+创建DF       pd.DataFrame({'col': [1,2,3]})
+读CSV       df = pd.read_csv('file.csv')
+写CSV       df.to_csv('out.csv', index=False)
+看结构       df.shape / df.info() / df.describe() / df.head()
+选列         df['col'] / df[['a','b']]
+选行         df.iloc[0] / df[0:3]
+条件筛选     df[df['age'] > 20]
+多条件       df[(df['a']>1) & (df['b']==2)]
+排序         df.sort_values('col', ascending=False)
+前N名        df.nlargest(3, 'score')
+分组统计     df.groupby('key')['val'].mean()
+多统计       df.groupby('key').agg({'a':'mean','b':'max'})
+缺失值检查   df.isnull().sum()
+删缺失行     df.dropna(subset=['col'])
+填缺失值     df['col'].fillna(value)
+唯一值       df['col'].unique()
+值计数       df['col'].value_counts()
+重置索引     df.reset_index()
+改列名       df.rename(columns={'old':'new'})
+新增列       df['new'] = df['a'] + df['b']
+删列         df.drop('col', axis=1)</pre>
+    </div>
+
+    <!-- ===== 下一步 ===== -->
+    <div class="section">
+      <div class="section-title">今天的完成标准</div>
+      <div class="tip">
+        <strong>按计划，今天完成后你应该能：</strong>
+        <ul style="margin-left:20px;margin-top:6px">
+          <li>独立创建 DataFrame 并查看 shape/info/describe</li>
+          <li>用条件筛选出特定行（多条件用 &amp; 和 |）</li>
+          <li>用 groupby 做分组统计</li>
+          <li>识别缺失值并用合适的策略填充或删除</li>
+          <li>把清洗后的数据导出为 CSV</li>
+        </ul>
+        <br>
+        <strong>如果上面5条都能做到 → 今天过关。</strong><br>
+        如果卡住了，回头把速查卡再敲一遍。不要看AI生成答案，自己敲出来才算会。
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

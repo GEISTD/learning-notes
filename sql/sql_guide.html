@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL 从 0 到精通 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --heading: #f0f6fc;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --yellow: #d29922;
+            --red: #f85149;
+            --purple: #bc8cff;
+            --orange: #e8873a;
+            --code-bg: #1c2128;
+            --pink: #db61a2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height: 1.7; font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+        .header {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.85em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+
+        .section {
+            margin-bottom: 48px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 20px 28px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.5em; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.3em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8em;
+        }
+        .section-body { padding: 24px 28px; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th {
+            text-align: left; padding: 10px 14px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.85em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.88em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px 20px; margin: 12px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85em; line-height: 1.6; color: var(--text); white-space: pre;
+        }
+        .code-block .kw { color: var(--purple); font-weight: bold; }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .tbl { color: var(--yellow); }
+        .code-block .col { color: var(--pink); }
+        .code-block .type { color: var(--orange); }
+        .code-block .out { color: #8b949e; }
+
+        .callout {
+            border-left: 4px solid; padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.78em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .tag-essential { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+        .stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px; margin: 24px 0;
+        }
+        .stat-card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 20px; text-align: center;
+        }
+        .stat-card .num { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-card .label { color: #8b949e; font-size: 0.85em; margin-top: 4px; }
+
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; margin: 16px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 8px; font-size: 0.95em; }
+        .card .card-desc { color: #8b949e; font-size: 0.85em; }
+
+        .pipeline {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            margin: 16px 0; padding: 16px; background: var(--code-bg);
+            border-radius: 8px; border: 1px solid var(--border);
+        }
+        .pipeline .step {
+            background: var(--card); border: 1px solid var(--accent);
+            padding: 6px 14px; border-radius: 6px; color: var(--accent); font-size: 0.85em;
+        }
+        .pipeline .arrow { color: var(--orange); font-size: 1.2em; }
+
+        .flow-chart {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 20px; margin: 16px 0;
+            text-align: center; font-family: 'Cascadia Code', monospace; font-size: 0.85em;
+        }
+        .flow-box {
+            display: inline-block; background: var(--card); border: 1px solid var(--accent);
+            padding: 8px 16px; border-radius: 6px; color: var(--accent); margin: 4px;
+        }
+        .flow-arrow { color: var(--orange); margin: 0 4px; }
+
+        .footer {
+            text-align: center; padding: 40px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.85em;
+        }
+
+        h3 { color: var(--accent); margin: 20px 0 12px; }
+        p { margin-bottom: 12px; }
+        ul, ol { margin-left: 20px; margin-bottom: 12px; }
+        li { margin-bottom: 6px; }
+
+        .example-table {
+            background: var(--code-bg); border-radius: 8px; padding: 16px;
+            margin: 12px 0; border: 1px solid var(--border);
+        }
+        .example-table h4 { color: var(--yellow); margin-bottom: 8px; }
+        .example-table table { margin-bottom: 0; }
+        .example-table th { background: transparent; border-bottom: 1px solid var(--border); color: var(--green); }
+
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>SQL 从 0 到精通</h1>
+    <div class="meta">数据库基础 &nbsp;|&nbsp; 2026-09-28 &nbsp;|&nbsp; 从零开始手把手</div>
+</div>
+
+<div class="nav">
+    <a href="#nav-what">什么是SQL</a>
+    <a href="#nav-install">安装MySQL</a>
+    <a href="#nav-basic">基础语法</a>
+    <a href="#nav-create">创建表</a>
+    <a href="#nav-crud">增删改查</a>
+    <a href="#nav-where">WHERE条件</a>
+    <a href="#nav-order">排序分页</a>
+    <a href="#nav-func">常用函数</a>
+    <a href="#nav-group">分组聚合</a>
+    <a href="#nav-join">多表连接</a>
+    <a href="#nav-subquery">子查询</a>
+    <a href="#nav-constraint">约束</a>
+    <a href="#nav-index">索引</a>
+    <a href="#nav-transaction">事务</a>
+    <a href="#nav-practice">实战练习</a>
+    <a href="#nav-interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat-card"><div class="num">16</div><div class="label">核心模块</div></div>
+        <div class="stat-card"><div class="num">100+</div><div class="label">SQL语句</div></div>
+        <div class="stat-card"><div class="num">50+</div><div class="label">代码示例</div></div>
+        <div class="stat-card"><div class="num">20</div><div class="label">面试题</div></div>
+    </div>
+
+    <!-- ===================== 什么是 SQL ===================== -->
+    <div class="section" id="nav-what">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128190;</div>
+            <h2>什么是 SQL</h2>
+            <span class="badge">基础概念</span>
+        </div>
+        <div class="section-body">
+            <p><strong>SQL（Structured Query Language，结构化查询语言）</strong>是用来和数据库打交道的语言。你用它来增删改查数据、建表、管理用户等等。</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">数据库 (Database)</div>
+                    <div class="card-desc">存储数据的"仓库"，一个数据库里可以有很多张表</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">表 (Table)</div>
+                    <div class="card-desc">就像 Excel 表格，有行有列，用来存一类数据</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">行 (Row / Record)</div>
+                    <div class="card-desc">一条数据记录。比如一个用户就是一行</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">列 (Column / Field)</div>
+                    <div class="card-desc">一个字段。比如姓名、年龄、邮箱各是一列</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">MySQL</div>
+                    <div class="card-desc">最流行的关系型数据库管理系统，开源免费</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">关系型数据库</div>
+                    <div class="card-desc">数据以表格形式存储，表与表之间可以关联</div>
+                </div>
+            </div>
+
+            <h3>举个例子</h3>
+            <div class="example-table">
+                <h4>users 表（用户表）</h4>
+                <table>
+                    <tr><th>id</th><th>name</th><th>age</th><th>email</th></tr>
+                    <tr><td>1</td><td>张三</td><td>20</td><td>zhangsan@test.com</td></tr>
+                    <tr><td>2</td><td>李四</td><td>22</td><td>lisi@test.com</td></tr>
+                    <tr><td>3</td><td>王五</td><td>19</td><td>wangwu@test.com</td></tr>
+                </table>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">SQL 关键词不区分大小写</div>
+                <code>SELECT * FROM users;</code> 和 <code>select * from users;</code> 效果一样。<br>
+                但<strong>习惯上关键词用大写</strong>，表名列名用小写，这样代码更易读。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 安装 MySQL ===================== -->
+    <div class="section" id="nav-install">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128230;</div>
+            <h2>第一步：安装 MySQL</h2>
+            <span class="badge">环境搭建</span>
+        </div>
+        <div class="section-body">
+            <p>在你的 WSL Ubuntu 22.04 里安装 MySQL：</p>
+
+            <div class="code-block"><span class="com"># 1. 更新软件源</span>
+sudo apt update
+
+<span class="com"># 2. 安装 MySQL 服务端</span>
+sudo apt install mysql-server -y
+
+<span class="com"># 3. 启动 MySQL</span>
+sudo service mysql start
+
+<span class="com"># 4. 检查是否启动成功</span>
+sudo service mysql status
+<span class="out"># 看到 "mysql is running" 就是成功了</span>
+
+<span class="com"># 5. 设置 root 密码</span>
+sudo mysql
+<span class="out"># 进入 MySQL 命令行后执行：</span>
+ALTER USER <span class="str">'root'</span>@<span class="str">'localhost'</span> IDENTIFIED BY <span class="str">'你的密码'</span>;
+FLUSH PRIVILEGES;
+EXIT;
+
+<span class="com"># 6. 用密码登录测试</span>
+mysql -u root -p
+<span class="out"># 输入刚才设置的密码，能进去就 OK 了</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">连接 MySQL 的方式</div>
+                <strong>命令行</strong>：<code>mysql -u 用户名 -p</code>（回车后输密码）<br>
+                <strong>图形化工具</strong>：Navicat、DBeaver、MySQL Workbench、phpMyAdmin 等<br>
+                <strong>Python 连接</strong>：<code>pymysql</code> 或 <code>mysql-connector-python</code>
+            </div>
+
+            <h3>MySQL 基本操作</h3>
+            <div class="code-block"><span class="com"># 启动/停止/重启 MySQL</span>
+sudo service mysql start
+sudo service mysql stop
+sudo service mysql restart
+
+<span class="com"># 登录 MySQL</span>
+mysql -u root -p
+
+<span class="com"># 查看所有数据库</span>
+SHOW DATABASES;
+
+<span class="com"># 创建数据库</span>
+CREATE DATABASE 数据库名;
+
+<span class="com"># 使用某个数据库</span>
+USE 数据库名;
+
+<span class="com"># 查看当前在哪个数据库</span>
+SELECT DATABASE();
+
+<span class="com"># 退出 MySQL</span>
+EXIT;  <span class="com"># 或 \q</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 基础语法 ===================== -->
+    <div class="section" id="nav-basic">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128221;</div>
+            <h2>SQL 基础语法</h2>
+            <span class="badge">入门必读</span>
+        </div>
+        <div class="section-body">
+            <h3>SQL 四大分类</h3>
+            <table>
+                <tr><th>分类</th><th>全称</th><th>作用</th><th>代表命令</th></tr>
+                <tr>
+                    <td><span class="tag tag-essential">DDL</span></td>
+                    <td>数据定义语言</td>
+                    <td>定义数据库结构（建库、建表）</td>
+                    <td>CREATE / ALTER / DROP</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-essential">DML</span></td>
+                    <td>数据操作语言</td>
+                    <td>操作数据（增删改查）</td>
+                    <td>INSERT / UPDATE / DELETE / SELECT</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-intermediate">DQL</span></td>
+                    <td>数据查询语言</td>
+                    <td>查询数据</td>
+                    <td>SELECT（最复杂最常用）</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-intermediate">DCL</span></td>
+                    <td>数据控制语言</td>
+                    <td>权限管理</td>
+                    <td>GRANT / REVOKE</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-advanced">TCL</span></td>
+                    <td>事务控制语言</td>
+                    <td>管理事务</td>
+                    <td>COMMIT / ROLLBACK</td>
+                </tr>
+            </table>
+
+            <h3>语法注意事项</h3>
+            <ul>
+                <li>每条 SQL 语句以 <code>;</code> 结尾</li>
+                <li>关键词不区分大小写，但<strong>建议大写</strong></li>
+                <li>字符串用<strong>单引号</strong>包裹：<code>'张三'</code></li>
+                <li>注释：<code>-- 这是注释</code>（两个横杠加空格）或 <code># 这是注释</code></li>
+                <li>多行注释：<code>/* ... */</code></li>
+            </ul>
+
+            <div class="callout warn">
+                <div class="callout-title">命名规范</div>
+                表名、列名用小写字母和下划线，如 <code>user_info</code>，不要用中文、空格、特殊字符。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 创建表 ===================== -->
+    <div class="section" id="nav-create">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128221;</div>
+            <h2>创建表（DDL）</h2>
+            <span class="badge">DDL</span>
+        </div>
+        <div class="section-body">
+            <h3>建库建表完整流程</h3>
+            <div class="code-block"><span class="com">-- 1. 创建数据库</span>
+<span class="kw">CREATE DATABASE</span> <span class="tbl">learn_sql</span> <span class="kw">CHARSET</span> utf8mb4;
+
+<span class="com">-- 2. 使用数据库</span>
+<span class="kw">USE</span> <span class="tbl">learn_sql</span>;
+
+<span class="com">-- 3. 创建表</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">users</span> (
+    <span class="col">id</span> <span class="type">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>  <span class="com">-- 主键，自增</span>,
+    <span class="col">name</span> <span class="type">VARCHAR</span>(<span class="num">50</span>) <span class="kw">NOT NULL</span>        <span class="com">-- 姓名，不能为空</span>,
+    <span class="col">age</span> <span class="type">INT</span> <span class="kw">DEFAULT</span> <span class="num">0</span>              <span class="com">-- 年龄，默认0</span>,
+    <span class="col">email</span> <span class="type">VARCHAR</span>(<span class="num">100</span>) <span class="kw">UNIQUE</span>        <span class="com">-- 邮箱，不能重复</span>,
+    <span class="col">created_at</span> <span class="type">DATETIME</span> <span class="kw">DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>  <span class="com">-- 创建时间，默认当前时间</span>
+);
+
+<span class="com">-- 4. 查看表结构</span>
+<span class="kw">DESC</span> <span class="tbl">users</span>;
+
+<span class="com">-- 5. 查看所有表</span>
+<span class="kw">SHOW TABLES</span>;
+
+<span class="com">-- 6. 查看建表语句</span>
+<span class="kw">SHOW CREATE TABLE</span> <span class="tbl">users</span>;</div>
+
+            <h3>常用数据类型</h3>
+            <table>
+                <tr><th>类型</th><th>说明</th><th>示例</th><th>占用</th></tr>
+                <tr>
+                    <td><code>INT</code></td>
+                    <td>整数（最常用）</td>
+                    <td>1, 100, -50</td>
+                    <td>4字节</td>
+                </tr>
+                <tr>
+                    <td><code>BIGINT</code></td>
+                    <td>大整数（存大数字用）</td>
+                    <td>99999999999</td>
+                    <td>8字节</td>
+                </tr>
+                <tr>
+                    <td><code>DECIMAL(M,D)</code></td>
+                    <td>精确小数（钱用这个！）</td>
+                    <td>99.99</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>FLOAT / DOUBLE</code></td>
+                    <td>浮点数（有精度丢失）</td>
+                    <td>3.14159</td>
+                    <td>4/8字节</td>
+                </tr>
+                <tr>
+                    <td><code>VARCHAR(n)</code></td>
+                    <td>可变长度字符串（最常用）</td>
+                    <td>'hello'</td>
+                    <td>最多n字符</td>
+                </tr>
+                <tr>
+                    <td><code>CHAR(n)</code></td>
+                    <td>固定长度字符串</td>
+                    <td>'A'</td>
+                    <td>n字符</td>
+                </tr>
+                <tr>
+                    <td><code>TEXT</code></td>
+                    <td>长文本（最多65535字）</td>
+                    <td>文章内容</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>DATE</code></td>
+                    <td>日期</td>
+                    <td>'2026-09-28'</td>
+                    <td>3字节</td>
+                </tr>
+                <tr>
+                    <td><code>DATETIME</code></td>
+                    <td>日期时间</td>
+                    <td>'2026-09-28 14:30:00'</td>
+                    <td>8字节</td>
+                </tr>
+                <tr>
+                    <td><code>TIMESTAMP</code></td>
+                    <td>时间戳（自动时区）</td>
+                    <td>—</td>
+                    <td>4字节</td>
+                </tr>
+                <tr>
+                    <td><code>BOOL / BOOLEAN</code></td>
+                    <td>布尔值（本质是 TINYINT）</td>
+                    <td>TRUE / FALSE</td>
+                    <td>1字节</td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">选类型的原则</div>
+                <strong>够用就行，越小越好</strong>。存年龄用 TINYINT（-128~127）就行，不用 INT。存手机号用 VARCHAR(20)，不要用数字类型（手机号可能有 0 开头或 +86）。
+            </div>
+
+            <h3>修改表结构（ALTER）</h3>
+            <div class="code-block"><span class="com">-- 添加列</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">users</span> <span class="kw">ADD COLUMN</span> <span class="col">phone</span> <span class="type">VARCHAR</span>(<span class="num">20</span>);
+
+<span class="com">-- 修改列</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">users</span> <span class="kw">MODIFY COLUMN</span> <span class="col">name</span> <span class="type">VARCHAR</span>(<span class="num">100</span>);
+
+<span class="com">-- 重命名列</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">users</span> <span class="kw">CHANGE COLUMN</span> <span class="col">name</span> <span class="col">username</span> <span class="type">VARCHAR</span>(<span class="num">100</span>);
+
+<span class="com">-- 删除列</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">users</span> <span class="kw">DROP COLUMN</span> <span class="col">phone</span>;
+
+<span class="com">-- 删除表</span>
+<span class="kw">DROP TABLE</span> <span class="tbl">users</span>;
+
+<span class="com">-- 删除数据库</span>
+<span class="kw">DROP DATABASE</span> <span class="tbl">learn_sql</span>;</div>
+
+            <div class="callout danger">
+                <div class="callout-title">DROP 是毁灭性操作！</div>
+                <code>DROP TABLE</code> 和 <code>DROP DATABASE</code> 会直接删掉所有数据，没有回收站。操作前一定要确认！线上操作一定要先备份。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 增删改查 ===================== -->
+    <div class="section" id="nav-crud">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#128221;</div>
+            <h2>增删改查（CRUD）</h2>
+            <span class="badge">最核心！</span>
+        </div>
+        <div class="section-body">
+            <p><strong>CRUD</strong> 就是增(Create)、查(Read)、改(Update)、删(Delete)的缩写，是数据库最基本的四种操作。</p>
+
+            <div class="pipeline">
+                <span class="step">C = INSERT</span>
+                <span class="arrow">→</span>
+                <span class="step">R = SELECT</span>
+                <span class="arrow">→</span>
+                <span class="step">U = UPDATE</span>
+                <span class="arrow">→</span>
+                <span class="step">D = DELETE</span>
+            </div>
+
+            <h3>1. 增：INSERT（插入数据）</h3>
+            <div class="code-block"><span class="com">-- 插入一行（指定列）</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">users</span> (<span class="col">name</span>, <span class="col">age</span>, <span class="col">email</span>)
+<span class="kw">VALUES</span> (<span class="str">'张三'</span>, <span class="num">20</span>, <span class="str">'zhangsan@test.com'</span>);
+
+<span class="com">-- 插入多行（批量插入，效率更高）</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">users</span> (<span class="col">name</span>, <span class="col">age</span>, <span class="col">email</span>)
+<span class="kw">VALUES</span>
+    (<span class="str">'李四'</span>, <span class="num">22</span>, <span class="str">'lisi@test.com'</span>),
+    (<span class="str">'王五'</span>, <span class="num">19</span>, <span class="str">'wangwu@test.com'</span>),
+    (<span class="str">'赵六'</span>, <span class="num">25</span>, <span class="str">'zhaoliu@test.com'</span>);
+
+<span class="com">-- 全列插入（不推荐，列变了容易出问题）</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">users</span>
+<span class="kw">VALUES</span> (<span class="num">1</span>, <span class="str">'张三'</span>, <span class="num">20</span>, <span class="str">'zhangsan@test.com'</span>, <span class="str">'2026-09-28 10:00:00'</span>);</div>
+
+            <h3>2. 查：SELECT（查询数据）</h3>
+            <div class="code-block"><span class="com">-- 查询所有列（不推荐，数据量大时慢）</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- 查询指定列（推荐）</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">age</span> <span class="kw">FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- 列起别名（AS 可以省略）</span>
+<span class="kw">SELECT</span> <span class="col">name</span> <span class="kw">AS</span> 姓名, <span class="col">age</span> 年龄 <span class="kw">FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- 去重查询</span>
+<span class="kw">SELECT DISTINCT</span> <span class="col">age</span> <span class="kw">FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- 简单计算</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">age</span> + <span class="num">1</span> <span class="kw">AS</span> 明年年龄 <span class="kw">FROM</span> <span class="tbl">users</span>;</div>
+
+            <h3>3. 改：UPDATE（更新数据）</h3>
+            <div class="code-block"><span class="com">-- 更新某个人的年龄</span>
+<span class="kw">UPDATE</span> <span class="tbl">users</span> <span class="kw">SET</span> <span class="col">age</span> = <span class="num">21</span> <span class="kw">WHERE</span> <span class="col">name</span> = <span class="str">'张三'</span>;
+
+<span class="com">-- 更新多个列</span>
+<span class="kw">UPDATE</span> <span class="tbl">users</span>
+<span class="kw">SET</span> <span class="col">age</span> = <span class="num">23</span>, <span class="col">email</span> = <span class="str">'new@test.com'</span>
+<span class="kw">WHERE</span> <span class="col">id</span> = <span class="num">2</span>;
+
+<span class="com">-- 所有人年龄 +1（慎用！没有 WHERE 会改全部）</span>
+<span class="kw">UPDATE</span> <span class="tbl">users</span> <span class="kw">SET</span> <span class="col">age</span> = <span class="col">age</span> + <span class="num">1</span>;</div>
+
+            <h3>4. 删：DELETE（删除数据）</h3>
+            <div class="code-block"><span class="com">-- 删除某个人</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">id</span> = <span class="num">1</span>;
+
+<span class="com">-- 删除符合条件的行</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">age</span> > <span class="num">30</span>;
+
+<span class="com">-- 删除全部数据（危险！）</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- 清空表（更快，不记日志，不能回滚）</span>
+<span class="kw">TRUNCATE TABLE</span> <span class="tbl">users</span>;</div>
+
+            <div class="callout danger">
+                <div class="callout-title">UPDATE 和 DELETE 一定要加 WHERE！</div>
+                忘记写 WHERE 会修改/删除整张表的数据。线上操作前先 <code>SELECT</code> 确认条件对不对，再执行更新/删除。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== WHERE 条件 ===================== -->
+    <div class="section" id="nav-where">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#128269;</div>
+            <h2>WHERE 条件查询</h2>
+            <span class="badge">DQL</span>
+        </div>
+        <div class="section-body">
+            <h3>比较运算符</h3>
+            <table>
+                <tr><th>运算符</th><th>说明</th><th>示例</th></tr>
+                <tr><td><code>=</code></td><td>等于</td><td><code>WHERE age = 20</code></td></tr>
+                <tr><td><code>!=</code> 或 <code>&lt;&gt;</code></td><td>不等于</td><td><code>WHERE age != 20</code></td></tr>
+                <tr><td><code>&gt;</code></td><td>大于</td><td><code>WHERE age &gt; 18</code></td></tr>
+                <tr><td><code>&lt;</code></td><td>小于</td><td><code>WHERE age &lt; 30</code></td></tr>
+                <tr><td><code>&gt;=</code></td><td>大于等于</td><td><code>WHERE age &gt;= 18</code></td></tr>
+                <tr><td><code>&lt;=</code></td><td>小于等于</td><td><code>WHERE age &lt;= 30</code></td></tr>
+            </table>
+
+            <h3>逻辑运算符</h3>
+            <table>
+                <tr><th>运算符</th><th>说明</th><th>示例</th></tr>
+                <tr><td><code>AND</code></td><td>并且（两个都满足）</td><td><code>WHERE age &gt; 18 AND age &lt; 30</code></td></tr>
+                <tr><td><code>OR</code></td><td>或者（满足一个就行）</td><td><code>WHERE age &lt; 18 OR age &gt; 60</code></td></tr>
+                <tr><td><code>NOT</code></td><td>不满足</td><td><code>WHERE NOT age = 20</code></td></tr>
+                <tr><td><code>BETWEEN ... AND ...</code></td><td>在范围内（包含两端）</td><td><code>WHERE age BETWEEN 18 AND 30</code></td></tr>
+                <tr><td><code>IN (...)</code></td><td>在列表中</td><td><code>WHERE age IN (18, 20, 22)</code></td></tr>
+                <tr><td><code>LIKE</code></td><td>模糊匹配</td><td><code>WHERE name LIKE '张%'</code></td></tr>
+                <tr><td><code>IS NULL</code></td><td>为空</td><td><code>WHERE email IS NULL</code></td></tr>
+                <tr><td><code>IS NOT NULL</code></td><td>不为空</td><td><code>WHERE email IS NOT NULL</code></td></tr>
+            </table>
+
+            <h3>LIKE 模糊匹配</h3>
+            <div class="code-block"><span class="com">-- % 匹配任意多个字符（0个或多个）</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">name</span> <span class="kw">LIKE</span> <span class="str">'张%'</span>;       <span class="com">-- 姓张的</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">name</span> <span class="kw">LIKE</span> <span class="str">'%三%'</span>;       <span class="com">-- 名字含"三"的</span>
+
+<span class="com">-- _ 匹配恰好一个字符</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">name</span> <span class="kw">LIKE</span> <span class="str">'张_'</span>;        <span class="com">-- 姓张且名字两个字</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">name</span> <span class="kw">LIKE</span> <span class="str">'张__'</span>;       <span class="com">-- 姓张且名字三个字</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">运算优先级</div>
+                <code>NOT</code> > <code>AND</code> > <code>OR</code><br>
+                不确定优先级时，加括号最保险：<code>WHERE (a = 1 OR b = 2) AND c = 3</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 排序分页 ===================== -->
+    <div class="section" id="nav-order">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#8595;</div>
+            <h2>排序与分页</h2>
+            <span class="badge">DQL</span>
+        </div>
+        <div class="section-body">
+            <h3>排序（ORDER BY）</h3>
+            <div class="code-block"><span class="com">-- 按年龄升序（默认就是升序，ASC 可省略）</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">ORDER BY</span> <span class="col">age</span> <span class="kw">ASC</span>;
+
+<span class="com">-- 按年龄降序</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">ORDER BY</span> <span class="col">age</span> <span class="kw">DESC</span>;
+
+<span class="com">-- 多字段排序：先按年龄降序，年龄相同按 id 升序</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">ORDER BY</span> <span class="col">age</span> <span class="kw">DESC</span>, <span class="col">id</span> <span class="kw">ASC</span>;</div>
+
+            <h3>分页（LIMIT）</h3>
+            <div class="code-block"><span class="com">-- 取前 N 条</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">LIMIT</span> <span class="num">5</span>;       <span class="com">-- 前5条</span>
+
+<span class="com">-- 分页：LIMIT 偏移量, 每页条数</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">LIMIT</span> <span class="num">0</span>, <span class="num">5</span>;    <span class="com">-- 第1页（前5条）</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">LIMIT</span> <span class="num">5</span>, <span class="num">5</span>;    <span class="com">-- 第2页（第6-10条）</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">LIMIT</span> <span class="num">10</span>, <span class="num">5</span>;   <span class="com">-- 第3页</span>
+
+<span class="com">-- 新写法（MySQL 8.0+）：LIMIT ... OFFSET ...</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">LIMIT</span> <span class="num">5</span> <span class="kw">OFFSET</span> <span class="num">10</span>;  <span class="com">-- 跳过10条，取5条</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">分页公式</div>
+                每页 N 条，第 page 页（从第1页开始）：<br>
+                <code>LIMIT (page - 1) * N, N</code>
+            </div>
+
+            <h3>完整 SELECT 语法顺序</h3>
+            <div class="flow-chart">
+                <div class="flow-box">SELECT 列</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">FROM 表</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">WHERE 条件</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">GROUP BY 分组</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">HAVING 分组后筛选</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">ORDER BY 排序</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">LIMIT 分页</div>
+            </div>
+
+            <div class="code-block"><span class="com">-- 完整示例：查年龄大于18岁的人，按年龄倒序，取前3条</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">age</span>
+<span class="kw">FROM</span> <span class="tbl">users</span>
+<span class="kw">WHERE</span> <span class="col">age</span> > <span class="num">18</span>
+<span class="kw">ORDER BY</span> <span class="col">age</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">3</span>;</div>
+        </div>
+    </div>
+
+    <!-- ===================== 常用函数 ===================== -->
+    <div class="section" id="nav-func">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#9881;</div>
+            <h2>常用函数</h2>
+            <span class="badge">DQL</span>
+        </div>
+        <div class="section-body">
+            <h3>字符串函数</h3>
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例结果</th></tr>
+                <tr><td><code>CONCAT(s1, s2, ...)</code></td><td>拼接字符串</td><td><code>CONCAT('你','好')</code> → '你好'</td></tr>
+                <tr><td><code>CHAR_LENGTH(s)</code></td><td>字符数</td><td><code>CHAR_LENGTH('abc')</code> → 3</td></tr>
+                <tr><td><code>UPPER(s) / LOWER(s)</code></td><td>转大/小写</td><td><code>UPPER('abc')</code> → 'ABC'</td></tr>
+                <tr><td><code>SUBSTRING(s, start, len)</code></td><td>截取子串</td><td><code>SUBSTRING('abcde', 2, 3)</code> → 'bcd'</td></tr>
+                <tr><td><code>REPLACE(s, old, new)</code></td><td>替换</td><td><code>REPLACE('abc','b','B')</code> → 'aBc'</td></tr>
+                <tr><td><code>TRIM(s)</code></td><td>去掉两端空格</td><td><code>TRIM('  abc  ')</code> → 'abc'</td></tr>
+                <tr><td><code>LEFT(s, n) / RIGHT(s, n)</code></td><td>左/右取n个字符</td><td>—</td></tr>
+            </table>
+
+            <h3>数值函数</h3>
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例结果</th></tr>
+                <tr><td><code>ROUND(n, d)</code></td><td>四舍五入</td><td><code>ROUND(3.14159, 2)</code> → 3.14</td></tr>
+                <tr><td><code>CEIL(n) / FLOOR(n)</code></td><td>向上/下取整</td><td><code>CEIL(3.1)</code> → 4</td></tr>
+                <tr><td><code>ABS(n)</code></td><td>绝对值</td><td><code>ABS(-5)</code> → 5</td></tr>
+                <tr><td><code>MOD(a, b)</code></td><td>取余</td><td><code>MOD(7, 3)</code> → 1</td></tr>
+                <tr><td><code>RAND()</code></td><td>0~1随机数</td><td>—</td></tr>
+            </table>
+
+            <h3>日期函数</h3>
+            <table>
+                <tr><th>函数</th><th>说明</th><th>示例结果</th></tr>
+                <tr><td><code>NOW()</code></td><td>当前日期时间</td><td>'2026-09-28 14:30:00'</td></tr>
+                <tr><td><code>CURDATE()</code></td><td>当前日期</td><td>'2026-09-28'</td></tr>
+                <tr><td><code>CURTIME()</code></td><td>当前时间</td><td>'14:30:00'</td></tr>
+                <tr><td><code>YEAR(d) / MONTH(d) / DAY(d)</code></td><td>取年/月/日</td><td>—</td></tr>
+                <tr><td><code>DATE_ADD(d, INTERVAL n unit)</code></td><td>日期加减</td><td><code>DATE_ADD(NOW(), INTERVAL 1 DAY)</code></td></tr>
+                <tr><td><code>DATEDIFF(d1, d2)</code></td><td>两个日期差多少天</td><td>—</td></tr>
+                <tr><td><code>DATE_FORMAT(d, fmt)</code></td><td>日期格式化</td><td><code>DATE_FORMAT(NOW(), '%Y年%m月%d日')</code></td></tr>
+            </table>
+
+            <div class="code-block"><span class="com">-- 日期格式化常用占位符</span>
+<span class="com">%Y 四位年  %m 两位月  %d 两位日</span>
+<span class="com">%H 24小时  %i 分钟    %s 秒</span>
+<span class="kw">SELECT</span> <span class="fn">DATE_FORMAT</span>(<span class="fn">NOW</span>(), <span class="str">'%Y-%m-%d %H:%i:%s'</span>);</div>
+
+            <h3>条件函数</h3>
+            <div class="code-block"><span class="com">-- IF(条件, 成立的值, 不成立的值)</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="fn">IF</span>(<span class="col">age</span> >= <span class="num">18</span>, <span class="str">'成年'</span>, <span class="str">'未成年'</span>) <span class="kw">AS</span> 状态
+<span class="kw">FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- CASE WHEN（多条件）</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">age</span>,
+<span class="kw">CASE</span>
+    <span class="kw">WHEN</span> <span class="col">age</span> < <span class="num">18</span> <span class="kw">THEN</span> <span class="str">'少年'</span>
+    <span class="kw">WHEN</span> <span class="col">age</span> < <span class="num">30</span> <span class="kw">THEN</span> <span class="str">'青年'</span>
+    <span class="kw">WHEN</span> <span class="col">age</span> < <span class="num">50</span> <span class="kw">THEN</span> <span class="str">'中年'</span>
+    <span class="kw">ELSE</span> <span class="str">'老年'</span>
+<span class="kw">END</span> <span class="kw">AS</span> 年龄段
+<span class="kw">FROM</span> <span class="tbl">users</span>;</div>
+        </div>
+    </div>
+
+    <!-- ===================== 分组聚合 ===================== -->
+    <div class="section" id="nav-group">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#128202;</div>
+            <h2>分组与聚合函数</h2>
+            <span class="badge">面试必考</span>
+        </div>
+        <div class="section-body">
+            <h3>聚合函数</h3>
+            <table>
+                <tr><th>函数</th><th>说明</th></tr>
+                <tr><td><code>COUNT(*)</code></td><td>统计行数（忽略 NULL）</td></tr>
+                <tr><td><code>COUNT(col)</code></td><td>统计某列不为 NULL 的行数</td></tr>
+                <tr><td><code>COUNT(DISTINCT col)</code></td><td>去重后计数</td></tr>
+                <tr><td><code>SUM(col)</code></td><td>求和</td></tr>
+                <tr><td><code>AVG(col)</code></td><td>平均值</td></tr>
+                <tr><td><code>MAX(col)</code></td><td>最大值</td></tr>
+                <tr><td><code>MIN(col)</code></td><td>最小值</td></tr>
+            </table>
+
+            <div class="code-block"><span class="com">-- 基础聚合</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> 总人数,
+    <span class="fn">SUM</span>(<span class="col">age</span>) <span class="kw">AS</span> 年龄总和,
+    <span class="fn">AVG</span>(<span class="col">age</span>) <span class="kw">AS</span> 平均年龄,
+    <span class="fn">MAX</span>(<span class="col">age</span>) <span class="kw">AS</span> 最大年龄,
+    <span class="fn">MIN</span>(<span class="col">age</span>) <span class="kw">AS</span> 最小年龄
+<span class="kw">FROM</span> <span class="tbl">users</span>;</div>
+
+            <h3>GROUP BY 分组</h3>
+            <div class="code-block"><span class="com">-- 按年龄段分组，统计每组人数和平均年龄</span>
+<span class="kw">SELECT</span> <span class="col">age</span>, <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> 人数, <span class="fn">AVG</span>(<span class="col">age</span>) <span class="kw">AS</span> 平均年龄
+<span class="kw">FROM</span> <span class="tbl">users</span>
+<span class="kw">GROUP BY</span> <span class="col">age</span>;
+
+<span class="com">-- 多字段分组</span>
+<span class="kw">SELECT</span> <span class="col">department</span>, <span class="col">gender</span>, <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> 人数
+<span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">GROUP BY</span> <span class="col">department</span>, <span class="col">gender</span>;
+
+<span class="com">-- 分组 + 排序</span>
+<span class="kw">SELECT</span> <span class="col">age</span>, <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> 人数
+<span class="kw">FROM</span> <span class="tbl">users</span>
+<span class="kw">GROUP BY</span> <span class="col">age</span>
+<span class="kw">ORDER BY</span> 人数 <span class="kw">DESC</span>;</div>
+
+            <h3>HAVING 分组后筛选</h3>
+            <div class="callout warn">
+                <div class="callout-title">WHERE vs HAVING 的区别</div>
+                <strong>WHERE</strong>：在分组<strong>之前</strong>筛选，不能用聚合函数<br>
+                <strong>HAVING</strong>：在分组<strong>之后</strong>筛选，必须用聚合函数<br>
+                执行顺序：WHERE → GROUP BY → 聚合计算 → HAVING
+            </div>
+
+            <div class="code-block"><span class="com">-- 找出人数大于1的年龄段</span>
+<span class="kw">SELECT</span> <span class="col">age</span>, <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> 人数
+<span class="kw">FROM</span> <span class="tbl">users</span>
+<span class="kw">WHERE</span> <span class="col">age</span> > <span class="num">18</span>          <span class="com">-- 先过滤：只要18岁以上的</span>
+<span class="kw">GROUP BY</span> <span class="col">age</span>              <span class="com">-- 再分组</span>
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(<span class="op">*</span>) > <span class="num">1</span>     <span class="com">-- 再筛选：人数大于1的组</span>
+<span class="kw">ORDER BY</span> 人数 <span class="kw">DESC</span>;       <span class="com">-- 再排序</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 多表连接 ===================== -->
+    <div class="section" id="nav-join">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128279;</div>
+            <h2>多表连接（JOIN）</h2>
+            <span class="badge">重点难点</span>
+        </div>
+        <div class="section-body">
+            <p>实际项目中数据存在多张表里，需要把它们"连起来"查询。这就是 JOIN。</p>
+
+            <h3>先建两张表演示</h3>
+            <div class="example-table">
+                <h4>students 学生表</h4>
+                <table>
+                    <tr><th>id</th><th>name</th><th>class_id</th></tr>
+                    <tr><td>1</td><td>张三</td><td>101</td></tr>
+                    <tr><td>2</td><td>李四</td><td>102</td></tr>
+                    <tr><td>3</td><td>王五</td><td>101</td></tr>
+                    <tr><td>4</td><td>赵六</td><td>NULL</td></tr>
+                </table>
+            </div>
+            <div class="example-table">
+                <h4>classes 班级表</h4>
+                <table>
+                    <tr><th>class_id</th><th>class_name</th></tr>
+                    <tr><td>101</td><td>计算机一班</td></tr>
+                    <tr><td>102</td><td>计算机二班</td></tr>
+                    <tr><td>103</td><td>软件工程班</td></tr>
+                </table>
+            </div>
+
+            <h3>四种 JOIN</h3>
+            <table>
+                <tr><th>类型</th><th>说明</th><th>结果</th></tr>
+                <tr>
+                    <td><span class="tag tag-essential">INNER JOIN</span></td>
+                    <td>内连接：两边都匹配的才显示</td>
+                    <td>张三+一班、李四+二班、王五+一班</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-essential">LEFT JOIN</span></td>
+                    <td>左连接：左边全部显示，右边匹配不到的为 NULL</td>
+                    <td>张三+一班、李四+二班、王五+一班、赵六+NULL</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-intermediate">RIGHT JOIN</span></td>
+                    <td>右连接：右边全部显示，左边匹配不到的为 NULL</td>
+                    <td>张三+一班、李四+二班、王五+一班、NULL+软工班</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-advanced">FULL JOIN</span></td>
+                    <td>全连接：两边都显示（MySQL 不直接支持）</td>
+                    <td>所有行都有</td>
+                </tr>
+            </table>
+
+            <div class="code-block"><span class="com">-- INNER JOIN（内连接，最常用）</span>
+<span class="kw">SELECT</span> s.<span class="col">name</span>, c.<span class="col">class_name</span>
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">INNER JOIN</span> <span class="tbl">classes</span> c <span class="kw">ON</span> s.<span class="col">class_id</span> = c.<span class="col">class_id</span>;
+
+<span class="com">-- LEFT JOIN（左连接）</span>
+<span class="kw">SELECT</span> s.<span class="col">name</span>, c.<span class="col">class_name</span>
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">LEFT JOIN</span> <span class="tbl">classes</span> c <span class="kw">ON</span> s.<span class="col">class_id</span> = c.<span class="col">class_id</span>;
+
+<span class="com">-- 三表连接</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> <span class="tbl">orders</span> o
+<span class="kw">JOIN</span> <span class="tbl">users</span> u <span class="kw">ON</span> o.<span class="col">user_id</span> = u.<span class="col">id</span>
+<span class="kw">JOIN</span> <span class="tbl">products</span> p <span class="kw">ON</span> o.<span class="col">product_id</span> = p.<span class="col">id</span>;</div>
+
+            <div class="callout tip">
+                <div class="callout-title">JOIN 记忆技巧</div>
+                把 LEFT JOIN 想成"以左表为准"：左表所有行都保留，右表能匹配上的就填数据，匹配不上的就填 NULL。<br>
+                INNER JOIN 就是"两边都有才要"，两边都匹配不到的就丢弃。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 子查询 ===================== -->
+    <div class="section" id="nav-subquery">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(232,135,58,0.15);color:#e8873a;">&#128225;</div>
+            <h2>子查询</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+            <p>子查询就是"查询里嵌套查询"，把一个 SELECT 的结果作为另一个查询的条件或来源。</p>
+
+            <div class="code-block"><span class="com">-- 1. WHERE 中的子查询（标量子查询）</span>
+<span class="com">-- 找出年龄最大的人</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span>
+<span class="kw">WHERE</span> <span class="col">age</span> = (<span class="kw">SELECT MAX</span>(<span class="col">age</span>) <span class="kw">FROM</span> <span class="tbl">users</span>);
+
+<span class="com">-- 2. IN 子查询</span>
+<span class="com">-- 找出在一班的所有学生</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">class_id</span> <span class="kw">IN</span> (
+    <span class="kw">SELECT</span> <span class="col">class_id</span> <span class="kw">FROM</span> <span class="tbl">classes</span> <span class="kw">WHERE</span> <span class="col">class_name</span> = <span class="str">'计算机一班'</span>
+);
+
+<span class="com">-- 3. FROM 中的子查询（派生表）</span>
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(s.age) <span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> <span class="col">age</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">age</span> > <span class="num">18</span>
+) s;
+
+<span class="com">-- 4. EXISTS 子查询（存在性判断）</span>
+<span class="com">-- 找出有学生的班级</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">classes</span> c
+<span class="kw">WHERE EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> <span class="tbl">students</span> s <span class="kw">WHERE</span> s.<span class="col">class_id</span> = c.<span class="col">class_id</span>
+);</div>
+
+            <div class="callout tip">
+                <div class="callout-title">子查询 vs JOIN</div>
+                很多子查询可以改写成 JOIN，通常 JOIN 效率更高。但子查询更直观、更好理解。初学者可以先用子查询，熟练了再考虑优化成 JOIN。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 约束 ===================== -->
+    <div class="section" id="nav-constraint">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128274;</div>
+            <h2>约束（Constraint）</h2>
+            <span class="badge">数据完整性</span>
+        </div>
+        <div class="section-body">
+            <p>约束是用来保证数据正确性和完整性的规则。</p>
+
+            <table>
+                <tr><th>约束</th><th>说明</th><th>示例</th></tr>
+                <tr>
+                    <td><code>PRIMARY KEY</code></td>
+                    <td>主键：唯一且非空，每行的身份证</td>
+                    <td><code>id INT PRIMARY KEY</code></td>
+                </tr>
+                <tr>
+                    <td><code>AUTO_INCREMENT</code></td>
+                    <td>自增（配合主键使用）</td>
+                    <td><code>id INT PRIMARY KEY AUTO_INCREMENT</code></td>
+                </tr>
+                <tr>
+                    <td><code>NOT NULL</code></td>
+                    <td>非空：不能不填</td>
+                    <td><code>name VARCHAR(50) NOT NULL</code></td>
+                </tr>
+                <tr>
+                    <td><code>UNIQUE</code></td>
+                    <td>唯一：不能重复</td>
+                    <td><code>email VARCHAR(100) UNIQUE</code></td>
+                </tr>
+                <tr>
+                    <td><code>DEFAULT</code></td>
+                    <td>默认值：不填时用这个</td>
+                    <td><code>age INT DEFAULT 0</code></td>
+                </tr>
+                <tr>
+                    <td><code>FOREIGN KEY</code></td>
+                    <td>外键：关联另一张表的主键</td>
+                    <td><code>FOREIGN KEY (class_id) REFERENCES classes(id)</code></td>
+                </tr>
+                <tr>
+                    <td><code>CHECK</code></td>
+                    <td>检查：自定义约束条件</td>
+                    <td><code>age INT CHECK (age >= 0)</code></td>
+                </tr>
+            </table>
+
+            <div class="code-block"><span class="com">-- 带外键的建表示例</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">orders</span> (
+    <span class="col">id</span> <span class="type">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+    <span class="col">user_id</span> <span class="type">INT</span> <span class="kw">NOT NULL</span>,
+    <span class="col">amount</span> <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">DEFAULT</span> <span class="num">0</span>,
+    <span class="kw">FOREIGN KEY</span> (<span class="col">user_id</span>) <span class="kw">REFERENCES</span> <span class="tbl">users</span>(<span class="col">id</span>)
+);</div>
+        </div>
+    </div>
+
+    <!-- ===================== 索引 ===================== -->
+    <div class="section" id="nav-index">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128190;</div>
+            <h2>索引</h2>
+            <span class="badge">性能优化</span>
+        </div>
+        <div class="section-body">
+            <p><strong>索引</strong>就像书的目录，能让你快速找到数据。没有索引就是一页一页翻（全表扫描），有索引就是翻目录找页码。</p>
+
+            <div class="code-block"><span class="com">-- 查看索引</span>
+<span class="kw">SHOW INDEX FROM</span> <span class="tbl">users</span>;
+
+<span class="com">-- 创建普通索引</span>
+<span class="kw">CREATE INDEX</span> idx_name <span class="kw">ON</span> <span class="tbl">users</span>(<span class="col">name</span>);
+
+<span class="com">-- 创建唯一索引</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_email <span class="kw">ON</span> <span class="tbl">users</span>(<span class="col">email</span>);
+
+<span class="com">-- 创建复合索引（多列）</span>
+<span class="kw">CREATE INDEX</span> idx_name_age <span class="kw">ON</span> <span class="tbl">users</span>(<span class="col">name</span>, <span class="col">age</span>);
+
+<span class="com">-- 删除索引</span>
+<span class="kw">DROP INDEX</span> idx_name <span class="kw">ON</span> <span class="tbl">users</span>;
+
+<span class="com">-- 查看执行计划（判断是否走索引）</span>
+<span class="kw">EXPLAIN</span> <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">users</span> <span class="kw">WHERE</span> <span class="col">name</span> = <span class="str">'张三'</span>;</div>
+
+            <div class="callout tip">
+                <div class="callout-title">索引使用原则</div>
+                <strong>1.</strong> 经常出现在 WHERE 条件里的列建索引<br>
+                <strong>2.</strong> 主键和唯一键自动有索引<br>
+                <strong>3.</strong> 索引不是越多越好（写操作变慢、占空间）<br>
+                <strong>4.</strong> 数据量小的表不需要索引<br>
+                <strong>5.</strong> 用 EXPLAIN 查看是否走索引
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 事务 ===================== -->
+    <div class="section" id="nav-transaction">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#128260;</div>
+            <h2>事务（Transaction）</h2>
+            <span class="badge">面试必考</span>
+        </div>
+        <div class="section-body">
+            <p><strong>事务</strong>就是一组 SQL 操作，它们要么全部成功，要么全部失败。最经典的例子就是银行转账：A 扣钱和 B 加钱必须同时成功，不能只扣不加。</p>
+
+            <div class="code-block"><span class="com">-- 开启事务</span>
+<span class="kw">START TRANSACTION</span>;
+
+<span class="com">-- 执行操作</span>
+<span class="kw">UPDATE</span> <span class="tbl">account</span> <span class="kw">SET</span> <span class="col">money</span> = <span class="col">money</span> - <span class="num">100</span> <span class="kw">WHERE</span> <span class="col">name</span> = <span class="str">'A'</span>;
+<span class="kw">UPDATE</span> <span class="tbl">account</span> <span class="kw">SET</span> <span class="col">money</span> = <span class="col">money</span> + <span class="num">100</span> <span class="kw">WHERE</span> <span class="col">name</span> = <span class="str">'B'</span>;
+
+<span class="com">-- 如果都成功，提交</span>
+<span class="kw">COMMIT</span>;
+
+<span class="com">-- 如果出错了，回滚（撤销所有操作）</span>
+<span class="kw">ROLLBACK</span>;</div>
+
+            <h3>ACID 四大特性（面试必背）</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">A - 原子性（Atomicity）</div>
+                    <div class="card-desc">事务是不可分割的最小单位，要么全成，要么全败。由 undo log 实现</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">C - 一致性（Consistency）</div>
+                    <div class="card-desc">事务前后数据始终保持一致状态。比如转账前后总金额不变</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">I - 隔离性（Isolation）</div>
+                    <div class="card-desc">多个事务互不干扰。有4种隔离级别</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">D - 持久性（Durability）</div>
+                    <div class="card-desc">事务提交后永久生效，断电也不丢。由 redo log 实现</div>
+                </div>
+            </div>
+
+            <h3>四种隔离级别</h3>
+            <table>
+                <tr><th>隔离级别</th><th>脏读</th><th>不可重复读</th><th>幻读</th></tr>
+                <tr><td>读未提交（READ UNCOMMITTED）</td><td>会</td><td>会</td><td>会</td></tr>
+                <tr><td>读已提交（READ COMMITTED）</td><td>不会</td><td>会</td><td>会</td></tr>
+                <tr><td>可重复读（REPEATABLE READ）</td><td>不会</td><td>不会</td><td>不会(MySQL)</td></tr>
+                <tr><td>串行化（SERIALIZABLE）</td><td>不会</td><td>不会</td><td>不会</td></tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">MySQL 默认隔离级别</div>
+                MySQL InnoDB 引擎默认是 <strong>可重复读（REPEATABLE READ）</strong>，并且通过 MVCC + Next-Key Lock 解决了幻读问题。这是面试高频题。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 实战练习 ===================== -->
+    <div class="section" id="nav-practice">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#9997;</div>
+            <h2>实战练习：学生成绩管理系统</h2>
+            <span class="badge">动手练</span>
+        </div>
+        <div class="section-body">
+            <p>光看不练假把式，跟着下面的步骤在 MySQL 里实际敲一遍。</p>
+
+            <h3>练习 1：建表</h3>
+            <div class="code-block"><span class="kw">CREATE DATABASE</span> <span class="tbl">school</span> <span class="kw">CHARSET</span> utf8mb4;
+<span class="kw">USE</span> <span class="tbl">school</span>;
+
+<span class="com">-- 学生表</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">students</span> (
+    <span class="col">id</span> <span class="type">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+    <span class="col">name</span> <span class="type">VARCHAR</span>(<span class="num">50</span>) <span class="kw">NOT NULL</span>,
+    <span class="col">gender</span> <span class="type">CHAR</span>(<span class="num">1</span>) <span class="kw">DEFAULT</span> <span class="str">'M'</span>,
+    <span class="col">birth_date</span> <span class="type">DATE</span>,
+    <span class="col">class</span> <span class="type">VARCHAR</span>(<span class="num">50</span>)
+);
+
+<span class="com">-- 课程表</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">courses</span> (
+    <span class="col">id</span> <span class="type">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+    <span class="col">name</span> <span class="type">VARCHAR</span>(<span class="num">50</span>) <span class="kw">NOT NULL</span>,
+    <span class="col">teacher</span> <span class="type">VARCHAR</span>(<span class="num">50</span>)
+);
+
+<span class="com">-- 成绩表</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">scores</span> (
+    <span class="col">id</span> <span class="type">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+    <span class="col">student_id</span> <span class="type">INT</span> <span class="kw">NOT NULL</span>,
+    <span class="col">course_id</span> <span class="type">INT</span> <span class="kw">NOT NULL</span>,
+    <span class="col">score</span> <span class="type">DECIMAL</span>(<span class="num">5</span>,<span class="num">2</span>) <span class="kw">DEFAULT</span> <span class="num">0</span>
+);</div>
+
+            <h3>练习 2：插入数据</h3>
+            <div class="code-block"><span class="com">-- 插入学生</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">students</span> (<span class="col">name</span>, <span class="col">gender</span>, <span class="col">birth_date</span>, <span class="col">class</span>)
+<span class="kw">VALUES</span>
+    (<span class="str">'张三'</span>, <span class="str">'M'</span>, <span class="str">'2005-03-15'</span>, <span class="str">'一班'</span>),
+    (<span class="str">'李四'</span>, <span class="str">'F'</span>, <span class="str">'2005-06-20'</span>, <span class="str">'一班'</span>),
+    (<span class="str">'王五'</span>, <span class="str">'M'</span>, <span class="str">'2005-01-10'</span>, <span class="str">'二班'</span>),
+    (<span class="str">'赵六'</span>, <span class="str">'F'</span>, <span class="str">'2004-12-05'</span>, <span class="str">'二班'</span>),
+    (<span class="str">'孙七'</span>, <span class="str">'M'</span>, <span class="str">'2005-08-18'</span>, <span class="str">'一班'</span>);
+
+<span class="com">-- 插入课程</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">courses</span> (<span class="col">name</span>, <span class="col">teacher</span>)
+<span class="kw">VALUES</span>
+    (<span class="str">'数学'</span>, <span class="str">'张老师'</span>),
+    (<span class="str">'英语'</span>, <span class="str">'李老师'</span>),
+    (<span class="str">'计算机'</span>, <span class="str">'王老师'</span>);
+
+<span class="com">-- 插入成绩</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">scores</span> (<span class="col">student_id</span>, <span class="col">course_id</span>, <span class="col">score</span>)
+<span class="kw">VALUES</span>
+    (<span class="num">1</span>, <span class="num">1</span>, <span class="num">90</span>), (<span class="num">1</span>, <span class="num">2</span>, <span class="num">85</span>), (<span class="num">1</span>, <span class="num">3</span>, <span class="num">95</span>),
+    (<span class="num">2</span>, <span class="num">1</span>, <span class="num">75</span>), (<span class="num">2</span>, <span class="num">2</span>, <span class="num">92</span>), (<span class="num">2</span>, <span class="num">3</span>, <span class="num">88</span>),
+    (<span class="num">3</span>, <span class="num">1</span>, <span class="num">65</span>), (<span class="num">3</span>, <span class="num">2</span>, <span class="num">70</span>), (<span class="num">3</span>, <span class="num">3</span>, <span class="num">80</span>),
+    (<span class="num">4</span>, <span class="num">1</span>, <span class="num">88</span>), (<span class="num">4</span>, <span class="num">2</span>, <span class="num">95</span>), (<span class="num">4</span>, <span class="num">3</span>, <span class="num">92</span>),
+    (<span class="num">5</span>, <span class="num">1</span>, <span class="num">92</span>), (<span class="num">5</span>, <span class="num">2</span>, <span class="num">80</span>), (<span class="num">5</span>, <span class="num">3</span>, <span class="num">78</span>);</div>
+
+            <h3>练习 3：基础查询</h3>
+            <div class="code-block"><span class="com">-- 1. 查询所有学生</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="com">-- 2. 查询一班的男生</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">birth_date</span> <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">class</span> = <span class="str">'一班'</span> <span class="kw">AND</span> <span class="col">gender</span> = <span class="str">'M'</span>;
+
+<span class="com">-- 3. 查询姓张的学生</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">students</span> <span class="kw">WHERE</span> <span class="col">name</span> <span class="kw">LIKE</span> <span class="str">'张%'</span>;
+
+<span class="com">-- 4. 按出生日期从大到小排序</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">birth_date</span> <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> <span class="col">birth_date</span> <span class="kw">DESC</span>;
+
+<span class="com">-- 5. 取前3个学生</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">students</span> <span class="kw">LIMIT</span> <span class="num">3</span>;</div>
+
+            <h3>练习 4：分组与聚合</h3>
+            <div class="code-block"><span class="com">-- 1. 每个班有多少人</span>
+<span class="kw">SELECT</span> <span class="col">class</span>, <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> 人数
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">GROUP BY</span> <span class="col">class</span>;
+
+<span class="com">-- 2. 数学成绩的平均分、最高分、最低分</span>
+<span class="kw">SELECT</span>
+    <span class="fn">AVG</span>(s.<span class="col">score</span>) <span class="kw">AS</span> 平均分,
+    <span class="fn">MAX</span>(s.<span class="col">score</span>) <span class="kw">AS</span> 最高分,
+    <span class="fn">MIN</span>(s.<span class="col">score</span>) <span class="kw">AS</span> 最低分
+<span class="kw">FROM</span> <span class="tbl">scores</span> s
+<span class="kw">JOIN</span> <span class="tbl">courses</span> c <span class="kw">ON</span> s.<span class="col">course_id</span> = c.<span class="col">id</span>
+<span class="kw">WHERE</span> c.<span class="col">name</span> = <span class="str">'数学'</span>;
+
+<span class="com">-- 3. 每个学生的总分，按总分从高到低排</span>
+<span class="kw">SELECT</span> st.<span class="col">name</span>, <span class="fn">SUM</span>(s.<span class="col">score</span>) <span class="kw">AS</span> 总分
+<span class="kw">FROM</span> <span class="tbl">scores</span> s
+<span class="kw">JOIN</span> <span class="tbl">students</span> st <span class="kw">ON</span> s.<span class="col">student_id</span> = st.<span class="col">id</span>
+<span class="kw">GROUP BY</span> st.<span class="col">id</span>
+<span class="kw">ORDER BY</span> 总分 <span class="kw">DESC</span>;
+
+<span class="com">-- 4. 找出平均分大于85分的学生</span>
+<span class="kw">SELECT</span> st.<span class="col">name</span>, <span class="fn">AVG</span>(s.<span class="col">score</span>) <span class="kw">AS</span> 平均分
+<span class="kw">FROM</span> <span class="tbl">scores</span> s
+<span class="kw">JOIN</span> <span class="tbl">students</span> st <span class="kw">ON</span> s.<span class="col">student_id</span> = st.<span class="col">id</span>
+<span class="kw">GROUP BY</span> st.<span class="col">id</span>
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(s.<span class="col">score</span>) > <span class="num">85</span>
+<span class="kw">ORDER BY</span> 平均分 <span class="kw">DESC</span>;</div>
+
+            <h3>练习 5：子查询</h3>
+            <div class="code-block"><span class="com">-- 1. 找出数学成绩最高的学生</span>
+<span class="kw">SELECT</span> st.<span class="col">name</span>, s.<span class="col">score</span>
+<span class="kw">FROM</span> <span class="tbl">scores</span> s
+<span class="kw">JOIN</span> <span class="tbl">students</span> st <span class="kw">ON</span> s.<span class="col">student_id</span> = st.<span class="col">id</span>
+<span class="kw">WHERE</span> s.<span class="col">course_id</span> = <span class="num">1</span>
+  <span class="kw">AND</span> s.<span class="col">score</span> = (<span class="kw">SELECT MAX</span>(<span class="col">score</span>) <span class="kw">FROM</span> <span class="tbl">scores</span> <span class="kw">WHERE</span> <span class="col">course_id</span> = <span class="num">1</span>);
+
+<span class="com">-- 2. 找出有不及格成绩的学生</span>
+<span class="kw">SELECT DISTINCT</span> st.<span class="col">name</span>
+<span class="kw">FROM</span> <span class="tbl">students</span> st
+<span class="kw">WHERE EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> <span class="tbl">scores</span> s
+    <span class="kw">WHERE</span> s.<span class="col">student_id</span> = st.<span class="col">id</span> <span class="kw">AND</span> s.<span class="col">score</span> < <span class="num">60</span>
+);</div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="nav-interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>什么是主键？什么是外键？</td>
+                    <td>主键(PRIMARY KEY)：唯一标识一行记录，不能重复也不能为空。外键(FOREIGN KEY)：引用另一张表的主键，保证数据的参照完整性</td>
+                </tr>
+                <tr>
+                    <td>DROP、DELETE、TRUNCATE 的区别？</td>
+                    <td>DELETE：删除数据，保留表结构，可以回滚，可以加WHERE<br>
+                        TRUNCATE：清空表数据，保留表结构，不能回滚，更快<br>
+                        DROP：删除整个表（数据+结构都没了）</td>
+                </tr>
+                <tr>
+                    <td>WHERE 和 HAVING 的区别？</td>
+                    <td>WHERE 在分组前筛选，不能用聚合函数；HAVING 在分组后筛选，必须用聚合函数。执行顺序：WHERE → GROUP BY → 聚合 → HAVING</td>
+                </tr>
+                <tr>
+                    <td>INNER JOIN 和 LEFT JOIN 的区别？</td>
+                    <td>INNER JOIN：两边都匹配的行才显示；LEFT JOIN：左表全部显示，右表匹配不到的为NULL</td>
+                </tr>
+                <tr>
+                    <td>什么是索引？有什么优缺点？</td>
+                    <td>索引像书的目录，加快查询速度。优点：查询快；缺点：占空间、降低写入速度（增删改要维护索引）</td>
+                </tr>
+                <tr>
+                    <td>索引的底层数据结构？</td>
+                    <td>B+树。B+树是多路平衡查找树，所有数据都在叶子节点，叶子节点用链表相连，适合范围查询</td>
+                </tr>
+                <tr>
+                    <td>什么是事务？ACID 是什么？</td>
+                    <td>事务是一组要么全成功要么全失败的SQL操作。ACID：原子性(A)、一致性(C)、隔离性(I)、持久性(D)</td>
+                </tr>
+                <tr>
+                    <td>事务的隔离级别有哪些？</td>
+                    <td>读未提交、读已提交、可重复读、串行化。级别越高越安全但性能越差。MySQL默认是可重复读</td>
+                </tr>
+                <tr>
+                    <td>什么是脏读、不可重复读、幻读？</td>
+                    <td>脏读：读到了别的事务还没提交的数据<br>
+                        不可重复读：同一事务里两次读同一行，结果不一样（因为中间被改了）<br>
+                        幻读：同一事务里两次查询，行数不一样（因为中间插入了新行）</td>
+                </tr>
+                <tr>
+                    <td>MySQL 存储引擎有哪些？区别？</td>
+                    <td>InnoDB（默认）：支持事务、支持外键、行级锁<br>
+                        MyISAM：不支持事务、表级锁、速度快（读多写少场景）<br>
+                        现在基本都用 InnoDB</td>
+                </tr>
+                <tr>
+                    <td>count(*), count(1), count(列名) 的区别？</td>
+                    <td>count(*) 和 count(1)：统计总行数，结果一样，InnoDB 中性能差不多<br>
+                        count(列名)：统计该列不为 NULL 的行数，结果可能更少</td>
+                </tr>
+                <tr>
+                    <td>什么是 SQL 注入？怎么防范？</td>
+                    <td>SQL注入是通过输入恶意SQL代码来攻击数据库。防范：使用参数化查询（预编译语句），不要拼接SQL字符串</td>
+                </tr>
+                <tr>
+                    <td>如何优化 SQL 查询？</td>
+                    <td>1. 给WHERE条件列加索引 2. 避免SELECT * 3. 用JOIN代替子查询 4. 避免索引失效（如左模糊匹配、列上做运算）5. 用EXPLAIN分析执行计划</td>
+                </tr>
+                <tr>
+                    <td>什么情况下索引会失效？</td>
+                    <td>1. 索引列上做运算或函数 2. 隐式类型转换 3. LIKE左模糊(%开头) 4. OR连接的列没有索引 5. 违反最左前缀原则</td>
+                </tr>
+                <tr>
+                    <td>最左前缀原则是什么？</td>
+                    <td>复合索引(index(a,b,c))从最左列开始匹配。WHERE a=1 AND b=2 走索引；WHERE b=2 AND c=3 不走索引（因为缺了a）</td>
+                </tr>
+                <tr>
+                    <td>MySQL 为什么用 B+树而不用 B 树？</td>
+                    <td>1. B+树非叶子节点不存数据，能存更多索引项，树更矮，IO更少<br>
+                        2. B+树叶子节点用链表串联，范围查询更方便<br>
+                        3. B+树查询时间更稳定（每次都走到叶子节点）</td>
+                </tr>
+                <tr>
+                    <td>什么是 MVCC？</td>
+                    <td>多版本并发控制（Multi-Version Concurrency Control）。每行数据有隐藏的版本号，读操作读的是快照版本，不用加锁，提高了并发性能。是 InnoDB 实现隔离级别的基础</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST SQL 学习笔记 &nbsp;|&nbsp; 2026-09-28</p>
+    <p>从零开始：安装 MySQL → 建表 → CRUD → 分组 → JOIN → 索引 → 事务 → 面试速答</p>
+</div>
+
+</body>
+</html>

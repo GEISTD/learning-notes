@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++手写代码模板手册</title>
+<style>
+  :root{--primary:#1a3c5e;--accent:#2563eb;--text:#1e293b;--text-light:#64748b;--bg:#f8fafc;--border:#e2e8f0;--code-bg:#1e293b;--code-text:#e2e8f0}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#e9eef4;color:var(--text);line-height:1.7;font-size:15px;padding:30px 15px}
+  .page{max-width:920px;margin:0 auto;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,0.08);border-radius:10px;overflow:hidden}
+  .header{background:linear-gradient(135deg,var(--primary) 0%,#2d5a87 100%);color:#fff;padding:30px 36px}
+  .header h1{font-size:24px;margin-bottom:6px}
+  .header .subtitle{font-size:14px;opacity:0.85}
+  .body{padding:28px 36px 36px}
+  .section{margin-bottom:28px}
+  .section-title{font-size:17px;font-weight:700;color:var(--primary);border-left:4px solid var(--accent);padding-left:10px;margin-bottom:14px}
+
+  .note{font-size:13px;color:var(--text-light);margin-bottom:14px;padding:8px 12px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0}
+  .note strong{color:#92400e}
+
+  pre{
+    background:var(--code-bg);color:var(--code-text);border-radius:8px;padding:14px 16px;
+    font-family:"Cascadia Code","Fira Code","Consolas",monospace;font-size:13.5px;
+    line-height:1.55;overflow-x:auto;margin-bottom:14px;white-space:pre-wrap;word-wrap:break-word
+  }
+  pre .cm{color:#64748b}
+  pre .kw{color:#7dd3fc}
+  pre .str{color:#86efac}
+  pre .num{color:#fcd34d}
+  pre .fn{color:#c4b5fd}
+
+  .tpl-card{border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden}
+  .tpl-header{background:var(--bg);padding:8px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;color:var(--text);display:flex;justify-content:space-between;align-items:center}
+  .tpl-header .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px}
+  .tpl-body{padding:12px 16px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr}}
+
+  .practice{font-size:13px;color:var(--text-light);margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
+  .practice strong{color:var(--text)}
+
+  @media print{body{background:#fff;padding:0;font-size:12px}.page{box-shadow:none;border-radius:0;max-width:100%}.header{padding:20px 24px}.body{padding:20px 24px}pre{font-size:11px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>C++ 手写代码模板手册</h1>
+    <div class="subtitle">数据结构基础模板 + 常见扩展模式 | 每个模板默写5遍到肌肉记忆</div>
+  </div>
+  <div class="body">
+
+    <div class="note"><strong>使用方法：</strong>每天选3-5个模板，关掉所有资料，纸笔默写。写到不看代码能完整写出来为止。每个模板下面有"默写检查点"，全部满足才算过关。</div>
+
+    <!-- ===== 1. 数组模板 ===== -->
+    <div class="section">
+      <div class="section-title">一、数组模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">1.1 一维数组遍历（正序/逆序）<span class="tag" style="background:#dbeafe;color:#1d4ed8">基础</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 正序遍历</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="cm">// a[i]</span>
+}
+
+<span class="cm">// 逆序遍历</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = n - <span class="num">1</span>; i &gt;= <span class="num">0</span>; i--) {
+    <span class="cm">// a[i]</span>
+}
+
+<span class="cm">// range-based for（只读）</span>
+<span class="kw">for</span> (<span class="kw">int</span> x : arr) {
+    <span class="cm">// x 是副本</span>
+}
+
+<span class="cm">// range-based for（引用，可修改）</span>
+<span class="kw">for</span> (<span class="kw">int</span>&amp; x : arr) {
+    x *= <span class="num">2</span>;
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①逆序循环i的初始值是n-1不是n ②range-based for加&amp;才能修改原数组</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">1.2 二维数组（矩阵遍历）<span class="tag" style="background:#dbeafe;color:#1d4ed8">基础</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 行优先遍历（外层行，内层列）</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; rows; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; cols; j++) {
+        <span class="cm">// matrix[i][j]</span>
+    }
+}
+
+<span class="cm">// 列优先遍历（外层列，内层行，缓存不友好但有时必须）</span>
+<span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; cols; j++) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; rows; i++) {
+        <span class="cm">// matrix[i][j]</span>
+    }
+}
+
+<span class="cm">// 对角线遍历（主对角线 i==j）</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="cm">// matrix[i][i] 是主对角线元素</span>
+    <span class="cm">// matrix[i][n-1-i] 是副对角线元素</span>
+}
+
+<span class="cm">// 矩阵转置</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = i + <span class="num">1</span>; j &lt; n; j++) {
+        <span class="fn">swap</span>(matrix[i][j], matrix[j][i]);
+    }
+}
+
+<span class="cm">// 矩阵顺时针旋转90度 = 转置 + 每行逆序</span>
+<span class="cm">// Step1: 转置</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="kw">for</span> (<span class="kw">int</span> j = i + <span class="num">1</span>; j &lt; n; j++)
+        <span class="fn">swap</span>(matrix[i][j], matrix[j][i]);
+<span class="cm">// Step2: 每行逆序</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++)
+    <span class="fn">reverse</span>(matrix[i].begin(), matrix[i].end());</pre>
+          <div class="practice"><strong>默写检查点：</strong>①转置时内层j从i+1开始（只处理上三角）②旋转90度=转置+行逆序，不要搞反成列逆序</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">1.3 双指针（对撞/快慢）<span class="tag" style="background:#dbeafe;color:#1d4ed8">高频</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 对撞指针（两端向中间）— 回文判断、两数之和</span>
+<span class="kw">int</span> left = <span class="num">0</span>, right = n - <span class="num">1</span>;
+<span class="kw">while</span> (left &lt; right) {
+    <span class="kw">if</span> (arr[left] + arr[right] == target) <span class="kw">break</span>;
+    <span class="kw">else if</span> (arr[left] + arr[right] &lt; target) left++;
+    <span class="kw">else</span> right--;
+}
+
+<span class="cm">// 快慢指针（同端出发）— 删除重复元素、找中点</span>
+<span class="kw">int</span> slow = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> fast = <span class="num">0</span>; fast &lt; n; fast++) {
+    <span class="kw">if</span> (fast == <span class="num">0</span> || arr[fast] != arr[fast - <span class="num">1</span>]) {
+        arr[slow++] = arr[fast];
+    }
+}
+<span class="cm">// slow 就是去重后的长度</span>
+
+<span class="cm">// 滑动窗口 — 最小覆盖子串框架</span>
+<span class="kw">int</span> left = <span class="num">0</span>, right = <span class="num">0</span>;
+<span class="kw">while</span> (right &lt; n) {
+    <span class="cm">// 扩大右边界：将 arr[right] 加入窗口</span>
+    right++;
+    <span class="kw">while</span> (窗口满足条件) {
+        <span class="cm">// 更新答案</span>
+        <span class="cm">// 缩小左边界：将 arr[left] 移出窗口</span>
+        left++;
+    }
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①对撞指针while条件是left&lt;right不是left&lt;=right ②快慢指针的fast走快slow走慢 ③滑动窗口外层扩右、内层缩左</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 2. 链表模板 ===== -->
+    <div class="section">
+      <div class="section-title">二、链表模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">2.1 链表节点定义与遍历<span class="tag" style="background:#dcfce7;color:#16a34a">基础</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 节点定义（必须能默写）</span>
+<span class="kw">struct</span> ListNode {
+    <span class="kw">int</span> val;
+    ListNode* next;
+    ListNode(<span class="kw">int</span> x) : val(x), next(<span class="kw">nullptr</span>) {}
+};
+
+<span class="cm">// 遍历链表（核心模板，写到烂熟）</span>
+ListNode* cur = head;
+<span class="kw">while</span> (cur != <span class="kw">nullptr</span>) {
+    <span class="cm">// 访问 cur->val</span>
+    cur = cur->next;
+}
+
+<span class="cm">// 统计链表长度</span>
+<span class="kw">int</span> <span class="fn">len</span>(ListNode* head) {
+    <span class="kw">int</span> n = <span class="num">0</span>;
+    ListNode* cur = head;
+    <span class="kw">while</span> (cur) { n++; cur = cur->next; }
+    <span class="kw">return</span> n;
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①构造函数初始化列表写法 ②遍历while条件是cur!=nullptr ③cur=cur->next必须在循环体内</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">2.2 链表逆置（四步法）<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 链表逆置 — 四步法（面试最高频之一）</span>
+ListNode* <span class="fn">reverseList</span>(ListNode* head) {
+    ListNode* prev = <span class="kw">nullptr</span>;
+    ListNode* cur = head;
+    <span class="kw">while</span> (cur != <span class="kw">nullptr</span>) {
+        ListNode* next = cur->next;  <span class="cm">// 1. 先存下一个</span>
+        cur->next = prev;            <span class="cm">// 2. 反转指向</span>
+        prev = cur;                  <span class="cm">// 3. prev前进</span>
+        cur = next;                  <span class="cm">// 4. cur前进</span>
+    }
+    <span class="kw">return</span> prev;  <span class="cm">// prev 是新的头</span>
+}
+
+<span class="cm">// 区间逆置 [left, right]（头插法）</span>
+ListNode* <span class="fn">reverseBetween</span>(ListNode* head, <span class="kw">int</span> left, <span class="kw">int</span> right) {
+    ListNode* dummy = <span class="kw">new</span> ListNode(<span class="num">0</span>);
+    dummy->next = head;
+    ListNode* prev = dummy;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; left - <span class="num">1</span>; i++) prev = prev->next;
+    ListNode* cur = prev->next;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; right - left; i++) {
+        ListNode* next = cur->next;
+        cur->next = next->next;
+        next->next = prev->next;
+        prev->next = next;
+    }
+    <span class="kw">return</span> dummy->next;
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①四步顺序：存next→反转→prev前进→cur前进 ②返回prev不是cur ③区间逆置用dummy节点防止头节点变化</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">2.3 链表常用扩展<span class="tag" style="background:#fef3c7;color:#d97706">扩展</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 快慢指针找中点（判断环/分割链表）</span>
+ListNode* slow = head, *fast = head;
+<span class="kw">while</span> (fast &amp;&amp; fast->next) {
+    slow = slow->next;
+    fast = fast->next->next;
+}
+<span class="cm">// slow 指向中点（奇数个节点时是中间，偶数个时是前半段最后一个）</span>
+
+<span class="cm">// 判断环形链表</span>
+<span class="kw">bool</span> <span class="fn">hasCycle</span>(ListNode* head) {
+    ListNode* slow = head, *fast = head;
+    <span class="kw">while</span> (fast &amp;&amp; fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        <span class="kw">if</span> (slow == fast) <span class="kw">return true</span>;
+    }
+    <span class="kw">return false</span>;
+}
+
+<span class="cm">// 合并两个有序链表</span>
+ListNode* <span class="fn">mergeTwoLists</span>(ListNode* l1, ListNode* l2) {
+    ListNode* dummy = <span class="kw">new</span> ListNode(<span class="num">0</span>);
+    ListNode* tail = dummy;
+    <span class="kw">while</span> (l1 &amp;&amp; l2) {
+        <span class="kw">if</span> (l1->val &lt;= l2->val) { tail->next = l1; l1 = l1->next; }
+        <span class="kw">else</span> { tail->next = l2; l2 = l2->next; }
+        tail = tail->next;
+    }
+    tail->next = l1 ? l1 : l2;  <span class="cm">// 接上剩余部分</span>
+    <span class="kw">return</span> dummy->next;
+}
+
+<span class="cm">// 删除倒数第N个节点（双指针一前一后）</span>
+ListNode* <span class="fn">removeNthFromEnd</span>(ListNode* head, <span class="kw">int</span> n) {
+    ListNode* dummy = <span class="kw">new</span> ListNode(<span class="num">0</span>);
+    dummy->next = head;
+    ListNode* fast = dummy, *slow = dummy;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) fast = fast->next;
+    <span class="kw">while</span> (fast->next) { fast = fast->next; slow = slow->next; }
+    ListNode* del = slow->next;
+    slow->next = del->next;
+    <span class="kw">delete</span> del;
+    <span class="kw">return</span> dummy->next;
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①快慢指针找中点while条件是fast&amp;&amp;fast->next ②合并链表用dummy+tail ③删除节点记得delete</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 3. 栈与队列 ===== -->
+    <div class="section">
+      <div class="section-title">三、栈与队列模板</div>
+
+      <div class="grid2">
+        <div class="tpl-card">
+          <div class="tpl-header">3.1 栈基础<span class="tag" style="background:#dcfce7;color:#16a34a">基础</span></div>
+          <div class="tpl-body">
+<pre><span class="cm">// 栈的基本操作</span>
+<span class="fn">stack</span>&lt;<span class="kw">int</span>&gt; st;
+st.<span class="fn">push</span>(x);     <span class="cm">// 入栈</span>
+st.<span class="fn">top</span>();         <span class="cm">// 查看栈顶</span>
+st.<span class="fn">pop</span>();         <span class="cm">// 弹出栈顶</span>
+st.<span class="fn">empty</span>();      <span class="cm">// 是否为空</span>
+st.<span class="fn">size</span>();        <span class="cm">// 元素个数</span>
+
+<span class="cm">// 括号匹配（经典栈应用）</span>
+<span class="kw">bool</span> <span class="fn">isValid</span>(<span class="kw">string</span> s) {
+    <span class="fn">stack</span>&lt;<span class="kw">char</span>&gt; st;
+    <span class="kw">for</span> (<span class="kw">char</span> c : s) {
+        <span class="kw">if</span> (c == <span class="str">'('</span> || c == <span class="str">'['</span> || c == <span class="str">'{'</span>)
+            st.<span class="fn">push</span>(c);
+        <span class="kw">else</span> {
+            <span class="kw">if</span> (st.<span class="fn">empty</span>()) <span class="kw">return false</span>;
+            <span class="kw">char</span> top = st.<span class="fn">top</span>();
+            <span class="kw">if</span> ((c == <span class="str">')'</span> &amp;&amp; top != <span class="str">'('</span>) ||
+                (c == <span class="str">']'</span> &amp;&amp; top != <span class="str">'['</span>) ||
+                (c == <span class="str">'}'</span> &amp;&amp; top != <span class="str">'{'</span>))
+                <span class="kw">return false</span>;
+            st.<span class="fn">pop</span>();
+        }
+    }
+    <span class="kw">return</span> st.<span class="fn">empty</span>();
+}</pre>
+          </div>
+        </div>
+
+        <div class="tpl-card">
+          <div class="tpl-header">3.2 队列基础<span class="tag" style="background:#dcfce7;color:#16a34a">基础</span></div>
+          <div class="tpl-body">
+<pre><span class="cm">// 队列的基本操作</span>
+<span class="fn">queue</span>&lt;<span class="kw">int</span>&gt; q;
+q.<span class="fn">push</span>(x);      <span class="cm">// 入队（尾部）</span>
+q.<span class="fn">front</span>();       <span class="cm">// 查看队头</span>
+q.<span class="fn">pop</span>();          <span class="cm">// 弹出队头</span>
+q.<span class="fn">empty</span>();
+
+<span class="cm">// 双端队列</span>
+<span class="fn">deque</span>&lt;<span class="kw">int</span>&gt; dq;
+dq.<span class="fn">push_back</span>(x);  <span class="cm">// 尾部插入</span>
+dq.<span class="fn">push_front</span>(x); <span class="cm">// 头部插入</span>
+dq.<span class="fn">pop_back</span>();    <span class="cm">// 尾部删除</span>
+dq.<span class="fn">pop_front</span>();   <span class="cm">// 头部删除</span>
+dq.<span class="fn">front</span>();       <span class="cm">// 查看头部</span>
+dq.<span class="fn">back</span>();        <span class="cm">// 查看尾部</span>
+
+<span class="cm">// 单调栈 — 每日温度（找右边第一个更大元素）</span>
+<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; <span class="fn">dailyTemperatures</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; T) {
+    <span class="kw">int</span> n = T.<span class="fn">size</span>();
+    <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; ans(n, <span class="num">0</span>);
+    <span class="fn">stack</span>&lt;<span class="kw">int</span>&gt; st;  <span class="cm">// 存下标</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+        <span class="kw">while</span> (!st.<span class="fn">empty</span>() &amp;&amp; T[i] &gt; T[st.<span class="fn">top</span>()]) {
+            ans[st.<span class="fn">top</span>()] = i - st.<span class="fn">top</span>();
+            st.<span class="fn">pop</span>();
+        }
+        st.<span class="fn">push</span>(i);
+    }
+    <span class="kw">return</span> ans;
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 4. 二叉树 ===== -->
+    <div class="section">
+      <div class="section-title">四、二叉树模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">4.1 二叉树定义与DFS遍历<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 节点定义</span>
+<span class="kw">struct</span> TreeNode {
+    <span class="kw">int</span> val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(<span class="kw">int</span> x) : val(x), left(<span class="kw">nullptr</span>), right(<span class="kw">nullptr</span>) {}
+};
+
+<span class="cm">// 递归三部曲：①base case ②左子树递归 ③右子树递归 ④利用左右子树的返回值</span>
+
+<span class="cm">// 前序遍历（根→左→右）</span>
+<span class="kw">void</span> <span class="fn">preorder</span>(TreeNode* root) {
+    <span class="kw">if</span> (!root) <span class="kw">return</span>;       <span class="cm">// base case</span>
+    <span class="fn">cout</span> &lt;&lt; root->val;       <span class="cm">// 访问根</span>
+    <span class="fn">preorder</span>(root->left);   <span class="cm">// 左</span>
+    <span class="fn">preorder</span>(root->right);  <span class="cm">// 右</span>
+}
+
+<span class="cm">// 中序遍历（左→根→右）— BST中序遍历是有序的</span>
+<span class="kw">void</span> <span class="fn">inorder</span>(TreeNode* root) {
+    <span class="kw">if</span> (!root) <span class="kw">return</span>;
+    <span class="fn">inorder</span>(root->left);
+    <span class="fn">cout</span> &lt;&lt; root->val;
+    <span class="fn">inorder</span>(root->right);
+}
+
+<span class="cm">// 后序遍历（左→右→根）— 求高度必须后序</span>
+<span class="kw">void</span> <span class="fn">postorder</span>(TreeNode* root) {
+    <span class="kw">if</span> (!root) <span class="kw">return</span>;
+    <span class="fn">postorder</span>(root->left);
+    <span class="fn">postorder</span>(root->right);
+    <span class="fn">cout</span> &lt;&lt; root->val;
+}
+
+<span class="cm">// 求最大深度（后序的典型应用）</span>
+<span class="kw">int</span> <span class="fn">maxDepth</span>(TreeNode* root) {
+    <span class="kw">if</span> (!root) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">int</span> left = <span class="fn">maxDepth</span>(root->left);
+    <span class="kw">int</span> right = <span class="fn">maxDepth</span>(root->right);
+    <span class="kw">return</span> <span class="fn">max</span>(left, right) + <span class="num">1</span>;
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①base case是if(!root) return ②前/中/后序的区别只是"访问根"那行代码的位置 ③求深度=后序+max(左,右)+1</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">4.2 BFS层序遍历<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// BFS层序遍历（队列实现）— 核心模板</span>
+<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; <span class="fn">levelOrder</span>(TreeNode* root) {
+    <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; result;
+    <span class="kw">if</span> (!root) <span class="kw">return</span> result;
+
+    <span class="fn">queue</span>&lt;TreeNode*&gt; q;
+    q.<span class="fn">push</span>(root);
+
+    <span class="kw">while</span> (!q.<span class="fn">empty</span>()) {
+        <span class="kw">int</span> levelSize = q.<span class="fn">size</span>();  <span class="cm">// 当前层节点数</span>
+        <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; level;
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; levelSize; i++) {
+            TreeNode* node = q.<span class="fn">front</span>();
+            q.<span class="fn">pop</span>();
+            level.<span class="fn">push_back</span>(node->val);
+
+            <span class="kw">if</span> (node->left)  q.<span class="fn">push</span>(node->left);
+            <span class="kw">if</span> (node->right) q.<span class="fn">push</span>(node->right);
+        }
+        result.<span class="fn">push_back</span>(level);
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// BFS的固定四步：</span>
+<span class="cm">// 1. 创建队列，push初始节点</span>
+<span class="cm">// 2. while队列不空</span>
+<span class="cm">// 3. 记录当前层size，for循环处理这一层</span>
+<span class="cm">// 4. 取出front→pop→处理→push子节点</span></pre>
+          <div class="practice"><strong>默写检查点：</strong>①先记录levelSize再进for循环（因为队列在变）②pop在front之后 ③push子节点前判空</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">4.3 二叉树扩展<span class="tag" style="background:#ede9fe;color:#7c3aed">扩展</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 判断对称二叉树</span>
+<span class="kw">bool</span> <span class="fn">isSymmetric</span>(TreeNode* root) {
+    <span class="kw">return</span> <span class="fn">check</span>(root->left, root->right);
+}
+<span class="kw">bool</span> <span class="fn">check</span>(TreeNode* p, TreeNode* q) {
+    <span class="kw">if</span> (!p &amp;&amp; !q) <span class="kw">return true</span>;
+    <span class="kw">if</span> (!p || !q) <span class="kw">return false</span>;
+    <span class="kw">return</span> p->val == q->val
+        &amp;&amp; <span class="fn">check</span>(p->left, q->right)
+        &amp;&amp; <span class="fn">check</span>(p->right, q->left);
+}
+
+<span class="cm">// 翻转二叉树</span>
+TreeNode* <span class="fn">invertTree</span>(TreeNode* root) {
+    <span class="kw">if</span> (!root) <span class="kw">return nullptr</span>;
+    <span class="fn">swap</span>(root->left, root->right);
+    <span class="fn">invertTree</span>(root->left);
+    <span class="fn">invertTree</span>(root->right);
+    <span class="kw">return</span> root;
+}
+
+<span class="cm">// 路径总和（DFS回溯思路）</span>
+<span class="kw">bool</span> <span class="fn">hasPathSum</span>(TreeNode* root, <span class="kw">int</span> target) {
+    <span class="kw">if</span> (!root) <span class="kw">return false</span>;
+    <span class="kw">if</span> (!root->left &amp;&amp; !root->right)
+        <span class="kw">return</span> root->val == target;
+    <span class="kw">return</span> <span class="fn">hasPathSum</span>(root->left, target - root->val)
+        || <span class="fn">hasPathSum</span>(root->right, target - root->val);
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①对称判断是left.right vs right.left ②翻转就是swap左右再递归 ③路径和用减法不用加法</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 5. 排序 ===== -->
+    <div class="section">
+      <div class="section-title">五、排序模板</div>
+
+      <div class="grid2">
+        <div class="tpl-card">
+          <div class="tpl-header">5.1 快速排序<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+          <div class="tpl-body">
+<pre><span class="cm">// 快排 — 分治三步：选基准→分区→递归</span>
+<span class="kw">void</span> <span class="fn">quickSort</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; a, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &gt;= hi) <span class="kw">return</span>;  <span class="cm">// base case</span>
+    <span class="kw">int</span> pivot = a[lo + (hi - lo) / <span class="num">2</span>];
+    <span class="kw">int</span> i = lo, j = hi;
+    <span class="kw">while</span> (i &lt;= j) {
+        <span class="kw">while</span> (a[i] &lt; pivot) i++;
+        <span class="kw">while</span> (a[j] &gt; pivot) j--;
+        <span class="kw">if</span> (i &lt;= j) {
+            <span class="fn">swap</span>(a[i], a[j]);
+            i++; j--;
+        }
+    }
+    <span class="fn">quickSort</span>(a, lo, j);
+    <span class="fn">quickSort</span>(a, i, hi);
+}</pre>
+          </div>
+        </div>
+
+        <div class="tpl-card">
+          <div class="tpl-header">5.2 归并排序<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+          <div class="tpl-body">
+<pre><span class="cm">// 归并 — 分治三步：分半→递归排序→合并</span>
+<span class="kw">void</span> <span class="fn">mergeSort</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; a, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &gt;= hi) <span class="kw">return</span>;
+    <span class="kw">int</span> mid = lo + (hi - lo) / <span class="num">2</span>;
+    <span class="fn">mergeSort</span>(a, lo, mid);
+    <span class="fn">mergeSort</span>(a, mid + <span class="num">1</span>, hi);
+
+    <span class="cm">// 合并两个有序段</span>
+    <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; tmp;
+    <span class="kw">int</span> i = lo, j = mid + <span class="num">1</span>;
+    <span class="kw">while</span> (i &lt;= mid &amp;&amp; j &lt;= hi) {
+        <span class="kw">if</span> (a[i] &lt;= a[j]) tmp.<span class="fn">push_back</span>(a[i++]);
+        <span class="kw">else</span> tmp.<span class="fn">push_back</span>(a[j++]);
+    }
+    <span class="kw">while</span> (i &lt;= mid) tmp.<span class="fn">push_back</span>(a[i++]);
+    <span class="kw">while</span> (j &lt;= hi) tmp.<span class="fn">push_back</span>(a[j++]);
+    <span class="kw">for</span> (<span class="kw">int</span> k = <span class="num">0</span>; k &lt; tmp.<span class="fn">size</span>(); k++)
+        a[lo + k] = tmp[k];
+}</pre>
+          </div>
+        </div>
+      </div>
+      <div class="practice"><strong>默写检查点：</strong>①快排的while(i&lt;=j)条件含等号 ②快排递归调用是(lo,j)和(i,hi)不是(lo,mid)和(mid+1,hi) ③归并的合并部分用双指针比较大小 ④mid=lo+(hi-lo)/2防止溢出</div>
+    </div>
+
+    <!-- ===== 6. 二分查找 ===== -->
+    <div class="section">
+      <div class="section-title">六、二分查找模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">6.1 二分查找三套模板<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 模板1：精确查找（while条件 &lt;=）</span>
+<span class="kw">int</span> <span class="fn">binarySearch</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; a, <span class="kw">int</span> target) {
+    <span class="kw">int</span> left = <span class="num">0</span>, right = a.<span class="fn">size</span>() - <span class="num">1</span>;
+    <span class="kw">while</span> (left &lt;= right) {
+        <span class="kw">int</span> mid = left + (right - left) / <span class="num">2</span>;
+        <span class="kw">if</span> (a[mid] == target) <span class="kw">return</span> mid;
+        <span class="kw">else if</span> (a[mid] &lt; target) left = mid + <span class="num">1</span>;
+        <span class="kw">else</span> right = mid - <span class="num">1</span>;
+    }
+    <span class="kw">return</span> -<span class="num">1</span>;
+}
+
+<span class="cm">// 模板2：找左边界（第一个 &gt;= target 的位置）</span>
+<span class="kw">int</span> <span class="fn">lowerBound</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; a, <span class="kw">int</span> target) {
+    <span class="kw">int</span> left = <span class="num">0</span>, right = a.<span class="fn">size</span>();
+    <span class="kw">while</span> (left &lt; right) {
+        <span class="kw">int</span> mid = left + (right - left) / <span class="num">2</span>;
+        <span class="kw">if</span> (a[mid] &lt; target) left = mid + <span class="num">1</span>;
+        <span class="kw">else</span> right = mid;  <span class="cm">// 注意不-1</span>
+    }
+    <span class="kw">return</span> left;
+}
+
+<span class="cm">// 模板3：找右边界（最后一个 &lt;= target 的位置）</span>
+<span class="kw">int</span> <span class="fn">upperBound</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; a, <span class="kw">int</span> target) {
+    <span class="kw">int</span> left = <span class="num">0</span>, right = a.<span class="fn">size</span>();
+    <span class="kw">while</span> (left &lt; right) {
+        <span class="kw">int</span> mid = left + (right - left) / <span class="num">2</span>;
+        <span class="kw">if</span> (a[mid] &lt;= target) left = mid + <span class="num">1</span>;
+        <span class="kw">else</span> right = mid;
+    }
+    <span class="kw">return</span> left - <span class="num">1</span>;  <span class="cm">// 右边界 = left - 1</span>
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①精确查找用left&lt;=right+left=mid+1/right=mid-1 ②找左边界用left&lt;right+right=mid ③找右边界返回left-1 ④mid永远用left+(right-left)/2防溢出</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 7. 哈希表 ===== -->
+    <div class="section">
+      <div class="section-title">七、哈希表模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">7.1 哈希表常用操作<span class="tag" style="background:#dcfce7;color:#16a34a">基础</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// unordered_map 基本操作</span>
+<span class="fn">unordered_map</span>&lt;<span class="kw">string</span>, <span class="kw">int</span>&gt; mp;
+mp[<span class="str">"key"</span>] = <span class="num">42</span>;          <span class="cm">// 插入/修改</span>
+mp.<span class="fn">insert</span>({<span class="str">"key"</span>, <span class="num">42</span>});   <span class="cm">// 插入（不覆盖）</span>
+mp.<span class="fn">count</span>(<span class="str">"key"</span>);           <span class="cm">// 是否存在（0或1）</span>
+mp.<span class="fn">erase</span>(<span class="str">"key"</span>);            <span class="cm">// 删除</span>
+mp.<span class="fn">size</span>();                  <span class="cm">// 元素个数</span>
+
+<span class="cm">// 遍历</span>
+<span class="kw">for</span> (<span class="kw">auto</span>&amp; [k, v] : mp) {
+    <span class="cm">// k 是 key, v 是 value</span>
+}
+
+<span class="cm">// 两数之和（哈希表经典应用）</span>
+<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; <span class="fn">twoSum</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; nums, <span class="kw">int</span> target) {
+    <span class="fn">unordered_map</span>&lt;<span class="kw">int</span>, <span class="kw">int</span>&gt; mp;  <span class="cm">// val -> index</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nums.<span class="fn">size</span>(); i++) {
+        <span class="kw">int</span> complement = target - nums[i];
+        <span class="kw">if</span> (mp.<span class="fn">count</span>(complement))
+            <span class="kw">return</span> {mp[complement], i};
+        mp[nums[i]] = i;
+    }
+    <span class="kw">return</span> {};
+}
+
+<span class="cm">// 字符频率统计</span>
+<span class="fn">unordered_map</span>&lt;<span class="kw">char</span>, <span class="kw">int</span>&gt; <span class="fn">countFreq</span>(<span class="kw">string</span> s) {
+    <span class="fn">unordered_map</span>&lt;<span class="kw">char</span>, <span class="kw">int</span>&gt; freq;
+    <span class="kw">for</span> (<span class="kw">char</span> c : s) freq[c]++;
+    <span class="kw">return</span> freq;
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①用count判断key存在，不用mp[key]==0（会自动插入空值）②两数之和先查再插入 ③auto&amp; [k,v]遍历</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 8. 回溯 ===== -->
+    <div class="section">
+      <div class="section-title">八、回溯模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">8.1 回溯万能模板<span class="tag" style="background:#fef3c7;color:#d97706">必背</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 回溯 = DFS + 选择 + 撤销选择</span>
+<span class="kw">void</span> <span class="fn">backtrack</span>(<span class="cm">/* 路径, 选择列表 */</span>) {
+    <span class="kw">if</span> (满足结束条件) {
+        <span class="cm">// 记录结果</span>
+        <span class="kw">return</span>;
+    }
+    <span class="kw">for</span> (<span class="kw">auto</span>&amp; choice : 选择列表) {
+        <span class="cm">// 做选择</span>
+        <span class="fn">backtrack</span>(<span class="cm">/* 新路径, 新选择列表 */</span>);
+        <span class="cm">// 撤销选择（回溯）</span>
+    }
+}
+
+<span class="cm">// 全排列（经典回溯）</span>
+<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; result;
+<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; path;
+<span class="fn">vector</span>&lt;<span class="kw">bool</span>&gt; used;
+
+<span class="kw">void</span> <span class="fn">permute</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; nums) {
+    used.<span class="fn">assign</span>(nums.<span class="fn">size</span>(), <span class="kw">false</span>);
+    <span class="fn">dfs</span>(nums);
+}
+<span class="kw">void</span> <span class="fn">dfs</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; nums) {
+    <span class="kw">if</span> (path.<span class="fn">size</span>() == nums.<span class="fn">size</span>()) {
+        result.<span class="fn">push_back</span>(path);
+        <span class="kw">return</span>;
+    }
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nums.<span class="fn">size</span>(); i++) {
+        <span class="kw">if</span> (used[i]) <span class="kw">continue</span>;
+        used[i] = <span class="kw">true</span>;           <span class="cm">// 选择</span>
+        path.<span class="fn">push_back</span>(nums[i]);
+        <span class="fn">dfs</span>(nums);
+        path.<span class="fn">pop_back</span>();            <span class="cm">// 撤销</span>
+        used[i] = <span class="kw">false</span>;
+    }
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①结束条件在最前 ②做选择→递归→撤销选择三步顺序 ③pop_back和used=false缺一不可</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 9. 动态规划 ===== -->
+    <div class="section">
+      <div class="section-title">九、动态规划模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">9.1 一维DP<span class="tag" style="background:#ede9fe;color:#7c3aed">进阶</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 爬楼梯 — 最简单的DP</span>
+<span class="cm">// 状态：dp[i] = 爬到第i阶的方法数</span>
+<span class="cm">// 转移：dp[i] = dp[i-1] + dp[i-2]</span>
+<span class="kw">int</span> <span class="fn">climbStairs</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="num">2</span>) <span class="kw">return</span> n;
+    <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; dp(n + <span class="num">1</span>);
+    dp[<span class="num">1</span>] = <span class="num">1</span>;
+    dp[<span class="num">2</span>] = <span class="num">2</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">3</span>; i &lt;= n; i++)
+        dp[i] = dp[i - <span class="num">1</span>] + dp[i - <span class="num">2</span>];
+    <span class="kw">return</span> dp[n];
+}
+
+<span class="cm">// 最大子数组和（Kadane算法）</span>
+<span class="cm">// 状态：dp[i] = 以i结尾的最大子数组和</span>
+<span class="cm">// 转移：dp[i] = max(dp[i-1]+a[i], a[i])</span>
+<span class="kw">int</span> <span class="fn">maxSubArray</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; a) {
+    <span class="kw">int</span> maxSum = a[<span class="num">0</span>], curSum = a[<span class="num">0</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; a.<span class="fn">size</span>(); i++) {
+        curSum = <span class="fn">max</span>(curSum + a[i], a[i]);
+        maxSum = <span class="fn">max</span>(maxSum, curSum);
+    }
+    <span class="kw">return</span> maxSum;
+}
+
+<span class="cm">// 打家劫舍</span>
+<span class="cm">// 状态：dp[i] = 前i家能偷的最大金额</span>
+<span class="cm">// 转移：dp[i] = max(dp[i-1], dp[i-2]+nums[i])</span>
+<span class="kw">int</span> <span class="fn">rob</span>(<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&amp; nums) {
+    <span class="kw">int</span> n = nums.<span class="fn">size</span>();
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">if</span> (n == <span class="num">1</span>) <span class="kw">return</span> nums[<span class="num">0</span>];
+    <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt; dp(n);
+    dp[<span class="num">0</span>] = nums[<span class="num">0</span>];
+    dp[<span class="num">1</span>] = <span class="fn">max</span>(nums[<span class="num">0</span>], nums[<span class="num">1</span>]);
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt; n; i++)
+        dp[i] = <span class="fn">max</span>(dp[i - <span class="num">1</span>], dp[i - <span class="num">2</span>] + nums[i]);
+    <span class="kw">return</span> dp[n - <span class="num">1</span>];
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①DP三步：定义状态→写转移方程→确定初始值 ②爬楼梯dp[1]=1,dp[2]=2 ③打家劫舍转移是max(不偷=dp[i-1], 偷=dp[i-2]+nums[i])</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">9.2 二维DP<span class="tag" style="background:#ede9fe;color:#7c3aed">进阶</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 最小路径和</span>
+<span class="cm">// 状态：dp[i][j] = 从(0,0)到(i,j)的最小路径和</span>
+<span class="cm">// 转移：dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]</span>
+<span class="kw">int</span> <span class="fn">minPathSum</span>(<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt;&amp; grid) {
+    <span class="kw">int</span> m = grid.<span class="fn">size</span>(), n = grid[<span class="num">0</span>].<span class="fn">size</span>();
+    <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; dp(m, <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;(n));
+    dp[<span class="num">0</span>][<span class="num">0</span>] = grid[<span class="num">0</span>][<span class="num">0</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; m; i++) dp[i][<span class="num">0</span>] = dp[i - <span class="num">1</span>][<span class="num">0</span>] + grid[i][<span class="num">0</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt; n; j++) dp[<span class="num">0</span>][j] = dp[<span class="num">0</span>][j - <span class="num">1</span>] + grid[<span class="num">0</span>][j];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; m; i++)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt; n; j++)
+            dp[i][j] = <span class="fn">min</span>(dp[i - <span class="num">1</span>][j], dp[i][j - <span class="num">1</span>]) + grid[i][j];
+    <span class="kw">return</span> dp[m - <span class="num">1</span>][n - <span class="num">1</span>];
+}
+
+<span class="cm">// 最长公共子序列（LCS）</span>
+<span class="cm">// 状态：dp[i][j] = s1[0..i-1]和s2[0..j-1]的LCS长度</span>
+<span class="cm">// 转移：s1[i-1]==s2[j-1] ? dp[i-1][j-1]+1 : max(dp[i-1][j], dp[i][j-1])</span>
+<span class="kw">int</span> <span class="fn">longestCommonSubsequence</span>(<span class="kw">string</span> s1, <span class="kw">string</span> s2) {
+    <span class="kw">int</span> m = s1.<span class="fn">size</span>(), n = s2.<span class="fn">size</span>();
+    <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; dp(m + <span class="num">1</span>, <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;(n + <span class="num">1</span>, <span class="num">0</span>));
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= m; i++)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= n; j++)
+            <span class="kw">if</span> (s1[i - <span class="num">1</span>] == s2[j - <span class="num">1</span>])
+                dp[i][j] = dp[i - <span class="num">1</span>][j - <span class="num">1</span>] + <span class="num">1</span>;
+            <span class="kw">else</span>
+                dp[i][j] = <span class="fn">max</span>(dp[i - <span class="num">1</span>][j], dp[i][j - <span class="num">1</span>]);
+    <span class="kw">return</span> dp[m][n];
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①二维DP先处理第一行第一列 ②LCS的dp下标和字符串下标差1（dp[1][1]对应s1[0]和s2[0]）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 10. 图论基础 ===== -->
+    <div class="section">
+      <div class="section-title">十、图论基础模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">10.1 图的表示与BFS/DFS<span class="tag" style="background:#ede9fe;color:#7c3aed">进阶</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 邻接表表示</span>
+<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; <span class="fn">buildGraph</span>(<span class="kw">int</span> n, <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt;&amp; edges) {
+    <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; graph(n);
+    <span class="kw">for</span> (<span class="kw">auto</span>&amp; e : edges) {
+        graph[e[<span class="num">0</span>].<span class="fn">push_back</span>(e[<span class="num">1</span>]);
+        graph[e[<span class="num">1</span>].<span class="fn">push_back</span>(e[<span class="num">0</span>]);  <span class="cm">// 无向图加这行</span>
+    }
+    <span class="kw">return</span> graph;
+}
+
+<span class="cm">// BFS遍历图（从start出发）</span>
+<span class="kw">void</span> <span class="fn">bfs</span>(<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt;&amp; graph, <span class="kw">int</span> start) {
+    <span class="fn">vector</span>&lt;<span class="kw">bool</span>&gt; visited(graph.<span class="fn">size</span>(), <span class="kw">false</span>);
+    <span class="fn">queue</span>&lt;<span class="kw">int</span>&gt; q;
+    q.<span class="fn">push</span>(start);
+    visited[start] = <span class="kw">true</span>;
+
+    <span class="kw">while</span> (!q.<span class="fn">empty</span>()) {
+        <span class="kw">int</span> cur = q.<span class="fn">front</span>();
+        q.<span class="fn">pop</span>();
+        <span class="kw">for</span> (<span class="kw">int</span> next : graph[cur]) {
+            <span class="kw">if</span> (!visited[next]) {
+                visited[next] = <span class="kw">true</span>;
+                q.<span class="fn">push</span>(next);
+            }
+        }
+    }
+}
+
+<span class="cm">// DFS遍历图</span>
+<span class="fn">vector</span>&lt;<span class="kw">bool</span>&gt; visited;
+<span class="kw">void</span> <span class="fn">dfs</span>(<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt;&amp; graph, <span class="kw">int</span> cur) {
+    visited[cur] = <span class="kw">true</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> next : graph[cur]) {
+        <span class="kw">if</span> (!visited[next])
+            <span class="fn">dfs</span>(graph, next);
+    }
+}
+
+<span class="cm">// 岛屿数量（矩阵DFS经典题）</span>
+<span class="kw">int</span> <span class="fn">numIslands</span>(<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">char</span>&gt;&gt;&amp; grid) {
+    <span class="kw">int</span> count = <span class="num">0</span>;
+    <span class="kw">int</span> m = grid.<span class="fn">size</span>(), n = grid[<span class="num">0</span>].<span class="fn">size</span>();
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; m; i++) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; n; j++) {
+            <span class="kw">if</span> (grid[i][j] == <span class="str">'1'</span>) {
+                <span class="fn">dfsIsland</span>(grid, i, j);
+                count++;
+            }
+        }
+    }
+    <span class="kw">return</span> count;
+}
+<span class="kw">void</span> <span class="fn">dfsIsland</span>(<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">char</span>&gt;&gt;&amp; grid, <span class="kw">int</span> i, <span class="kw">int</span> j) {
+    <span class="kw">if</span> (i &lt; <span class="num">0</span> || i &gt;= grid.<span class="fn">size</span>() || j &lt; <span class="num">0</span> || j &gt;= grid[<span class="num">0</span>].<span class="fn">size</span>()) <span class="kw">return</span>;
+    <span class="kw">if</span> (grid[i][j] != <span class="str">'1'</span>) <span class="kw">return</span>;
+    grid[i][j] = <span class="str">'0'</span>;  <span class="cm">// 标记为已访问</span>
+    <span class="fn">dfsIsland</span>(grid, i + <span class="num">1</span>, j);
+    <span class="fn">dfsIsland</span>(grid, i - <span class="num">1</span>, j);
+    <span class="fn">dfsIsland</span>(grid, i, j + <span class="num">1</span>);
+    <span class="fn">dfsIsland</span>(grid, i, j - <span class="num">1</span>);
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①BFS入队时就标记visited（不是出队时）②岛屿DFS四个方向递归 ③边界检查在DFS最前面</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 11. C++后端扩展模板 ===== -->
+    <div class="section">
+      <div class="section-title">十一、C++后端扩展模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">11.1 RAII与智能指针<span class="tag" style="background:#fff7ed;color:#ea580c">后端</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// unique_ptr — 独占所有权</span>
+<span class="fn">unique_ptr</span>&lt;<span class="kw">int</span>&gt; p = <span class="fn">make_unique</span>&lt;<span class="kw">int</span>&gt;(<span class="num">42</span>);
+<span class="cm">// 不能复制，可以move</span>
+<span class="fn">unique_ptr</span>&lt;<span class="kw">int</span>&gt; p2 = <span class="fn">move</span>(p);
+
+<span class="cm">// shared_ptr — 共享所有权（引用计数）</span>
+<span class="fn">shared_ptr</span>&lt;<span class="kw">int</span>&gt; sp = <span class="fn">make_shared</span>&lt;<span class="kw">int</span>&gt;(<span class="num">42</span>);
+<span class="fn">shared_ptr</span>&lt;<span class="kw">int</span>&gt; sp2 = sp;  <span class="cm">// 引用计数+1</span>
+<span class="cm">// sp.reset() 引用计数-1，到0时析构</span>
+
+<span class="cm">// RAII示例 — 文件守卫</span>
+<span class="kw">class</span> FileGuard {
+    FILE* fp;
+<span class="kw">public</span>:
+    FileGuard(<span class="kw">const</span> <span class="kw">char</span>* path) : fp(<span class="fn">fopen</span>(path, <span class="str">"r"</span>)) {}
+    ~FileGuard() { <span class="kw">if</span> (fp) <span class="fn">fclose</span>(fp); }
+    <span class="cm">// 禁止拷贝（三/五法则）</span>
+    FileGuard(<span class="kw">const</span> FileGuard&amp;) = <span class="kw">delete</span>;
+    FileGuard&amp; <span class="kw">operator</span>=(<span class="kw">const</span> FileGuard&amp;) = <span class="kw">delete</span>;
+    FILE* get() { <span class="kw">return</span> fp; }
+};</pre>
+          <div class="practice"><strong>默写检查点：</strong>①make_unique/make_shared优先于new ②unique_ptr不能复制只能move ③RAII在析构函数释放资源</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">11.2 多线程基础模板<span class="tag" style="background:#fff7ed;color:#ea580c">后端</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// 线程安全计数器</span>
+<span class="kw">class</span> Counter {
+    <span class="kw">int</span> count = <span class="num">0</span>;
+    <span class="fn">mutex</span> mtx;
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">increment</span>() {
+        <span class="fn">lock_guard</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);  <span class="cm">// RAII自动加锁/解锁</span>
+        count++;
+    }
+    <span class="kw">int</span> <span class="fn">get</span>() {
+        <span class="fn">lock_guard</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);
+        <span class="kw">return</span> count;
+    }
+};
+
+<span class="cm">// 生产者-消费者（condition_variable）</span>
+<span class="fn">queue</span>&lt;<span class="kw">int</span>&gt; taskQueue;
+<span class="fn">mutex</span> mtx;
+<span class="fn">condition_variable</span> cv;
+
+<span class="cm">// 生产者</span>
+<span class="kw">void</span> <span class="fn">producer</span>() {
+    <span class="kw">while</span> (<span class="kw">true</span>) {
+        <span class="kw">int</span> task = <span class="fn">produce</span>();
+        {
+            <span class="fn">unique_lock</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);
+            taskQueue.<span class="fn">push</span>(task);
+        }
+        cv.<span class="fn">notify_one</span>();  <span class="cm">// 唤醒一个消费者</span>
+    }
+}
+
+<span class="cm">// 消费者</span>
+<span class="kw">void</span> <span class="fn">consumer</span>() {
+    <span class="kw">while</span> (<span class="kw">true</span>) {
+        <span class="fn">unique_lock</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);
+        cv.<span class="fn">wait</span>(lock, []{ <span class="kw">return</span> !taskQueue.<span class="fn">empty</span>(); });  <span class="cm">// 等待+条件检查</span>
+        <span class="kw">int</span> task = taskQueue.<span class="fn">front</span>();
+        taskQueue.<span class="fn">pop</span>();
+        lock.<span class="fn">unlock</span>();
+        <span class="fn">process</span>(task);
+    }
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①lock_guard用mutex，unique_lock配合cv ②cv.wait第二个参数是lambda判断条件 ③生产者push后notify，消费者wait前检查条件</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">11.3 简易线程池模板<span class="tag" style="background:#fff7ed;color:#ea580c">后端</span></div>
+        <div class="tpl-body">
+<pre><span class="kw">class</span> ThreadPool {
+    <span class="fn">vector</span>&lt;<span class="fn">thread</span>&gt; workers;
+    <span class="fn">queue</span>&lt;<span class="kw">function</span>&lt;<span class="kw">void</span>()&gt;&gt; tasks;
+    <span class="fn">mutex</span> mtx;
+    <span class="fn">condition_variable</span> cv;
+    <span class="kw">bool</span> stop = <span class="kw">false</span>;
+
+<span class="kw">public</span>:
+    ThreadPool(<span class="kw">int</span> numThreads) {
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numThreads; i++) {
+            workers.<span class="fn">emplace_back</span>([<span class="kw">this</span>] {
+                <span class="kw">while</span> (<span class="kw">true</span>) {
+                    <span class="kw">function</span>&lt;<span class="kw">void</span>()&gt; task;
+                    {
+                        <span class="fn">unique_lock</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);
+                        cv.<span class="fn">wait</span>(lock, [<span class="kw">this</span>] { <span class="kw">return</span> stop || !tasks.<span class="fn">empty</span>(); });
+                        <span class="kw">if</span> (stop &amp;&amp; tasks.<span class="fn">empty</span>()) <span class="kw">return</span>;
+                        task = <span class="fn">move</span>(tasks.<span class="fn">front</span>());
+                        tasks.<span class="fn">pop</span>();
+                    }
+                    task();  <span class="cm">// 执行任务（不加锁）</span>
+                }
+            });
+        }
+    }
+
+    <span class="kw">template</span>&lt;<span class="kw">class</span> F&gt;
+    <span class="kw">void</span> <span class="fn">submit</span>(F&amp;&amp; f) {
+        {
+            <span class="fn">lock_guard</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);
+            tasks.<span class="fn">emplace</span>(<span class="fn">forward</span>&lt;F&gt;(f));
+        }
+        cv.<span class="fn">notify_one</span>();
+    }
+
+    ~ThreadPool() {
+        {
+            <span class="fn">lock_guard</span>&lt;<span class="fn">mutex</span>&gt; <span class="fn">lock</span>(mtx);
+            stop = <span class="kw">true</span>;
+        }
+        cv.<span class="fn">notify_all</span>();
+        <span class="kw">for</span> (<span class="kw">auto</span>&amp; w : workers) w.<span class="fn">join</span>();
+    }
+};</pre>
+          <div class="practice"><strong>默写检查点：</strong>①worker线程用lambda捕获this ②wait条件是stop||!empty ③stop后要执行完队列中剩余任务再退出 ④析构时notify_all+join</div>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">11.4 TCP Socket模板（Linux/WSL）<span class="tag" style="background:#fff7ed;color:#ea580c">后端</span></div>
+        <div class="tpl-body">
+<pre><span class="cm">// TCP服务端（C语言Socket API）</span>
+<span class="kw">int</span> <span class="fn">server</span>() {
+    <span class="kw">int</span> listenfd = <span class="fn">socket</span>(AF_INET, SOCK_STREAM, <span class="num">0</span>);
+
+    <span class="kw">struct</span> sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = <span class="fn">htons</span>(<span class="num">8080</span>);
+
+    <span class="fn">bind</span>(listenfd, (<span class="kw">struct</span> sockaddr*)&amp;addr, <span class="kw">sizeof</span>(addr));
+    <span class="fn">listen</span>(listenfd, <span class="num">5</span>);  <span class="cm">// backlog=5</span>
+
+    <span class="kw">while</span> (<span class="kw">true</span>) {
+        <span class="kw">struct</span> sockaddr_in clientAddr;
+        <span class="kw">int</span> addrlen = <span class="kw">sizeof</span>(clientAddr);
+        <span class="kw">int</span> connfd = <span class="fn">accept</span>(listenfd, (<span class="kw">struct</span> sockaddr*)&amp;clientAddr, &amp;addrlen);
+
+        <span class="kw">char</span> buf[<span class="num">1024</span>];
+        <span class="kw">int</span> n = <span class="fn">recv</span>(connfd, buf, <span class="kw">sizeof</span>(buf), <span class="num">0</span>);
+        buf[n] = <span class="str">'\0'</span>;
+        <span class="fn">send</span>(connfd, buf, n, <span class="num">0</span>);  <span class="cm">// echo回显</span>
+        <span class="fn">close</span>(connfd);
+    }
+}
+
+<span class="cm">// TCP客户端</span>
+<span class="kw">int</span> <span class="fn">client</span>() {
+    <span class="kw">int</span> sockfd = <span class="fn">socket</span>(AF_INET, SOCK_STREAM, <span class="num">0</span>);
+
+    <span class="kw">struct</span> sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = <span class="fn">htons</span>(<span class="num">8080</span>);
+    <span class="fn">inet_pton</span>(AF_INET, <span class="str">"127.0.0.1"</span>, &amp;addr.sin_addr);
+
+    <span class="fn">connect</span>(sockfd, (<span class="kw">struct</span> sockaddr*)&amp;addr, <span class="kw">sizeof</span>(addr));
+
+    <span class="kw">const</span> <span class="kw">char</span>* msg = <span class="str">"Hello Server"</span>;
+    <span class="fn">send</span>(sockfd, msg, <span class="fn">strlen</span>(msg), <span class="num">0</span>);
+
+    <span class="kw">char</span> buf[<span class="num">1024</span>];
+    <span class="kw">int</span> n = <span class="fn">recv</span>(sockfd, buf, <span class="kw">sizeof</span>(buf), <span class="num">0</span>);
+    buf[n] = <span class="str">'\0'</span>;
+    <span class="fn">close</span>(sockfd);
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①服务端流程：socket→bind→listen→accept→recv/send→close ②客户端流程：socket→connect→send/recv→close ③htons转换端口字节序 ④recv返回的是字节数，手动加'\0'</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 12. 矩阵运算扩展 ===== -->
+    <div class="section">
+      <div class="section-title">十二、矩阵运算扩展模板</div>
+
+      <div class="tpl-card">
+        <div class="tpl-header">12.1 矩阵基础运算<span class="tag" style="background:#ede9fe;color:#7c3aed">线性代数扩展</span></div>
+        <div class="tpl-body">
+<pre><span class="kw">using</span> Matrix = <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt;;
+
+<span class="cm">// 矩阵加法 A + B</span>
+Matrix <span class="fn">add</span>(Matrix&amp; A, Matrix&amp; B) {
+    <span class="kw">int</span> m = A.<span class="fn">size</span>(), n = A[<span class="num">0</span>].<span class="fn">size</span>();
+    Matrix C(m, <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;(n));
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; m; i++)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; n; j++)
+            C[i][j] = A[i][j] + B[i][j];
+    <span class="kw">return</span> C;
+}
+
+<span class="cm">// 矩阵乘法 A(m×k) * B(k×n) = C(m×n)</span>
+Matrix <span class="fn">multiply</span>(Matrix&amp; A, Matrix&amp; B) {
+    <span class="kw">int</span> m = A.<span class="fn">size</span>(), k = A[<span class="num">0</span>].<span class="fn">size</span>(), n = B[<span class="num">0</span>].<span class="fn">size</span>();
+    Matrix C(m, <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;(n, <span class="num">0</span>));
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; m; i++)        <span class="cm">// C的行</span>
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; n; j++)    <span class="cm">// C的列</span>
+            <span class="kw">for</span> (<span class="kw">int</span> p = <span class="num">0</span>; p &lt; k; p++)  <span class="cm">// A的列=B的行</span>
+                C[i][j] += A[i][p] * B[p][j];
+    <span class="kw">return</span> C;
+}
+
+<span class="cm">// 矩阵快速幂（求A^n）— 用于加速递推</span>
+<span class="cm">// 例：斐波那契数列可以用矩阵快速幂在O(logN)内求第n项</span>
+Matrix <span class="fn">matPow</span>(Matrix A, <span class="kw">int</span> n) {
+    <span class="kw">int</span> sz = A.<span class="fn">size</span>();
+    Matrix result(sz, <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;(sz, <span class="num">0</span>));
+    <span class="cm">// 初始化为单位矩阵</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; sz; i++) result[i][i] = <span class="num">1</span>;
+
+    <span class="kw">while</span> (n &gt; <span class="num">0</span>) {
+        <span class="kw">if</span> (n &amp; <span class="num">1</span>) result = <span class="fn">multiply</span>(result, A);
+        A = <span class="fn">multiply</span>(A, A);
+        n &gt;&gt;= <span class="num">1</span>;
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// 前缀和矩阵（区域和查询O(1)）</span>
+<span class="cm">// prefix[i][j] = (0,0)到(i-1,j-1)的元素总和</span>
+<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; <span class="fn">buildPrefix</span>(Matrix&amp; a) {
+    <span class="kw">int</span> m = a.<span class="fn">size</span>(), n = a[<span class="num">0</span>].<span class="fn">size</span>();
+    <span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt; pre(m + <span class="num">1</span>, <span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;(n + <span class="num">1</span>, <span class="num">0</span>));
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= m; i++)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= n; j++)
+            pre[i][j] = a[i-<span class="num">1</span>][j-<span class="num">1</span>] + pre[i-<span class="num">1</span>][j] + pre[i][j-<span class="num">1</span>] - pre[i-<span class="num">1</span>][j-<span class="num">1</span>];
+    <span class="kw">return</span> pre;
+}
+<span class="cm">// 查询(x1,y1)到(x2,y2)的区域和</span>
+<span class="kw">int</span> <span class="fn">query</span>(<span class="fn">vector</span>&lt;<span class="fn">vector</span>&lt;<span class="kw">int</span>&gt;&gt;&amp; pre, <span class="kw">int</span> x1, <span class="kw">int</span> y1, <span class="kw">int</span> x2, <span class="kw">int</span> y2) {
+    <span class="kw">return</span> pre[x2+<span class="num">1</span>][y2+<span class="num">1</span>] - pre[x1][y2+<span class="num">1</span>] - pre[x2+<span class="num">1</span>][y1] + pre[x1][y1];
+}</pre>
+          <div class="practice"><strong>默写检查点：</strong>①矩阵乘法三层循环顺序是ijk（ijk可交换但缓存效率不同）②快速幂初始化为单位矩阵 ③前缀和公式含容斥原理：右下-左下-右上+左上</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 13. 经典模式总结 ===== -->
+    <div class="section">
+      <div class="section-title">十三、看到题怎么选模板</div>
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:12px">
+        <tr><th>题目关键词</th><th>用什么模板</th></tr>
+        <tr><td>"有序数组""查找"</td><td>二分查找（模板1/2/3）</td></tr>
+        <tr><td>"反转""逆置"</td><td>链表逆置四步法 / 数组双指针对撞</td></tr>
+        <tr><td>"层次""层序""最短路径"</td><td>BFS + 队列</td></tr>
+        <tr><td>"所有方案""排列""组合"</td><td>回溯模板（选择→递归→撤销）</td></tr>
+        <tr><td>"最大/最小""最优解"</td><td>动态规划（定义状态→转移方程）</td></tr>
+        <tr><td>"去重""唯一"</td><td>哈希表 / 快慢指针</td></tr>
+        <tr><td>"区间""合并区间"</td><td>排序 + 贪心</td></tr>
+        <tr><td>"连通块""岛屿"</td><td>DFS/BFS + visited标记</td></tr>
+        <tr><td>"滑动窗口""最长不含"</td><td>双指针滑动窗口模板</td></tr>
+        <tr><td>"第K大/小"</td><td>堆（priority_queue）或快排划分</td></tr>
+        <tr><td>"最近更大/更小"</td><td>单调栈</td></tr>
+        <tr><td>"前缀和""区间和"</td><td>前缀和数组/矩阵</td></tr>
+      </table>
+    </div>
+
+    <!-- ===== 默写计划 ===== -->
+    <div class="section">
+      <div class="section-title">14天默写计划</div>
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:12px">
+        <tr><th>天</th><th>默写模板（每个5遍）</th></tr>
+        <tr><td>Day 1</td><td>一维数组遍历(正序/逆序) + 链表节点定义与遍历</td></tr>
+        <tr><td>Day 2</td><td>链表逆置四步法 + 双指针(对撞)</td></tr>
+        <tr><td>Day 3</td><td>快慢指针 + 合并有序链表 + 二维数组遍历</td></tr>
+        <tr><td>Day 4</td><td>矩阵转置 + 滑动窗口 + 栈的基本操作</td></tr>
+        <tr><td>Day 5</td><td>括号匹配 + 单调栈 + 队列基本操作</td></tr>
+        <tr><td>Day 6</td><td>二叉树定义 + 前中后序遍历 + 求最大深度</td></tr>
+        <tr><td>Day 7</td><td>BFS层序遍历(四步法) + 翻转二叉树</td></tr>
+        <tr><td>Day 8</td><td>快速排序 + 归并排序</td></tr>
+        <tr><td>Day 9</td><td>二分查找三套模板</td></tr>
+        <tr><td>Day 10</td><td>哈希表操作 + 两数之和 + 回溯万能模板</td></tr>
+        <tr><td>Day 11</td><td>全排列(回溯) + 爬楼梯(DP) + 最大子数组和</td></tr>
+        <tr><td>Day 12</td><td>打家劫舍 + 最小路径和 + LCS</td></tr>
+        <tr><td>Day 13</td><td>图邻接表 + BFS/DFS图遍历 + 岛屿数量</td></tr>
+        <tr><td>Day 14</td><td>矩阵乘法 + 前缀和矩阵 + 矩阵快速幂</td></tr>
+      </table>
+      <div class="note"><strong>后端方向额外加练：</strong>在Day 7-14的周末补充默写智能指针、线程安全计数器、生产者消费者、线程池、TCP Socket模板，每个至少默写3遍。</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手写代码训练计划 - 12周</title>
+<style>
+  :root {
+    --primary: #1a3c5e;
+    --accent: #2563eb;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --bg: #f8fafc;
+    --border: #e2e8f0;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --orange: #ea580c;
+    --orange-bg: #fff7ed;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --purple: #7c3aed;
+    --purple-bg: #faf5ff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+    background:#e9eef4; color:var(--text); line-height:1.7; font-size:15px;
+    padding:30px 15px;
+  }
+  .page { max-width:880px; margin:0 auto; background:#fff; box-shadow:0 2px 20px rgba(0,0,0,0.08); border-radius:10px; overflow:hidden; }
+
+  /* Header */
+  .header { background:linear-gradient(135deg,var(--primary) 0%,#2d5a87 100%); color:#fff; padding:30px 36px; }
+  .header h1 { font-size:24px; margin-bottom:6px; }
+  .header .subtitle { font-size:14px; opacity:0.85; }
+  .body { padding:28px 36px 36px; }
+
+  /* Section */
+  .section { margin-bottom:26px; }
+  .section-title {
+    font-size:17px; font-weight:700; color:var(--primary);
+    border-left:4px solid var(--accent); padding-left:10px; margin-bottom:14px;
+  }
+
+  /* Daily Schedule */
+  .schedule-card {
+    background:var(--bg); border:1px solid var(--border); border-radius:8px;
+    padding:16px 20px; margin-bottom:14px;
+  }
+  .schedule-card h3 { font-size:15px; color:var(--text); margin-bottom:8px; }
+  .time-block { display:flex; gap:12px; align-items:flex-start; margin-bottom:6px; font-size:14px; }
+  .time-block:last-child { margin-bottom:0; }
+  .time-label {
+    flex-shrink:0; width:90px; font-weight:600; color:var(--accent);
+  }
+  .time-desc { color:var(--text-light); }
+  .time-desc strong { color:var(--text); }
+
+  /* Phase Cards */
+  .phase {
+    border-radius:8px; padding:16px 20px; margin-bottom:14px; border:1px solid;
+  }
+  .phase-green { background:var(--green-bg); border-color:#bbf7d0; }
+  .phase-orange { background:var(--orange-bg); border-color:#fed7aa; }
+  .phase-red { background:var(--red-bg); border-color:#fecaca; }
+  .phase-purple { background:var(--purple-bg); border-color:#ddd6fe; }
+
+  .phase-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .phase-header h3 { font-size:16px; }
+  .phase-green h3 { color:var(--green); }
+  .phase-orange h3 { color:var(--orange); }
+  .phase-red h3 { color:var(--red); }
+  .phase-purple h3 { color:var(--purple); }
+  .phase-weeks { font-size:13px; color:var(--text-light); font-weight:600; }
+
+  .week-row { display:grid; grid-template-columns:70px 1fr auto; gap:8px; align-items:start; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13.5px; }
+  .week-row:last-child { border-bottom:none; }
+  .week-label { font-weight:700; color:var(--text); }
+  .week-content { color:var(--text-light); line-height:1.6; }
+  .week-content strong { color:var(--text); }
+  .week-count { font-size:12px; color:var(--accent); font-weight:600; white-space:nowrap; }
+
+  /* Rules */
+  .rules { list-style:none; padding:0; }
+  .rules li {
+    font-size:14px; color:var(--text-light); padding-left:18px; position:relative;
+    margin-bottom:8px; line-height:1.7;
+  }
+  .rules li::before { content:""; position:absolute; left:2px; top:10px; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .rules li strong { color:var(--text); }
+  .rules .warn::before { background:var(--red); }
+  .rules .warn { color:var(--red-bg); }
+
+  /* Problem List */
+  .topic-table { width:100%; border-collapse:collapse; font-size:13.5px; margin-bottom:12px; }
+  .topic-table th { background:var(--primary); color:#fff; padding:8px 10px; text-align:left; font-weight:600; font-size:13px; }
+  .topic-table td { padding:7px 10px; border-bottom:1px solid var(--border); color:var(--text-light); }
+  .topic-table td:first-child { font-weight:600; color:var(--text); }
+  .topic-table td:last-child { text-align:center; font-weight:600; color:var(--accent); }
+
+  /* Checklist */
+  .checklist {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:8px;
+  }
+  .check-item {
+    background:var(--bg); border:1px solid var(--border); border-radius:6px;
+    padding:8px 10px; font-size:13px; text-align:center;
+  }
+  .check-item strong { display:block; color:var(--text); font-size:14px; margin-bottom:2px; }
+  .check-item span { color:var(--text-light); }
+
+  /* Print */
+  @media print {
+    body { background:#fff; padding:0; font-size:13px; }
+    .page { box-shadow:none; border-radius:0; max-width:100%; }
+    .header { padding:20px 24px; }
+    .body { padding:20px 24px; }
+    .checklist { grid-template-columns:repeat(4,1fr); }
+  }
+  @media (max-width:600px) {
+    .checklist { grid-template-columns:1fr 1fr; }
+    .week-row { grid-template-columns:1fr; gap:2px; }
+    .body { padding:18px; }
+    .header { padding:20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>手写代码训练计划</h1>
+    <div class="subtitle">12周系统性训练 | 目标：实习面试手写代码能力 | 适用：C++后端方向</div>
+  </div>
+
+  <div class="body">
+
+    <!-- ===== 总览 ===== -->
+    <div class="section">
+      <div class="section-title">计划总览</div>
+      <div class="schedule-card">
+        <h3>四个阶段，逐步递进</h3>
+        <div class="time-block">
+          <span class="time-label">第1-3周</span>
+          <span class="time-desc"><strong>Phase 1 - C++基础重建</strong>：每天手写基础数据结构，重建代码手感</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">第4-6周</span>
+          <span class="time-desc"><strong>Phase 2 - LeetCode简单题</strong>：数组→字符串→链表→栈队列，每天2题</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">第7-9周</span>
+          <span class="time-desc"><strong>Phase 3 - LeetCode中等题</strong>：树→排序→二分查找→BFS/DFS，每天1-2题</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">第10-12周</span>
+          <span class="time-desc"><strong>Phase 4 - 综合实战</strong>：模拟面试+项目代码精读+八股穿插</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 每日时间分配 ===== -->
+    <div class="section">
+      <div class="section-title">每日时间分配（工作日）</div>
+      <div class="schedule-card">
+        <h3>每天总投入：约 1.5-2 小时</h3>
+        <div class="time-block">
+          <span class="time-label">20 min</span>
+          <span class="time-desc"><strong>热身</strong>：默写当天主题的核心模板（如链表节点定义、二分查找框架）</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">40 min</span>
+          <span class="time-desc"><strong>主练</strong>：做1-2道题，先自己想10分钟，想不出看提示再写，<strong>不看AI</strong></span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">15 min</span>
+          <span class="time-desc"><strong>复盘</strong>：把今天的解法用纸笔默写一遍，写下3句话总结思路</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">15 min</span>
+          <span class="time-desc"><strong>八股</strong>：当天主题对应的面试知识点（如链表→对应"指针和引用的区别"）</span>
+        </div>
+      </div>
+
+      <div class="schedule-card">
+        <h3>周末特别安排（约 3 小时）</h3>
+        <div class="time-block">
+          <span class="time-label">60 min</span>
+          <span class="time-desc"><strong>周测</strong>：从本周题目中随机抽3道，限时完成，模拟面试压力</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">60 min</span>
+          <span class="time-desc"><strong>项目精读</strong>：读自己GitHub项目的一个文件，逐行理解并写笔记</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">30 min</span>
+          <span class="time-desc"><strong>错题回顾</strong>：把本周做错/卡住的题重新做一遍</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Phase 1 ===== -->
+    <div class="section">
+      <div class="section-title">详细周计划</div>
+
+      <div class="phase phase-green">
+        <div class="phase-header">
+          <h3>Phase 1 - C++基础重建</h3>
+          <span class="phase-weeks">第1-3周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 1</span>
+          <span class="week-content"><strong>数组与遍历</strong>：手写一维数组遍历、逆序、找最大最小值；手写冒泡排序；理解指针与数组的关系</span>
+          <span class="week-count">5题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 2</span>
+          <span class="week-content"><strong>字符串处理</strong>：手写strlen/strcpy/strcmp；反转字符串；统计字符频率；手写atoi</span>
+          <span class="week-count">5题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 3</span>
+          <span class="week-content"><strong>结构体与类</strong>：手写Student类（构造/析构/成员函数）；理解this指针；手写简易vector（push_back/size/at）</span>
+          <span class="week-count">5题</span>
+        </div>
+      </div>
+
+      <div class="phase phase-orange">
+        <div class="phase-header">
+          <h3>Phase 2 - LeetCode简单题</h3>
+          <span class="phase-weeks">第4-6周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 4</span>
+          <span class="week-content"><strong>数组题</strong>：两数之和、删除有序数组重复项、买卖股票最佳时机、旋转数组、只出现一次的数字</span>
+          <span class="week-count">10题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 5</span>
+          <span class="week-content"><strong>链表题</strong>：反转链表、合并两个有序链表、环形链表、删除链表节点、链表中倒数第k个节点</span>
+          <span class="week-count">10题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 6</span>
+          <span class="week-content"><strong>栈与队列</strong>：有效括号、用栈实现队列、最小栈、每日温度、滑动窗口最大值</span>
+          <span class="week-count">10题</span>
+        </div>
+      </div>
+
+      <div class="phase phase-red">
+        <div class="phase-header">
+          <h3>Phase 3 - LeetCode中等题</h3>
+          <span class="phase-weeks">第7-9周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 7</span>
+          <span class="week-content"><strong>二叉树基础</strong>：前/中/后序遍历（递归+迭代）、层序遍历、最大深度、对称二叉树、翻转二叉树</span>
+          <span class="week-count">8题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 8</span>
+          <span class="week-content"><strong>排序与查找</strong>：手写快速排序、手写归并排序、二分查找模板、搜索旋转排序数组、在排序数组中查找元素</span>
+          <span class="week-count">7题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 9</span>
+          <span class="week-content"><strong>BFS/DFS</strong>：岛屿数量、二叉树路径总和、全排列、组合总和、子集</span>
+          <span class="week-count">7题</span>
+        </div>
+      </div>
+
+      <div class="phase phase-purple">
+        <div class="phase-header">
+          <h3>Phase 4 - 综合实战</h3>
+          <span class="phase-weeks">第10-12周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 10</span>
+          <span class="week-content"><strong>动态规划入门</strong>：爬楼梯、斐波那契、最大子数组和、打家劫舍、最小路径和</span>
+          <span class="week-count">6题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 11</span>
+          <span class="week-content"><strong>项目精读+模拟面试</strong>：逐文件讲解自己的student-management-system，每大模块限时口述5分钟</span>
+          <span class="week-count">5模块</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 12</span>
+          <span class="week-content"><strong>模拟面试</strong>：找同学/用录屏自测，完成3次完整模拟面试（手写代码+项目讲解+八股）</span>
+          <span class="week-count">3轮</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 核心规则 ===== -->
+    <div class="section">
+      <div class="section-title">训练铁律</div>
+      <ul class="rules">
+        <li><strong>禁止使用AI写代码</strong>：可以搜题意、看题解思路，但代码必须自己手敲。看题解后必须关闭，凭记忆重新写</li>
+        <li><strong>先想后写</strong>：拿到题先在纸上画3分钟思路，确定方案再敲代码，不要边想边改</li>
+        <li><strong>纸笔默写</strong>：每道题做完后，关掉电脑，用纸笔把核心代码默写一遍。默不出来说明没真懂</li>
+        <li><strong>错题本</strong>：卡超过20分钟的题记下来，周末重做。第二次还卡，标记为重点</li>
+        <li><strong>不求多求懂</strong>：宁可1道题吃透，也不要3道题囫囵吞枣。能口述清楚解法才算"吃透"</li>
+        <li><strong>每周至少5天</strong>：连续2天不练，手感会明显倒退。哪怕只做15分钟也比不做强</li>
+      </ul>
+    </div>
+
+    <!-- ===== 推荐题单 ===== -->
+    <div class="section">
+      <div class="section-title">推荐题单（按主题）</div>
+      <table class="topic-table">
+        <tr>
+          <th>主题</th>
+          <th>推荐题目（LeetCode题号）</th>
+          <th>题数</th>
+        </tr>
+        <tr>
+          <td>数组</td>
+          <td>1(两数之和) 26(删重复) 27(移除元素) 35(搜索插入) 66(加一) 88(合并) 121(股票)</td>
+          <td>7</td>
+        </tr>
+        <tr>
+          <td>字符串</td>
+          <td>344(反转) 541(反转II) 125(回文) 242(字母异位词) 58(最后单词长度)</td>
+          <td>5</td>
+        </tr>
+        <tr>
+          <td>链表</td>
+          <td>206(反转) 21(合并) 141(环形) 83(删重复) 19(倒数第k) 160(相交)</td>
+          <td>6</td>
+        </tr>
+        <tr>
+          <td>栈队列</td>
+          <td>20(有效括号) 232(栈实现队列) 155(最小栈) 739(每日温度)</td>
+          <td>4</td>
+        </tr>
+        <tr>
+          <td>二叉树</td>
+          <td>144(前序) 94(中序) 145(后序) 102(层序) 104(最大深度) 226(翻转) 101(对称)</td>
+          <td>7</td>
+        </tr>
+        <tr>
+          <td>排序查找</td>
+          <td>912(排序数组-手写快排) 704(二分查找) 33(搜索旋转) 34(找区间)</td>
+          <td>4</td>
+        </tr>
+        <tr>
+          <td>BFS/DFS</td>
+          <td>200(岛屿) 112(路径总和) 46(全排列) 78(子集) 39(组合总和)</td>
+          <td>5</td>
+        </tr>
+        <tr>
+          <td>动态规划</td>
+          <td>70(爬楼梯) 53(最大子数组) 198(打家劫舍) 64(最小路径) 300(最长递增子序列)</td>
+          <td>5</td>
+        </tr>
+      </table>
+      <div style="font-size:13px;color:var(--text-light);margin-top:4px;">合计 43 题，约12周完成，平均每周3-4题（含复习）</div>
+    </div>
+
+    <!-- ===== 项目精读计划 ===== -->
+    <div class="section">
+      <div class="section-title">项目精读计划（每周六）</div>
+      <div class="schedule-card">
+        <h3>student-management-system 逐文件拆解</h3>
+        <div class="time-block">
+          <span class="time-label">Week 2</span>
+          <span class="time-desc"><strong>student.h / score.h / user.h</strong>：数据模型定义，理解类成员设计</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">Week 4</span>
+          <span class="time-desc"><strong>databasemanager.cpp</strong>：数据库连接与初始化，理解SQLite操作</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">Week 6</span>
+          <span class="time-desc"><strong>studentdao.cpp / scoredao.cpp / userdao.cpp</strong>：DAO模式实现，逐行理解CRUD</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">Week 8</span>
+          <span class="time-desc"><strong>tcpserver.cpp</strong>（40KB核心文件）：重点！理解多客户端连接、信号槽、数据解析</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">Week 10</span>
+          <span class="time-desc"><strong>businesslogic.cpp + networkmanager.cpp</strong>：业务逻辑与网络通信的衔接</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">Week 11</span>
+          <span class="time-desc"><strong>UIManager.cpp</strong>（110KB）：挑核心功能段读，不用全读，能讲清楚3个核心交互即可</span>
+        </div>
+        <div class="time-block">
+          <span class="time-label">Week 12</span>
+          <span class="time-desc"><strong>fileexpoter.cpp + gomoku/ai.cpp</strong>：导出逻辑+五子棋AI算法，作为面试加分项</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 八股时间线 ===== -->
+    <div class="section">
+      <div class="section-title">八股知识点时间线</div>
+      <table class="topic-table">
+        <tr>
+          <th>周次</th>
+          <th>主题</th>
+          <th>核心考点</th>
+        </tr>
+        <tr><td>1-3周</td><td>C++基础</td><td>指针vs引用、virtual虚函数、构造/析构顺序、STL vector/map/set底层</td></tr>
+        <tr><td>4-6周</td><td>数据结构</td><td>链表vs数组区别、栈队列应用场景、哈希表原理与冲突解决</td></tr>
+        <tr><td>7-9周</td><td>树与算法</td><td>二叉树性质、AVL/红黑树概念、快排/归并时间复杂度、二分查找边界条件</td></tr>
+        <tr><td>10-12周</td><td>网络+OS</td><td>TCP三次握手/四次挥手、HTTP与HTTPS、进程vs线程、死锁四条件、虚拟内存</td></tr>
+      </table>
+    </div>
+
+    <!-- ===== 自测清单 ===== -->
+    <div class="section">
+      <div class="section-title">每周末自测清单</div>
+      <div class="checklist">
+        <div class="check-item">
+          <strong>本周题目</strong>
+          <span>能默写几道？</span>
+        </div>
+        <div class="check-item">
+          <strong>错题重做</strong>
+          <span>过了几道？</span>
+        </div>
+        <div class="check-item">
+          <strong>项目精读</strong>
+          <span>读了哪个文件？</span>
+        </div>
+        <div class="check-item">
+          <strong>口述能力</strong>
+          <span>能讲清几题思路？</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--text-light);">如果4项里达不到3项，下周减量到每天1题，确保质量优先。</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++后端开发 - 每日手写代码训练计划</title>
+<style>
+  :root {
+    --primary:#1a3c5e; --accent:#2563eb; --text:#1e293b; --text-light:#64748b;
+    --bg:#f8fafc; --border:#e2e8f0;
+    --c1:#16a34a; --c1bg:#f0fdf4; --c1bd:#bbf7d0;
+    --c2:#0891b2; --c2bg:#ecfeff; --c2bd:#a5f3fc;
+    --c3:#ea580c; --c3bg:#fff7ed; --c3bd:#fed7aa;
+    --c4:#7c3aed; --c4bg:#faf5ff; --c4bd:#ddd6fe;
+    --c5:#dc2626; --c5bg:#fef2f2; --c5bd:#fecaca;
+    --c6:#4338ca; --c6bg:#eef2ff; --c6bd:#c7d2fe;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#e9eef4;color:var(--text);line-height:1.7;font-size:15px;padding:30px 15px}
+  .page{max-width:900px;margin:0 auto;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,0.08);border-radius:10px;overflow:hidden}
+  .header{background:linear-gradient(135deg,var(--primary) 0%,#2d5a87 100%);color:#fff;padding:30px 36px}
+  .header h1{font-size:24px;margin-bottom:6px}
+  .header .subtitle{font-size:14px;opacity:0.85}
+  .body{padding:28px 36px 36px}
+  .section{margin-bottom:26px}
+  .section-title{font-size:17px;font-weight:700;color:var(--primary);border-left:4px solid var(--accent);padding-left:10px;margin-bottom:14px}
+
+  /* Daily template */
+  .daily-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+  .daily-card{border-radius:8px;padding:12px 10px;text-align:center;border:1px solid;font-size:13px}
+  .daily-card strong{display:block;font-size:14px;margin-bottom:4px}
+  .daily-card span{color:var(--text-light);font-size:12px}
+
+  /* Phase cards */
+  .phase{border-radius:8px;padding:16px 20px;margin-bottom:14px;border:1px solid}
+  .phase-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .phase-header h3{font-size:16px}
+  .phase-weeks{font-size:13px;color:var(--text-light);font-weight:600}
+  .week-row{display:grid;grid-template-columns:65px 1fr auto;gap:8px;align-items:start;padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+  .week-row:last-child{border-bottom:none}
+  .week-label{font-weight:700;color:var(--text)}
+  .week-content{color:var(--text-light);line-height:1.6}
+  .week-content strong{color:var(--text)}
+  .week-tag{font-size:12px;font-weight:600;white-space:nowrap}
+
+  /* Exercise box */
+  .ex-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:12px}
+  .ex-box h3{font-size:14px;color:var(--text);margin-bottom:8px}
+  .ex-list{list-style:none;padding:0}
+  .ex-list li{font-size:13.5px;color:var(--text-light);padding-left:18px;position:relative;margin-bottom:5px;line-height:1.65}
+  .ex-list li::before{content:"▸";position:absolute;left:2px;color:var(--accent);font-size:12px}
+  .ex-list li strong{color:var(--text)}
+  .ex-list code{background:#e2e8f0;padding:1px 5px;border-radius:3px;font-size:12.5px;color:var(--primary)}
+
+  /* Rules */
+  .rules{list-style:none;padding:0}
+  .rules li{font-size:14px;color:var(--text-light);padding-left:18px;position:relative;margin-bottom:8px;line-height:1.7}
+  .rules li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .rules li strong{color:var(--text)}
+
+  /* Table */
+  .table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:12px}
+  .table th{background:var(--primary);color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:13px}
+  .table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text-light)}
+  .table td:first-child{font-weight:600;color:var(--text)}
+  .table td:last-child{text-align:center;font-weight:600;color:var(--accent)}
+
+  /* Checklist */
+  .checklist{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .check-item{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;text-align:center}
+  .check-item strong{display:block;color:var(--text);font-size:14px;margin-bottom:2px}
+  .check-item span{color:var(--text-light)}
+
+  .note{font-size:13px;color:var(--text-light);margin-top:8px;padding:8px 12px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0}
+  .note strong{color:#92400e}
+
+  @media print{body{background:#fff;padding:0;font-size:13px}.page{box-shadow:none;border-radius:0;max-width:100%}.header{padding:20px 24px}.body{padding:20px 24px}}
+  @media(max-width:600px){.daily-grid{grid-template-columns:1fr 1fr}.checklist{grid-template-columns:1fr 1fr}.week-row{grid-template-columns:1fr;gap:2px}.body{padding:18px}.header{padding:20px}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>C++ 后端开发 · 每日手写代码训练计划</h1>
+    <div class="subtitle">16周系统训练 | 从代码手感重建到后端实战 | 禁止AI生成代码</div>
+  </div>
+
+  <div class="body">
+
+    <!-- ===== 总览 ===== -->
+    <div class="section">
+      <div class="section-title">计划总览</div>
+      <div class="ex-box">
+        <h3>六个阶段，每阶段2-3周，逐步递进</h3>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;font-size:12px;text-align:center">
+          <div style="background:var(--c1bg);border:1px solid var(--c1bd);border-radius:6px;padding:8px 4px"><strong style="color:var(--c1)">P1</strong><br>语法重建</div>
+          <div style="background:var(--c2bg);border:1px solid var(--c2bd);border-radius:6px;padding:8px 4px"><strong style="color:var(--c2)">P2</strong><br>STL实战</div>
+          <div style="background:var(--c3bg);border:1px solid var(--c3bd);border-radius:6px;padding:8px 4px"><strong style="color:var(--c3)">P3</strong><br>数据结构</div>
+          <div style="background:var(--c4bg);border:1px solid var(--c4bd);border-radius:6px;padding:8px 4px"><strong style="color:var(--c4)">P4</strong><br>多线程</div>
+          <div style="background:var(--c5bg);border:1px solid var(--c5bd);border-radius:6px;padding:8px 4px"><strong style="color:var(--c5)">P5</strong><br>网络编程</div>
+          <div style="background:var(--c6bg);border:1px solid var(--c6bd);border-radius:6px;padding:8px 4px"><strong style="color:var(--c6)">P6</strong><br>综合实战</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 每日模板 ===== -->
+    <div class="section">
+      <div class="section-title">每日时间分配（工作日 约2小时）</div>
+      <div class="daily-grid">
+        <div class="daily-card" style="background:var(--c1bg);border-color:var(--c1bd)">
+          <strong style="color:var(--c1)">15min</strong>
+          <span>默写当天<br>核心模板</span>
+        </div>
+        <div class="daily-card" style="background:var(--c2bg);border-color:var(--c2bd)">
+          <strong style="color:var(--c2)">50min</strong>
+          <span>主练题<br>（不用AI）</span>
+        </div>
+        <div class="daily-card" style="background:var(--c3bg);border-color:var(--c3bd)">
+          <strong style="color:var(--c3)">15min</strong>
+          <span>纸笔默写<br>复盘</span>
+        </div>
+        <div class="daily-card" style="background:var(--c4bg);border-color:var(--c4bd)">
+          <strong style="color:var(--c4)">20min</strong>
+          <span>八股知识<br>对应主题</span>
+        </div>
+        <div class="daily-card" style="background:var(--c5bg);border-color:var(--c5bd)">
+          <strong style="color:var(--c5)">20min</strong>
+          <span>项目精读<br>（每周2次）</span>
+        </div>
+      </div>
+      <div class="ex-box" style="margin-top:8px">
+        <h3>周末特别安排（约3小时）</h3>
+        <ul class="ex-list">
+          <li><strong>周测</strong>（60min）：本周题目随机抽3道，限时完成</li>
+          <li><strong>后端实战</strong>（60min）：写一个后端小模块（如连接池、日志器、线程池组件）</li>
+          <li><strong>错题回顾</strong>（30min）：本周卡住的题重新做</li>
+          <li><strong>项目精读</strong>（30min）：读自己GitHub项目的一个文件</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== Phase 1 ===== -->
+    <div class="section">
+      <div class="section-title">详细周计划</div>
+
+      <div class="phase" style="background:var(--c1bg);border-color:var(--c1bd)">
+        <div class="phase-header">
+          <h3 style="color:var(--c1)">Phase 1 - C++语法重建</h3>
+          <span class="phase-weeks">第1-2周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 1</span>
+          <span class="week-content"><strong>指针与内存</strong>：手写链表节点定义与遍历；new/delete配对实践；理解栈区vs堆区；手写深拷贝构造函数；引用vs指针对比</span>
+          <span class="week-tag" style="color:var(--c1)">6题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 2</span>
+          <span class="week-content"><strong>类与RAII</strong>：手写String类（构造/拷贝/赋值/析构）；手写SmartPointer类；理解三/五法则；RAII资源管理实践</span>
+          <span class="week-tag" style="color:var(--c1)">6题</span>
+        </div>
+      </div>
+
+      <div class="phase" style="background:var(--c2bg);border-color:var(--c2bd)">
+        <div class="phase-header">
+          <h3 style="color:var(--c2)">Phase 2 - STL深入</h3>
+          <span class="phase-weeks">第3-4周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 3</span>
+          <span class="week-content"><strong>容器原理</strong>：手写简易vector（push_back/size/operator[]）；手写简易unordered_map（哈希表+链地址法）；理解迭代器失效问题</span>
+          <span class="week-tag" style="color:var(--c2)">5题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 4</span>
+          <span class="week-content"><strong>算法与函数对象</strong>：手写lambda+STL算法（sort/find_if/count_if/transform）；手写简易function包装器；理解move语义与perfect forwarding</span>
+          <span class="week-tag" style="color:var(--c2)">5题</span>
+        </div>
+      </div>
+
+      <div class="phase" style="background:var(--c3bg);border-color:var(--c3bd)">
+        <div class="phase-header">
+          <h3 style="color:var(--c3)">Phase 3 - 数据结构与算法</h3>
+          <span class="phase-weeks">第5-7周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 5</span>
+          <span class="week-content"><strong>链表与栈队列</strong>：反转链表(LC206)、合并有序链表(LC21)、环形链表(LC141)、有效括号(LC20)、最小栈(LC155)</span>
+          <span class="week-tag" style="color:var(--c3)">8题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 6</span>
+          <span class="week-content"><strong>二叉树</strong>：前/中/后序(递归+迭代)(LC144/94/145)、层序遍历(LC102)、最大深度(LC104)、对称二叉树(LC101)</span>
+          <span class="week-tag" style="color:var(--c3)">8题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 7</span>
+          <span class="week-content"><strong>排序与查找</strong>：手写快速排序、手写归并排序、手写二分查找(LC704)、搜索旋转数组(LC33)、岛屿数量(LC200)</span>
+          <span class="week-tag" style="color:var(--c3)">7题</span>
+        </div>
+      </div>
+
+      <div class="phase" style="background:var(--c4bg);border-color:var(--c4bd)">
+        <div class="phase-header">
+          <h3 style="color:var(--c4)">Phase 4 - 多线程编程</h3>
+          <span class="phase-weeks">第8-10周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 8</span>
+          <span class="week-content"><strong>线程基础</strong>：手写std::thread启动/join/detach；理解std::mutex/lock_guard/unique_lock；手写线程安全的Counter类</span>
+          <span class="week-tag" style="color:var(--c4)">4题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 9</span>
+          <span class="week-content"><strong>同步机制</strong>：手写生产者-消费者模型（condition_variable）；手写线程池（submit任务+worker线程取任务）；理解死锁条件</span>
+          <span class="week-tag" style="color:var(--c4)">3题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 10</span>
+          <span class="week-content"><strong>异步与future</strong>：手写std::async/promise/future实践；手写简易Promise类；理解atomic与内存序基础</span>
+          <span class="week-tag" style="color:var(--c4)">3题</span>
+        </div>
+      </div>
+
+      <div class="phase" style="background:var(--c5bg);border-color:var(--c5bd)">
+        <div class="phase-header">
+          <h3 style="color:var(--c5)">Phase 5 - 网络编程</h3>
+          <span class="phase-weeks">第11-13周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 11</span>
+          <span class="week-content"><strong>Socket基础</strong>：手写TCP服务端（socket/bind/listen/accept/recv/send全流程）；手写TCP客户端；理解三次握手/四次挥手</span>
+          <span class="week-tag" style="color:var(--c5)">3题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 12</span>
+          <span class="week-content"><strong>多路复用</strong>：手写select模型服务端；手写epoll模型服务端（Linux/WSL环境）；理解Reactor模式</span>
+          <span class="week-tag" style="color:var(--c5)">3题</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 13</span>
+          <span class="week-content"><strong>HTTP与协议</strong>：手写简易HTTP请求解析器（解析GET/POST）；手写JSON序列化/反序列化；设计自定义应用层通信协议</span>
+          <span class="week-tag" style="color:var(--c5)">3题</span>
+        </div>
+      </div>
+
+      <div class="phase" style="background:var(--c6bg);border-color:var(--c6bd)">
+        <div class="phase-header">
+          <h3 style="color:var(--c6)">Phase 6 - 综合实战</h3>
+          <span class="phase-weeks">第14-16周</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 14</span>
+          <span class="week-content"><strong>日志系统</strong>：手写异步日志器（多线程写入+缓冲区+文件刷盘），理解生产环境日志架构</span>
+          <span class="week-tag" style="color:var(--c6)">1项目</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 15</span>
+          <span class="week-content"><strong>数据库连接池</strong>：手写SQLite连接池（初始化/获取/归还/超时），结合DAO模式重构自己项目的数据层</span>
+          <span class="week-tag" style="color:var(--c6)">1项目</span>
+        </div>
+        <div class="week-row">
+          <span class="week-label">Week 16</span>
+          <span class="week-content"><strong>模拟面试</strong>：完成3轮模拟面试（手写代码+项目讲解+八股问答），每轮自评找薄弱点</span>
+          <span class="week-tag" style="color:var(--c6)">3轮</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 后端实战项目清单 ===== -->
+    <div class="section">
+      <div class="section-title">周末后端实战项目清单</div>
+      <div class="note"><strong>原则：</strong>每个项目控制在200-500行，从零手写，不用AI生成代码。可以查文档和API手册，但不能复制粘贴。</div>
+      <table class="table" style="margin-top:12px">
+        <tr><th>项目</th><th>涉及知识点</th><th>预计行数</th></tr>
+        <tr><td>线程安全队列</td><td>mutex + condition_variable + 模板</td><td>~150行</td></tr>
+        <tr><td>固定大小线程池</td><td>thread + 任务队列 + worker线程</td><td>~200行</td></tr>
+        <tr><td>异步日志器</td><td>多线程 + 环形缓冲区 + 文件IO</td><td>~300行</td></tr>
+        <tr><td>数据库连接池</td><td>SQLite + 连接管理 + 超时机制</td><td>~250行</td></tr>
+        <tr><td>简易HTTP服务器</td><td>Socket + 请求解析 + 响应构建</td><td>~400行</td></tr>
+        <tr><td>LRU缓存</td><td>哈希表 + 双向链表 + 模板</td><td>~200行</td></tr>
+        <tr><td>事件循环（Reactor）</td><td>epoll/select + 回调机制</td><td>~350行</td></tr>
+      </table>
+    </div>
+
+    <!-- ===== 项目精读计划 ===== -->
+    <div class="section">
+      <div class="section-title>GitHub项目精读计划（每周六30min）</div>
+      <div class="ex-box">
+        <h3>student-management-system 逐文件拆解</h3>
+        <ul class="ex-list">
+          <li><strong>Week 2</strong>：<code>student.h</code> / <code>score.h</code> / <code>user.h</code> — 数据模型定义，理解类成员设计</li>
+          <li><strong>Week 4</strong>：<code>databasemanager.cpp</code> — 数据库连接与初始化</li>
+          <li><strong>Week 6</strong>：<code>studentdao.cpp</code> / <code>scoredao.cpp</code> / <code>userdao.cpp</code> — DAO模式CRUD实现</li>
+          <li><strong>Week 8</strong>：<code>tcpserver.cpp</code>（40KB核心）— 重点！多客户端连接/信号槽/数据解析</li>
+          <li><strong>Week 10</strong>：<code>businesslogic.cpp</code> + <code>networkmanager.cpp</code> — 业务逻辑与网络衔接</li>
+          <li><strong>Week 12</strong>：<code>UIManager.cpp</code>（110KB）— 挑核心功能段读，能讲清3个交互</li>
+          <li><strong>Week 14</strong>：<code>fileexpoter.cpp</code> + <code>gomoku/ai.cpp</code> — 导出逻辑+AI算法，面试加分</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== 八股时间线 ===== -->
+    <div class="section">
+      <div class="section-title">八股知识点时间线</div>
+      <table class="table">
+        <tr><th>周次</th><th>主题</th><th>核心考点</th></tr>
+        <tr><td>1-2周</td><td>C++核心</td><td>指针vs引用、virtual虚函数表、构造/析构顺序、三/五法则、RAII</td></tr>
+        <tr><td>3-4周</td><td>STL原理</td><td>vector扩容机制、map红黑树、unordered_map哈希、迭代器失效、move语义</td></tr>
+        <tr><td>5-7周</td><td>数据结构</td><td>链表vs数组、二叉树性质、快排/归并复杂度、二分查找边界、BFS/DFS</td></tr>
+        <tr><td>8-10周</td><td>多线程</td><td>线程同步、mutex原理、死锁四条件、condition_variable、atomic内存序</td></tr>
+        <tr><td>11-13周</td><td>网络</td><td>TCP三次握手/四次挥手、拥塞控制、select/epoll区别、HTTP协议、Reactor模式</td></tr>
+        <tr><td>14-16周</td><td>OS+数据库</td><td>进程vs线程、虚拟内存、页面置换、SQL索引、事务ACID、连接池原理</td></tr>
+      </table>
+    </div>
+
+    <!-- ===== 训练铁律 ===== -->
+    <div class="section">
+      <div class="section-title">训练铁律</div>
+      <ul class="rules">
+        <li><strong>禁止AI生成代码</strong>：可以查文档/看思路，但代码必须自己手敲。看题解后必须关闭，凭记忆重写</li>
+        <li><strong>先画后写</strong>：拿到题先在纸上画3分钟数据流/调用关系，确定方案再敲代码</li>
+        <li><strong>纸笔默写</strong>：每道题/每个模块做完后，关电脑用纸笔默写核心代码，默不出=没懂</li>
+        <li><strong>能口述才算会</strong>：每道题做完后对着空气讲一遍解法，讲不清楚的回去重做</li>
+        <li><strong>错题本</strong>：卡超过20分钟的题记下来，周末重做。第二次还卡=重点标记</li>
+        <li><strong>后端项目不能跳</strong>：周末实战项目是核心产出，面试时"我从零手写了线程池"比任何AI项目有说服力</li>
+        <li><strong>每天至少1.5小时</strong>：连续2天不练手感倒退，哪怕只做15分钟也行</li>
+      </ul>
+    </div>
+
+    <!-- ===== 自测清单 ===== -->
+    <div class="section">
+      <div class="section-title">每周末自测清单</div>
+      <div class="checklist">
+        <div class="check-item"><strong>本周题目</strong><span>能默写几道？</span></div>
+        <div class="check-item"><strong>实战项目</strong><span>完成了哪个？</span></div>
+        <div class="check-item"><strong>项目精读</strong><span>读了哪个文件？</span></div>
+        <div class="check-item"><strong>口述能力</strong><span>能讲清几题？</span></div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--text-light)">4项里达不到3项 → 下周减量到每天1题，质量优先。</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
