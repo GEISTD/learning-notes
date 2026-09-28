@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Engineering 完全指南 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --heading: #f0f6fc;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --yellow: #d29922;
+            --red: #f85149;
+            --purple: #bc8cff;
+            --orange: #e8873a;
+            --code-bg: #1c2128;
+            --pink: #db61a2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height: 1.75; font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+        .header {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.85em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+
+        .section {
+            margin-bottom: 48px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 20px 28px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.5em; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.3em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8em;
+        }
+        .section-body { padding: 24px 28px; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th {
+            text-align: left; padding: 10px 14px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.85em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.88em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px 20px; margin: 12px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85em; line-height: 1.6; color: var(--text); white-space: pre-wrap;
+        }
+        .code-block .kw { color: var(--purple); font-weight: bold; }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .var { color: var(--yellow); }
+        .code-block .tag { color: var(--pink); font-weight: bold; }
+
+        .callout {
+            border-left: 4px solid; padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+
+        .tag-chip {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.78em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .tag-essential { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+        .stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px; margin: 24px 0;
+        }
+        .stat-card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 20px; text-align: center;
+        }
+        .stat-card .num { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-card .label { color: #8b949e; font-size: 0.85em; margin-top: 4px; }
+
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; margin: 16px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 8px; font-size: 0.95em; }
+        .card .card-desc { color: #8b949e; font-size: 0.85em; }
+
+        .formula {
+            background: linear-gradient(135deg, rgba(88,166,255,0.1), rgba(188,140,255,0.1));
+            border: 1px solid var(--accent); border-radius: 10px;
+            padding: 20px 28px; margin: 16px 0; text-align: center;
+            font-family: 'Cascadia Code', monospace; font-size: 1em;
+        }
+        .formula .part { display: inline-block; margin: 0 4px; }
+
+        .good-bad {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;
+        }
+        .good-box, .bad-box {
+            border-radius: 8px; padding: 16px;
+            font-family: 'Cascadia Code', monospace; font-size: 0.85em;
+        }
+        .good-box { background: rgba(63,185,80,0.08); border: 1px solid var(--green); }
+        .bad-box { background: rgba(248,81,73,0.08); border: 1px solid var(--red); }
+        .good-box .label { color: var(--green); font-weight: bold; margin-bottom: 8px; display: block; }
+        .bad-box .label { color: var(--red); font-weight: bold; margin-bottom: 8px; display: block; }
+
+        .template-box {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px 20px; margin: 12px 0;
+        }
+        .template-box .template-title {
+            color: var(--accent); font-weight: 600; margin-bottom: 8px;
+            font-size: 0.95em; display: flex; align-items: center; gap: 8px;
+        }
+        .template-box .template-content {
+            font-family: 'Cascadia Code', monospace; font-size: 0.85em;
+            color: var(--text); line-height: 1.6; white-space: pre-wrap;
+        }
+
+        h3 { color: var(--accent); margin: 20px 0 12px; }
+        p { margin-bottom: 12px; }
+        ul, ol { margin-left: 20px; margin-bottom: 12px; }
+        li { margin-bottom: 6px; }
+
+        .footer {
+            text-align: center; padding: 40px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+            .good-bad { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>Prompt Engineering 完全指南</h1>
+    <div class="meta">AI 时代的核心技能 &nbsp;|&nbsp; 2026-09-28 &nbsp;|&nbsp; 从入门到精通</div>
+</div>
+
+<div class="nav">
+    <a href="#nav-what">什么是Prompt</a>
+    <a href="#nav-principle">六大原则</a>
+    <a href="#nav-framework">经典框架</a>
+    <a href="#nav-techniques">核心技巧</a>
+    <a href="#nav-templates">常用模板</a>
+    <a href="#nav-scenarios">场景实战</a>
+    <a href="#nav-mistakes">常见错误</a>
+    <a href="#nav-advanced">进阶技术</a>
+    <a href="#nav-workflow">工作流</a>
+    <a href="#nav-interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat-card"><div class="num">10</div><div class="label">核心模块</div></div>
+        <div class="stat-card"><div class="num">30+</div><div class="label">技巧方法</div></div>
+        <div class="stat-card"><div class="num">15</div><div class="label">实战模板</div></div>
+        <div class="stat-card"><div class="num">15</div><div class="label">面试题</div></div>
+    </div>
+
+    <!-- ===================== 什么是 Prompt ===================== -->
+    <div class="section" id="nav-what">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128161;</div>
+            <h2>什么是 Prompt Engineering</h2>
+            <span class="badge">基础概念</span>
+        </div>
+        <div class="section-body">
+            <p><strong>Prompt（提示词）</strong>就是你给 AI 说的话。<strong>Prompt Engineering（提示词工程）</strong>就是研究"怎么跟 AI 说话，才能让它干得更好"的学问。</p>
+
+            <div class="callout tip">
+                <div class="callout-title">一句话理解</div>
+                AI 就像一个能力极强但不会读心术的实习生。你说得越清楚、越具体，它做得越好。Prompt Engineering 就是教你怎么把需求说清楚。
+            </div>
+
+            <h3>为什么要学 Prompt？</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">效率提升 10 倍</div>
+                    <div class="card-desc">好的 prompt 一次出结果，差的 prompt 改十遍都不对</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">质量可控</div>
+                    <div class="card-desc">你能决定输出的格式、深度、风格，而不是碰运气</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">省钱省 token</div>
+                    <div class="card-desc">精准的 prompt 减少来回对话，降低 API 调用成本</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">职场核心技能</div>
+                    <div class="card-desc">AI 时代，会用 AI 的人取代不会用的人</div>
+                </div>
+            </div>
+
+            <h3>Prompt 的本质</h3>
+            <div class="formula">
+                <span class="part">清晰的指令</span> +
+                <span class="part">充分的上下文</span> +
+                <span class="part">明确的输出要求</span> =
+                <span class="part" style="color:var(--green);">高质量结果</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 六大原则 ===================== -->
+    <div class="section" id="nav-principle">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128208;</div>
+            <h2>六大核心原则</h2>
+            <span class="badge">基础必会</span>
+        </div>
+        <div class="section-body">
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">1. 明确具体，不要模糊</div>
+                    <div class="card-desc">
+                        <strong>❌</strong> "帮我写篇文章"<br>
+                        <strong>✅</strong> "帮我写一篇 800 字的科普文章，主题是 WSL2 的网络原理，面向大学生，语言通俗"
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. 给角色，给身份</div>
+                    <div class="card-desc">
+                        告诉 AI "你是谁"，它会自动切换到对应模式。<br>
+                        "你是一位有 10 年经验的前端架构师..."
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. 给示例（Few-shot）</div>
+                    <div class="card-desc">
+                        举 1~3 个例子比描述 100 个字更管用。尤其是格式类需求。
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. 分步思考（CoT）</div>
+                    <div class="card-desc">
+                        复杂问题让 AI "一步步想"，准确率大幅提升。<br>
+                        "请先分析问题，再给出方案"
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. 规定输出格式</div>
+                    <div class="card-desc">
+                        要 JSON？要 Markdown 表格？要代码？明确说出来。<br>
+                        "输出格式：JSON，包含 name, age, email 三个字段"
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">6. 给约束条件</div>
+                    <div class="card-desc">
+                        告诉 AI "不要做什么"。字数限制、风格要求、禁用内容等。<br>
+                        "不要超过 500 字，不要用专业术语"
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">记忆口诀：角上下分格约</div>
+                <strong>角</strong>色设定 · <strong>上</strong>下文 · <strong>下</strong>达任务 · <strong>分</strong>步思考 · <strong>格</strong>式要求 · <strong>约</strong>束条件
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 经典框架 ===================== -->
+    <div class="section" id="nav-framework">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128221;</div>
+            <h2>经典 Prompt 框架</h2>
+            <span class="badge">结构化方法</span>
+        </div>
+        <div class="section-body">
+            <p>业界总结了很多好用的 Prompt 结构模板，照着填就行，不容易漏信息。</p>
+
+            <h3>1. CRISPE 框架（最全面）</h3>
+            <table>
+                <tr><th>字母</th><th>含义</th><th>说明</th><th>示例</th></tr>
+                <tr><td><strong>C</strong></td><td>Capacity & Role（身份角色）</td><td>你希望 AI 扮演什么角色</td><td>"你是一位资深 Python 后端工程师"</td></tr>
+                <tr><td><strong>R</strong></td><td>Input（输入）</td><td>你要处理的原始信息</td><td>"这是一段有 bug 的代码：..."</td></tr>
+                <tr><td><strong>I</strong></td><td>Instruction（指令）</td><td>具体要做什么</td><td>"找出 bug 并修复，解释原因"</td></tr>
+                <tr><td><strong>S</strong></td><td>Output（输出格式）</td><td>结果长什么样</td><td>"输出格式：1. 问题分析 2. 修复代码 3. 注意事项"</td></tr>
+                <tr><td><strong>P</strong></td><td>Personality（风格）</td><td>回答的语气风格</td><td>"用简洁专业的语气，面向初学者"</td></tr>
+                <tr><td><strong>E</strong></td><td>Example（示例）</td><td>举例子说明</td><td>"参考这个格式：..."</td></tr>
+            </table>
+
+            <div class="template-box">
+                <div class="template-title">CRISPE 完整模板</div>
+                <div class="template-content">你是一位【角色/身份】，拥有【X年经验/专业背景】。
+
+【背景信息/输入内容】
+
+请你完成以下任务：
+【具体要做什么】
+
+输出要求：
+1. 【格式要求】
+2. 【长度要求】
+3. 【风格要求】
+4. 【其他约束】
+
+参考示例：
+【示例1】
+【示例2】</div>
+            </div>
+
+            <h3>2. RTF 框架（简洁版）</h3>
+            <table>
+                <tr><th>字母</th><th>含义</th><th>说明</th></tr>
+                <tr><td><strong>R</strong></td><td>Role（角色）</td><td>AI 扮演的身份</td></tr>
+                <tr><td><strong>T</strong></td><td>Task（任务）</td><td>具体做什么</td></tr>
+                <tr><td><strong>F</strong></td><td>Format（格式）</td><td>输出格式</td></tr>
+            </table>
+
+            <div class="template-box">
+                <div class="template-title">RTF 简洁模板</div>
+                <div class="template-content">你是【角色】。
+请帮我【任务描述】。
+输出格式：【格式要求】</div>
+            </div>
+
+            <h3>3. CO-STAR 框架（复杂任务用）</h3>
+            <table>
+                <tr><th>字母</th><th>含义</th><th>说明</th></tr>
+                <tr><td><strong>C</strong></td><td>Context（背景）</td><td>任务的背景信息</td></tr>
+                <tr><td><strong>O</strong></td><td>Objective（目标）</td><td>要达成什么目标</td></tr>
+                <tr><td><strong>S</strong></td><td>Style（风格）</td><td>输出的风格</td></tr>
+                <tr><td><strong>T</strong></td><td>Tone（语气）</td><td>回答的语气</td></tr>
+                <tr><td><strong>A</strong></td><td>Audience（受众）</td><td>写给谁看的</td></tr>
+                <tr><td><strong>R</strong></td><td>Response（响应格式）</td><td>输出的格式</td></tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">怎么选框架？</div>
+                <strong>简单任务</strong>（写封邮件、翻译一段话）→ 直接说，不用框架<br>
+                <strong>中等任务</strong>（写文章、改代码）→ RTF 框架，简洁够用<br>
+                <strong>复杂任务</strong>（产品方案、技术设计、研究报告）→ CRISPE / CO-STAR 框架，信息更全
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 核心技巧 ===================== -->
+    <div class="section" id="nav-techniques">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9889;</div>
+            <h2>核心技巧</h2>
+            <span class="badge">提效神器</span>
+        </div>
+        <div class="section-body">
+
+            <h3>技巧 1：Few-shot Learning（给例子）</h3>
+            <p>给 AI 看 1~3 个正确答案的例子，它就能学会你想要的模式。这是最有效的技巧之一。</p>
+
+            <div class="good-bad">
+                <div class="bad-box">
+                    <span class="label">❌ 不给例子</span>
+帮我把这些产品名改成英文：
+1. 苹果手机
+2. 华为笔记本
+                </div>
+                <div class="good-box">
+                    <span class="label">✅ 给例子</span>
+帮我把产品名翻译成英文，遵循以下格式：
+
+示例：
+输入：小米耳机 → 输出：Xiaomi Earbuds
+输入：大疆无人机 → 输出：DJI Drone
+
+现在翻译：
+1. 苹果手机
+2. 华为笔记本
+                </div>
+            </div>
+
+            <h3>技巧 2：Chain-of-Thought（思维链）</h3>
+            <p>复杂问题让 AI "一步步思考"，准确率大幅提升。数学题、逻辑题、推理题特别管用。</p>
+
+            <div class="good-bad">
+                <div class="bad-box">
+                    <span class="label">❌ 直接问答案</span>
+一家店5个苹果卖10元，买8个多少钱？
+                </div>
+                <div class="good-box">
+                    <span class="label">✅ 让它一步步想</span>
+一家店5个苹果卖10元，买8个多少钱？
+请一步步分析并给出答案。
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">进阶：Self-Consistency（自洽性）</div>
+                让 AI 用不同方法解同一道题，取出现次数最多的答案。可以提升难题正确率。
+            </div>
+
+            <h3>技巧 3：Role-play（角色扮演）</h3>
+            <p>给 AI 一个明确的身份，它的回答质量会显著提升。</p>
+
+            <div class="template-box">
+                <div class="template-title">常用角色模板</div>
+                <div class="template-content"># 编程类
+"你是一位有10年经验的资深【前端/后端/算法】工程师，代码风格简洁规范，善于解释复杂概念"
+
+# 写作类
+"你是一位资深【科技/商业/科普】作家，文章结构清晰，语言通俗易懂"
+
+# 学习类
+"你是一位耐心的【数学/英语/编程】老师，擅长用简单的例子解释复杂概念，会循序渐进地引导学生"
+
+# 产品类
+"你是一位有5年经验的产品经理，擅长用户需求分析和产品方案设计"
+
+# 翻译类
+"你是一位专业的中英翻译，翻译准确流畅，保留原文语气和风格"</div>
+            </div>
+
+            <h3>技巧 4：结构化输出</h3>
+            <p>明确要求输出格式，让结果直接能用，减少二次整理。</p>
+
+            <div class="template-box">
+                <div class="template-title">常用格式要求</div>
+                <div class="template-content"># Markdown 格式
+"用 Markdown 格式输出，包含标题、列表、代码块"
+
+# JSON 格式
+"输出严格的 JSON 格式，包含以下字段：name, age, skills（数组）"
+
+# 表格格式
+"用表格形式输出，包含三列：名称、说明、示例"
+
+# 代码格式
+"只输出代码，不要解释，不要用代码块包裹"
+
+# 分点输出
+"分3点回答，每点不超过50字"</div>
+            </div>
+
+            <h3>技巧 5：约束与边界</h3>
+            <p>告诉 AI "不要做什么"，避免跑偏。</p>
+
+            <div class="template-box">
+                <div class="template-title">常用约束</div>
+                <div class="template-content">- 字数："不超过500字" / "至少800字"
+- 受众："面向完全不懂技术的人" / "面向有3年经验的开发者"
+- 风格："用口语化的方式" / "用学术论文的严谨风格"
+- 内容："不要使用任何专业术语" / "必须包含代码示例"
+- 限制："只回答与SQL相关的问题，其他问题请说明无法回答"
+- 否定："不要用列表形式，请用连贯的段落"</div>
+            </div>
+
+            <h3>技巧 6：迭代优化</h3>
+            <p>第一次输出不满意很正常，关键是会"改 prompt"。</p>
+
+            <div class="callout tip">
+                <div class="callout-title">迭代三问</div>
+                <strong>1. 哪里不满意？</strong> → 太长？太短？方向偏了？格式不对？<br>
+                <strong>2. 缺了什么信息？</strong> → 是不是背景没说清楚？要求没讲明白？<br>
+                <strong>3. 能不能给个例子？</strong> → 把你想要的样子举出来，AI 秒懂
+            </div>
+
+            <div class="code-block"><span class="com"># 迭代示例</span>
+
+<span class="com"># 第1轮：太笼统</span>
+<span class="str">"帮我写一篇关于AI的文章"</span>
+
+<span class="com"># 第2轮：加约束</span>
+<span class="str">"帮我写一篇500字的AI科普文章，面向高中生"</span>
+
+<span class="com"># 第3轮：加结构</span>
+<span class="str">"帮我写一篇500字的AI科普文章，面向高中生。
+结构：1.什么是AI 2.AI能做什么 3.怎么学习AI
+语言要生动有趣，不要用专业术语"</span>
+
+<span class="com"># 第4轮：给示例</span>
+<span class="str">"参考下面这篇文章的风格：[示例文章]
+再写一篇关于大模型的科普文，500字左右"</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 常用模板 ===================== -->
+    <div class="section" id="nav-templates">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128208;</div>
+            <h2>常用 Prompt 模板</h2>
+            <span class="badge">拿来就用</span>
+        </div>
+        <div class="section-body">
+
+            <div class="template-box">
+                <div class="template-title">📝 写作类 - 文章/报告</div>
+                <div class="template-content">你是一位资深的【领域】作家，擅长【风格】的写作。
+
+请帮我写一篇关于【主题】的文章，要求：
+- 字数：约【X】字
+- 受众：【面向什么人】
+- 结构：【第1部分... 第2部分... 第3部分...】
+- 风格：【生动有趣/专业严谨/通俗易懂】
+- 语气：【口语化/正式/亲切】
+
+请用 Markdown 格式输出，包含适当的标题和列表。</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">💻 编程类 - 代码编写</div>
+                <div class="template-content">你是一位有【X】年经验的资深【语言/技术】工程师，代码风格简洁规范，注释清晰。
+
+请帮我实现【功能描述】，要求：
+- 语言：【Python/Go/JS等】
+- 输入：【输入是什么】
+- 输出：【输出是什么】
+- 注意事项：【边界条件、性能要求等】
+
+请输出完整的可运行代码，并加上必要的注释。最后简要说明实现思路。</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">🐛 编程类 - Debug 查错</div>
+                <div class="template-content">你是一位资深【语言】工程师，擅长排查 bug。
+
+以下代码出现了问题：
+
+【代码内容】
+
+错误信息：
+【报错信息】
+
+请帮我：
+1. 分析 bug 产生的原因
+2. 给出修复后的完整代码
+3. 说明如何避免类似问题</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">📚 学习类 - 知识讲解</div>
+                <div class="template-content">你是一位耐心的【学科】老师，擅长用简单的例子解释复杂概念。
+
+请帮我讲解【知识点】，要求：
+- 我目前的基础：【小白/有一定了解/有经验】
+- 讲解深度：【入门/进阶/深入原理】
+- 用【比喻/代码示例/画图/生活例子】的方式帮助理解
+- 结构：先讲是什么 → 为什么需要 → 怎么用 → 注意事项
+
+最后给我 3 道练习题检验理解程度，并附上答案。</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">🔍 研究类 - 信息调研</div>
+                <div class="template-content">你是一位资深的研究分析师，擅长信息整理和对比分析。
+
+请帮我调研【主题】，要求：
+- 调研范围：【时间/地区/领域限制】
+- 输出结构：
+  1. 背景概述
+  2. 主要玩家/方案对比（用表格）
+  3. 优劣势分析
+  4. 发展趋势
+  5. 参考来源
+
+请用客观、专业的语气，信息要有依据。</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">📋 翻译类 - 中英互译</div>
+                <div class="template-content">你是一位专业的中英翻译，翻译准确流畅，保留原文的语气和风格。
+
+请将以下内容翻译成【目标语言】：
+【原文内容】
+
+要求：
+- 风格：【正式/口语/文学/技术】
+- 专业术语：【如有特定术语表请列出】
+- 保留原文格式（如列表、加粗等）</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">🎯 总结类 - 内容提炼</div>
+                <div class="template-content">请帮我总结以下内容：
+
+【长文本/文章/会议记录】
+
+要求：
+- 字数：【约X字 / 3-5句话】
+- 保留：【关键数据/核心观点/行动项】
+- 格式：【分点总结 / 一段式 / 表格】
+
+请确保信息准确，不要添加原文没有的内容。</div>
+            </div>
+
+            <div class="template-box">
+                <div class="template-title">💼 面试类 - 模拟面试</div>
+                <div class="template-content">你是一位资深的【岗位】面试官，有10年面试经验。
+
+请对我进行模拟面试，要求：
+- 岗位：【目标岗位，如前端工程师】
+- 难度：【初级/中级/高级】
+- 面试流程：先问基础题，再问进阶题，最后问项目/场景题
+- 每次只问 1 道题，等我回答后再给出点评和下一题
+
+面试结束后给我整体评估：
+1. 优势
+2. 薄弱点
+3. 改进建议
+
+准备好了就开始吧！</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 场景实战 ===================== -->
+    <div class="section" id="nav-scenarios">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127937;</div>
+            <h2>场景实战</h2>
+            <span class="badge">学以致用</span>
+        </div>
+        <div class="section-body">
+
+            <h3>场景 1：写代码</h3>
+            <div class="code-block"><span class="com"># ❌ 差的 prompt</span>
+<span class="str">"帮我写个登录功能"</span>
+
+<span class="com"># ✅ 好的 prompt</span>
+<span class="str">"你是一位有5年经验的 Python后端工程师。
+
+请用 Flask 实现一个用户登录接口，要求：
+1. 使用 MySQL 数据库存储用户信息
+2. 密码用 bcrypt 加密存储
+3. 登录成功返回 JWT token
+4. 包含输入验证（邮箱格式、密码长度）
+5. 有适当的错误处理和 HTTP 状态码
+
+项目结构：
+- app.py - 主程序
+- models.py - 数据库模型
+- auth.py - 认证逻辑
+
+请输出完整可运行代码，并附上安装依赖的命令和测试方法。"</span></div>
+
+            <h3>场景 2：学新技术</h3>
+            <div class="code-block"><span class="com"># ❌ 差的 prompt</span>
+<span class="str">"教我学 Docker"</span>
+
+<span class="com"># ✅ 好的 prompt</span>
+<span class="str">"你是一位耐心的 DevOps 老师。我是一名前端开发，有基础的 Linux 知识，但完全没接触过 Docker。
+
+请带我从零开始学习 Docker，要求：
+1. 分阶段讲解，从入门到进阶
+2. 每个知识点配一个动手练习
+3. 用通俗的比喻解释概念，不要堆砌术语
+4. 每阶段结束后给我一个小测验
+
+先从第1阶段开始：Docker 是什么，为什么需要它，安装和第一个容器。"</span></div>
+
+            <h3>场景 3：改简历</h3>
+            <div class="code-block"><span class="com"># ❌ 差的 prompt</span>
+<span class="str">"帮我改改简历"</span>
+
+<span class="com"># ✅ 好的 prompt</span>
+<span class="str">"你是一位有5年经验的互联网行业HR，看过上千份简历。
+
+以下是我的简历：
+【简历内容】
+
+我投递的岗位是【目标岗位名称】，岗位要求是：
+【岗位JD内容】
+
+请帮我：
+1. 整体评价：我的简历匹配度如何？有哪些硬伤？
+2. 内容优化：哪些经历需要突出？哪些可以删减？
+3. 措辞优化：把平淡的描述改成有数据支撑、有冲击力的表述
+4. 格式建议：排版和结构上有什么可以改进的？
+
+请用 STAR 法则优化我的项目描述。"</span></div>
+
+            <h3>场景 4：做决策</h3>
+            <div class="code-block"><span class="com"># ❌ 差的 prompt</span>
+<span class="str">"我该考研还是找工作？"</span>
+
+<span class="com"># ✅ 好的 prompt</span>
+<span class="str">"你是一位职业规划咨询师，有丰富的大学生职业指导经验。
+
+我的情况：
+- 学校：【学校名称和层次】
+- 专业：【专业名称】
+- 年级：【大几】
+- 成绩：【排名/绩点】
+- 实习经历：【有/无，什么公司什么岗位】
+- 技术栈：【会什么】
+- 家庭经济情况：【是否需要尽快工作赚钱】
+- 兴趣方向：【喜欢什么】
+- 目标城市：【想去哪里发展】
+
+请帮我分析考研和直接工作两种选择：
+1. 各自的优缺点
+2. 适合的人群
+3. 未来 3-5 年的发展路径对比
+4. 结合我的情况，你的建议是什么？为什么？
+
+请客观分析，不要给出绝对答案，帮我理清思路。"</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 常见错误 ===================== -->
+    <div class="section" id="nav-mistakes">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#10071;</div>
+            <h2>常见错误与避坑</h2>
+            <span class="badge">新手必看</span>
+        </div>
+        <div class="section-body">
+
+            <table>
+                <tr><th>错误</th><th>表现</th><th>正确做法</th></tr>
+                <tr>
+                    <td><strong>1. 太笼统</strong></td>
+                    <td>"帮我写个网站"</td>
+                    <td>明确技术栈、功能、目标用户、页面结构等</td>
+                </tr>
+                <tr>
+                    <td><strong>2. 一次问太多</strong></td>
+                    <td>同时问 10 个不相关的问题</td>
+                    <td>一个 prompt 聚焦一个任务，拆成多轮对话</td>
+                </tr>
+                <tr>
+                    <td><strong>3. 不给背景</strong></td>
+                    <td>直接抛问题，不说前因后果</td>
+                    <td>提供必要的上下文：你是谁、为什么要做、约束条件</td>
+                </tr>
+                <tr>
+                    <td><strong>4. 不设边界</strong></td>
+                    <td>结果太长/太短/跑偏了</td>
+                    <td>明确字数、格式、风格、不要做什么</td>
+                </tr>
+                <tr>
+                    <td><strong>5. 完全相信输出</strong></td>
+                    <td>AI 说什么都信</td>
+                    <td>关键信息一定要验证，AI 会"幻觉"（编造假信息）</td>
+                </tr>
+                <tr>
+                    <td><strong>6. 不会迭代</strong></td>
+                    <td>一次不满意就放弃</td>
+                    <td>好结果都是改出来的，3~5 轮迭代很正常</td>
+                </tr>
+                <tr>
+                    <td><strong>7. 怕写太长</strong></td>
+                    <td>觉得 prompt 越短越好</td>
+                    <td>该长就长，信息越充分结果越好。长 prompt ≠ 费钱</td>
+                </tr>
+                <tr>
+                    <td><strong>8. 用问句不用陈述句</strong></td>
+                    <td>"你能帮我...吗？"</td>
+                    <td>直接下达指令："请帮我..."</td>
+                </tr>
+                <tr>
+                    <td><strong>9. 忽略安全</strong></td>
+                    <td>把公司机密、密码发给 AI</td>
+                    <td>敏感信息脱敏后再发，公司数据不要随便贴</td>
+                </tr>
+                <tr>
+                    <td><strong>10. 不验证代码</strong></td>
+                    <td>AI 写的代码直接用</td>
+                    <td>一定要读一遍、测一遍，AI 会编不存在的 API</td>
+                </tr>
+            </table>
+
+            <div class="callout danger">
+                <div class="callout-title">⚠️ AI 幻觉（Hallucination）</div>
+                AI 会"一本正经地胡说八道"，编造不存在的事实、数据、引用。<br>
+                <strong>应对方法：</strong><br>
+                1. 重要事实一定要交叉验证<br>
+                2. 让 AI 给出参考来源（然后检查来源是否真实存在）<br>
+                3. 代码一定要跑一遍，API 一定要查文档<br>
+                4. 法律、医疗等专业领域的建议仅供参考
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 进阶技术 ===================== -->
+    <div class="section" id="nav-advanced">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128640;</div>
+            <h2>进阶技术</h2>
+            <span class="badge">高级</span>
+        </div>
+        <div class="section-body">
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">1. 思维树（Tree of Thoughts）</div>
+                    <div class="card-desc">不是让 AI 一条路走到黑，而是探索多条推理路径，评估后选最优的。适合复杂决策问题</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. 自我反思（Self-Refine）</div>
+                    <div class="card-desc">让 AI 自己 critique 自己的输出，然后迭代改进。"请审视上面的回答，找出3个可以改进的地方并重写"</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. 专家混合（MoE Prompt）</div>
+                    <div class="card-desc">让 AI 模拟多个专家讨论问题，"请模拟3位不同领域的专家讨论这个问题..."</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. RAG（检索增强生成）</div>
+                    <div class="card-desc">把相关文档/资料先"喂"给 AI，让它基于你的资料回答，减少幻觉</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. 系统提示词（System Prompt）</div>
+                    <div class="card-desc">在对话最开始设定全局规则，整个对话过程都生效。适合固定角色和输出风格</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">6. ReAct 框架</div>
+                    <div class="card-desc">Reasoning + Acting，让 AI 边思考边行动（调用工具）。Agent 的基础原理</div>
+                </div>
+            </div>
+
+            <h3>让 AI 自我改进的 Prompt</h3>
+            <div class="template-box">
+                <div class="template-title">自我反思模板</div>
+                <div class="template-content">请对你上面的回答进行批判性审视：
+
+1. 有哪些不准确或可能有问题的地方？
+2. 有什么遗漏的重要信息？
+3. 逻辑上有没有漏洞？
+4. 有没有更好的表达方式？
+
+请根据以上审视，重写一个改进版。</div>
+            </div>
+
+            <h3>专家辩论模板</h3>
+            <div class="template-box">
+                <div class="template-title">多专家讨论模板</div>
+                <div class="template-content">请模拟以下3位专家就【问题】展开讨论：
+
+专家A：【身份和立场】
+专家B：【身份和立场】
+专家C：【身份和立场，中立裁判】
+
+讨论规则：
+1. 每位专家先发表自己的观点
+2. 然后互相质疑和辩论
+3. 最后由专家C总结共识和分歧点
+
+请用对话形式输出。</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 工作流 ===================== -->
+    <div class="section" id="nav-workflow">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#9881;</div>
+            <h2>高效 AI 工作流</h2>
+            <span class="badge">方法论</span>
+        </div>
+        <div class="section-body">
+
+            <h3>四步工作法</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">第1步：明确需求</div>
+                    <div class="card-desc">想清楚你到底要什么？目标是什么？输出给谁看？有什么约束？</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">第2步：写 Prompt</div>
+                    <div class="card-desc">用 CRISPE 或 RTF 框架组织语言，角色+任务+格式+约束</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">第3步：评估输出</div>
+                    <div class="card-desc">结果满意吗？哪里不对？缺了什么？多了什么？</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">第4步：迭代优化</div>
+                    <div class="card-desc">告诉 AI 哪里不对，补充信息，让它改。重复 2~4 轮</div>
+                </div>
+            </div>
+
+            <h3>什么情况该用 AI？</h3>
+            <table>
+                <tr><th>适合用 AI</th><th>不适合用 AI</th></tr>
+                <tr>
+                    <td>头脑风暴、创意发散</td>
+                    <td>精确的数学计算（直接用计算器/代码）</td>
+                </tr>
+                <tr>
+                    <td>写初稿、打草稿</td>
+                    <td>100% 准确的事实查询（用搜索引擎）</td>
+                </tr>
+                <tr>
+                    <td>解释概念、学习知识</td>
+                    <td>涉及人身安全、重大决策的问题</td>
+                </tr>
+                <tr>
+                    <td>代码脚手架、模板生成</td>
+                    <td>核心业务逻辑的复杂代码（自己写+测试）</td>
+                </tr>
+                <tr>
+                    <td>翻译、润色、改写</td>
+                    <td>法律、医疗、金融等专业建议（仅供参考）</td>
+                </tr>
+                <tr>
+                    <td>信息整理、总结归纳</td>
+                    <td>需要原始数据的问题（自己查数据源）</td>
+                </tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">AI 是助手，不是替代</div>
+                最好的方式是：<strong>AI 出初稿，人来把关</strong>。<br>
+                让 AI 帮你节省 80% 的时间，剩下 20% 的关键判断和质量把控由你自己来。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="nav-interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>什么是 Prompt Engineering？</td>
+                    <td>提示词工程是研究如何设计和优化输入提示，使大语言模型输出更高质量、更符合预期结果的技术。核心是把人类需求清晰、准确地传达给 AI</td>
+                </tr>
+                <tr>
+                    <td>写好 Prompt 的关键原则有哪些？</td>
+                    <td>1. 明确具体，不要模糊 2. 给角色身份 3. 给示例（Few-shot）4. 分步思考（CoT）5. 规定输出格式 6. 给约束条件。口诀：角上下分格约</td>
+                </tr>
+                <tr>
+                    <td>什么是 Few-shot Learning？</td>
+                    <td>少样本学习，即在 Prompt 中给 AI 几个示例，让它理解任务模式后再执行。相比零样本（Zero-shot）效果更好，尤其是格式类和分类类任务</td>
+                </tr>
+                <tr>
+                    <td>什么是 Chain-of-Thought（思维链）？</td>
+                    <td>让模型输出推理过程而不是直接给答案。通过"请一步步思考"等提示，引导模型展示中间推理步骤，能显著提升复杂推理题的准确率</td>
+                </tr>
+                <tr>
+                    <td>Zero-shot、One-shot、Few-shot 的区别？</td>
+                    <td>Zero-shot：不给例子直接提问；One-shot：给1个例子；Few-shot：给多个例子。例子越多效果通常越好，但也越费 token</td>
+                </tr>
+                <tr>
+                    <td>什么是 AI 幻觉（Hallucination）？</td>
+                    <td>模型生成看似合理但实际错误的内容，比如编造不存在的事实、数据、引用。应对方法：交叉验证、让 AI 给出处、关键信息人工核实</td>
+                </tr>
+                <tr>
+                    <td>System Prompt 有什么用？</td>
+                    <td>系统提示词在对话最开始设定，对整个对话生效。用来定义 AI 的角色、行为准则、输出风格等，是长期生效的"人设设定"</td>
+                </tr>
+                <tr>
+                    <td>Prompt 越长越好吗？</td>
+                    <td>不是。信息充分很重要，但冗余信息反而可能干扰。原则：必要的信息不能少，无关的信息不要加。精准比冗长更重要</td>
+                </tr>
+                <tr>
+                    <td>如何验证 Prompt 的效果？</td>
+                    <td>1. 定义评估标准（准确率、完整性、格式正确性等）2. 准备测试用例集 3. 同一任务多跑几次看稳定性 4. A/B 测试不同版本的 prompt</td>
+                </tr>
+                <tr>
+                    <td>什么是 RAG？和 Prompt 什么关系？</td>
+                    <td>RAG（检索增强生成）是先从知识库检索相关文档，再把文档拼到 Prompt 里，让 AI 基于给定资料回答。能减少幻觉、让回答更准确</td>
+                </tr>
+                <tr>
+                    <td>温度（Temperature）参数是什么？</td>
+                    <td>控制输出随机性的参数。0~2 之间。越低越确定、越保守；越高越随机、越有创意。写代码选 0.1~0.3，创意写作选 0.7~1.0</td>
+                </tr>
+                <tr>
+                    <td>什么是 Prompt 注入攻击？</td>
+                    <td>攻击者通过在输入中嵌入恶意指令，诱导 AI 忽略系统设定，执行非预期操作。防范方法：输入校验、输出过滤、角色隔离、用 delimiter 分隔用户输入</td>
+                </tr>
+                <tr>
+                    <td>如何处理长文本任务？</td>
+                    <td>1. 分段处理：把长文本切成小块分别处理再汇总 2. 摘要压缩：先压缩再处理 3. RAG：检索相关片段再回答 4. 选择更大上下文窗口的模型</td>
+                </tr>
+                <tr>
+                    <td>你觉得 Prompt Engineering 未来会消失吗？</td>
+                    <td>不会完全消失但会变化。随着模型理解能力提升，简单任务可能不需要精心设计 prompt 了。但复杂任务、专业领域、需要精确输出的场景，Prompt 依然重要。而且会从"写提示词"进化为"设计 AI 工作流"</td>
+                </tr>
+                <tr>
+                    <td>举一个你用 AI 提升效率的例子</td>
+                    <td>面试时说一个具体的例子：比如我用 AI 帮我写代码的单元测试，先给它函数签名和需求，它生成测试用例初稿，我再review补充。效率提升了大约3倍，而且覆盖率也更高</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST Prompt Engineering 学习笔记 &nbsp;|&nbsp; 2026-09-28</p>
+    <p>六大原则 → 经典框架 → 核心技巧 → 实战模板 → 避坑指南 → 面试速答</p>
+</div>
+
+</body>
+</html>
