@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java 从0到1学习完全指南 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117; --card: #161b22; --border: #30363d;
+            --text: #c9d1d9; --heading: #f0f6fc; --accent: #f89820;
+            --green: #3fb950; --yellow: #d29922; --red: #f85149;
+            --purple: #bc8cff; --orange: #e8873a; --code-bg: #1c2128; --pink: #db61a2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.75; font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        .header {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.82em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+        .section {
+            margin-bottom: 40px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 18px 24px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.3em; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.2em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.78em;
+        }
+        .section-body { padding: 20px 24px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th {
+            text-align: left; padding: 8px 12px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.82em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9em; }
+        tr:hover td { background: rgba(248, 152, 32, 0.06); }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.85em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px 18px; margin: 10px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82em; line-height: 1.55; color: var(--text); white-space: pre;
+        }
+        .code-block .kw { color: var(--purple); font-weight: bold; }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .type { color: var(--yellow); }
+        .code-block .cls { color: var(--pink); }
+        .callout {
+            border-left: 4px solid; padding: 14px 18px; margin: 12px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 5px; font-size: 0.92em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.75em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .tag-essential { background: rgba(248,152,32,0.15); color: var(--accent); }
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px; margin: 12px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 6px; font-size: 0.9em; }
+        .card .card-desc { color: #8b949e; font-size: 0.82em; }
+        h3 { color: var(--accent); margin: 18px 0 10px; font-size: 1.05em; }
+        h4 { color: var(--yellow); margin: 14px 0 8px; font-size: 0.95em; }
+        p { margin-bottom: 10px; }
+        ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        li { margin-bottom: 4px; font-size: 0.92em; }
+        .footer {
+            text-align: center; padding: 30px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.82em;
+        }
+        .vs-box {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;
+        }
+        .vs-col { background: var(--code-bg); border-radius: 8px; padding: 14px; border: 1px solid var(--border); }
+        .vs-col h4 { text-align: center; margin-top: 0; }
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+            .vs-box { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>Java 从 0 到 1 学习完全指南</h1>
+    <div class="meta">零基础入门 · 面向对象 · 集合框架 · JVM · 并发 · 面试速答 &nbsp;|&nbsp; 2026-09-29</div>
+</div>
+
+<div class="nav">
+    <a href="#intro">Java简介</a>
+    <a href="#basics">基础语法</a>
+    <a href="#oop">面向对象</a>
+    <a href="#inheritance">继承多态</a>
+    <a href="#array-string">数组与字符串</a>
+    <a href="#exception">异常处理</a>
+    <a href="#collection">集合框架</a>
+    <a href="#io">IO流</a>
+    <a href="#thread">多线程</a>
+    <a href="#jvm">JVM基础</a>
+    <a href="#interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <!-- ===================== Java 简介 ===================== -->
+    <div class="section" id="intro">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,152,32,0.15);color:#f89820;">&#9749;</div>
+            <h2>Java 简介 &amp; 环境搭建</h2>
+            <span class="badge">入门</span>
+        </div>
+        <div class="section-body">
+
+            <h3>什么是 Java</h3>
+            <p>Java 是一门 <strong>面向对象</strong> 的编程语言，由 Sun 公司（现在是 Oracle）于 1995 年推出。最大的特点是 <strong>"一次编写，到处运行"（Write Once, Run Anywhere）</strong>，因为 Java 程序运行在 JVM（Java 虚拟机）上，跨平台能力强。</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">Java SE</div>
+                    <div class="card-desc">标准版，基础语法和核心API，是其他版本的基础</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Java EE</div>
+                    <div class="card-desc">企业版，用于开发大型企业级应用（Web、分布式）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Java ME</div>
+                    <div class="card-desc">微型版，用于嵌入式设备（现在用得少了）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">应用领域</div>
+                    <div class="card-desc">后端开发、Android、大数据、企业级系统</div>
+                </div>
+            </div>
+
+            <h3>Java 核心特性</h3>
+            <ul>
+                <li><strong>简单</strong>：去掉了 C++ 中复杂的指针、多继承、手动内存管理</li>
+                <li><strong>面向对象</strong>：封装、继承、多态</li>
+                <li><strong>跨平台</strong>：JVM 实现 "一次编写，到处运行"</li>
+                <li><strong>健壮</strong>：强类型、异常处理、垃圾回收</li>
+                <li><strong>安全</strong>：沙箱机制，Java Web Start 等</li>
+                <li><strong>多线程</strong>：内置多线程支持</li>
+            </ul>
+
+            <h3>JDK / JRE / JVM 的关系</h3>
+            <div class="code-block"><span class="com">JDK (Java Development Kit) = 开发工具包</span>
+<span class="com">  └─ JRE (Java Runtime Environment) = 运行环境</span>
+<span class="com">       └─ JVM (Java Virtual Machine) = Java虚拟机</span>
+<span class="com">            + 核心类库</span>
+
+<span class="com">JDK = JRE + 开发工具(javac, java, javadoc...)</span>
+<span class="com">JRE = JVM + 核心类库</span>
+<span class="com">JVM = 真正执行字节码的虚拟机</span>
+
+<span class="com">开发人员装 JDK 就行，因为 JDK 包含了 JRE</span></div>
+
+            <h3>第一个 Java 程序</h3>
+            <div class="code-block"><span class="com">// HelloWorld.java</span>
+<span class="kw">public class</span> <span class="cls">HelloWorld</span> {       <span class="com">// 类名必须和文件名完全一致</span>
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {  <span class="com">// main 方法是程序入口，固定写法</span>
+        System.out.<span class="fn">println</span>(<span class="str">"Hello, World!"</span>);  <span class="com">// 输出并换行</span>
+    }
+}
+
+<span class="com">// 编译：生成 .class 字节码文件</span>
+<span class="com">// javac HelloWorld.java</span>
+
+<span class="com">// 运行：JVM 执行字节码</span>
+<span class="com">// java HelloWorld</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">Java 执行流程</div>
+                <code>.java 源文件</code> → <strong>javac 编译</strong> → <code>.class 字节码</code> → <strong>JVM 解释执行</strong> → 结果<br>
+                这就是 Java 跨平台的原理：字节码不针对具体平台，只针对 JVM
+            </div>
+
+            <h3>在 WSL 中安装 Java</h3>
+            <div class="code-block"><span class="com"># Ubuntu 22.04 安装 OpenJDK 17（LTS 长期支持版）</span>
+sudo apt update
+sudo apt install openjdk-17-jdk -y
+
+<span class="com"># 验证安装</span>
+java -version
+javac -version
+
+<span class="com"># 配置 JAVA_HOME（可选但推荐）</span>
+<span class="com"># 在 ~/.zshrc 或 ~/.bashrc 末尾加：</span>
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH</div>
+        </div>
+    </div>
+
+    <!-- ===================== 基础语法 ===================== -->
+    <div class="section" id="basics">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128221;</div>
+            <h2>基础语法</h2>
+            <span class="badge">必会</span>
+        </div>
+        <div class="section-body">
+
+            <h3>八大基本数据类型</h3>
+            <table>
+                <tr><th>类型</th><th>大小</th><th>默认值</th><th>范围</th><th>说明</th></tr>
+                <tr><td><code>byte</code></td><td>1字节</td><td>0</td><td>-128 ~ 127</td><td>字节型</td></tr>
+                <tr><td><code>short</code></td><td>2字节</td><td>0</td><td>-32768 ~ 32767</td><td>短整型</td></tr>
+                <tr><td><code>int</code></td><td>4字节</td><td>0</td><td>-2^31 ~ 2^31-1</td><td>整型，最常用</td></tr>
+                <tr><td><code>long</code></td><td>8字节</td><td>0L</td><td>-2^63 ~ 2^63-1</td><td>长整型，加L后缀</td></tr>
+                <tr><td><code>float</code></td><td>4字节</td><td>0.0f</td><td>约6~7位有效数</td><td>单精度，加f后缀</td></tr>
+                <tr><td><code>double</code></td><td>8字节</td><td>0.0</td><td>约15~16位有效数</td><td>双精度，默认浮点</td></tr>
+                <tr><td><code>char</code></td><td>2字节</td><td>'\u0000'</td><td>0 ~ 65535</td><td>字符型（Unicode）</td></tr>
+                <tr><td><code>boolean</code></td><td>1bit</td><td>false</td><td>true / false</td><td>布尔型</td></tr>
+            </table>
+
+            <div class="callout warn">
+                <div class="callout-title">注意事项</div>
+                1. Java 是<strong>强类型语言</strong>，变量必须先声明类型才能用<br>
+                2. 局部变量不会自动初始化，使用前必须赋值（否则编译报错）<br>
+                3. long 类型末尾加 L（推荐大写），float 类型末尾加 f
+            </div>
+
+            <h3>引用类型 vs 基本类型</h3>
+            <table>
+                <tr><th>对比项</th><th>基本类型</th><th>引用类型</th></tr>
+                <tr><td>示例</td><td>int, double, char...</td><td>String, 数组, 自定义类</td></tr>
+                <tr><td>存储</td><td>存的是值本身</td><td>存的是对象的地址（引用）</td></tr>
+                <tr><td>位置</td><td>栈上</td><td>对象在堆上，引用在栈上</td></tr>
+                <tr><td>大小</td><td>固定（1~8字节）</td><td>引用4/8字节，对象大小不固定</td></tr>
+                <tr><td>默认值</td><td>0, 0.0, false等</td><td>null</td></tr>
+                <tr><td>比较</td><td>用 == 比较值</td><td>== 比较地址，equals 比较内容</td></tr>
+            </table>
+
+            <h3>变量类型</h3>
+            <div class="code-block"><span class="kw">public class</span> <span class="cls">Demo</span> {
+    <span class="type">int</span> a;          <span class="com">// 成员变量（实例变量）：在堆上，有默认值</span>
+    <span class="kw">static int</span> b;   <span class="com">// 静态变量（类变量）：所有对象共享</span>
+
+    <span class="kw">void</span> <span class="fn">method</span>(<span class="type">int</span> c) {  <span class="com">// c 是参数</span>
+        <span class="type">int</span> d;      <span class="com">// 局部变量：在栈上，没有默认值，必须初始化才能用</span>
+    }
+}</div>
+
+            <h3>运算符</h3>
+            <div class="code-block"><span class="com">// 算术：+ - * / % ++ --</span>
+<span class="type">int</span> a = <span class="num">10</span>;
+a++;     <span class="com">// a = 11，先使用后加</span>
+++a;     <span class="com">// a = 12，先加后使用</span>
+
+<span class="com">// 关系：== != > < >= <=</span>
+<span class="com">// 逻辑：&& || ! （短路！）</span>
+<span class="com">// 位运算：& | ^ ~ << >> >>></span>
+
+<span class="com">// 赋值：= += -= *= /= %=</span>
+<span class="com">// 三目：条件 ? 值1 : 值2</span>
+<span class="type">int</span> max = a > b ? a : b;</div>
+
+            <h3>流程控制</h3>
+            <div class="code-block"><span class="com">// if-else</span>
+<span class="kw">if</span> (score >= <span class="num">90</span>) {
+    System.out.<span class="fn">println</span>(<span class="str">"优秀"</span>);
+} <span class="kw">else if</span> (score >= <span class="num">60</span>) {
+    System.out.<span class="fn">println</span>(<span class="str">"及格"</span>);
+} <span class="kw">else</span> {
+    System.out.<span class="fn">println</span>(<span class="str">"不及格"</span>);
+}
+
+<span class="com">// switch（支持 byte short int char String 枚举）</span>
+<span class="kw">switch</span> (day) {
+    <span class="kw">case</span> <span class="num">1</span>: System.out.<span class="fn">println</span>(<span class="str">"周一"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: System.out.<span class="fn">println</span>(<span class="str">"周二"</span>); <span class="kw">break</span>;
+    <span class="kw">default</span>: System.out.<span class="fn">println</span>(<span class="str">"其他"</span>);
+}
+
+<span class="com">// for 循环</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < <span class="num">10</span>; i++) { }
+
+<span class="com">// while 循环</span>
+<span class="kw">while</span> (条件) { }
+
+<span class="com">// do-while</span>
+<span class="kw">do</span> { } <span class="kw">while</span> (条件);
+
+<span class="com">// break：跳出循环    continue：跳过本次继续下一次</span></div>
+
+            <h3>方法（函数）</h3>
+            <div class="code-block"><span class="com">// 修饰符 返回值类型 方法名(参数列表) { 方法体 }</span>
+<span class="kw">public static int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b) {
+    <span class="kw">return</span> a + b;
+}
+
+<span class="com">// 方法重载：同名不同参（类型/个数/顺序）</span>
+<span class="kw">public static int</span> <span class="fn">max</span>(<span class="type">int</span> a, <span class="type">int</span> b) { ... }
+<span class="kw">public static double</span> <span class="fn">max</span>(<span class="type">double</span> a, <span class="type">double</span> b) { ... }
+
+<span class="com">// 返回值不同不算重载</span>
+<span class="com">// Java 只有值传递：基本类型传值副本，引用类型传引用副本</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">Java 只有值传递</div>
+                基本类型：传的是值的副本，改形参不影响实参<br>
+                引用类型：传的是引用的副本，两个引用指向同一个对象，可以改对象的内容，但不能让实参指向新对象
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 面向对象 ===================== -->
+    <div class="section" id="oop">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(219,97,162,0.15);color:#db61a2;">&#127959;</div>
+            <h2>面向对象</h2>
+            <span class="badge">核心</span>
+        </div>
+        <div class="section-body">
+
+            <h3>类与对象</h3>
+            <div class="code-block"><span class="com">// 定义类</span>
+<span class="kw">public class</span> <span class="cls">Person</span> {
+    <span class="com">// 属性（成员变量）</span>
+    <span class="kw">private</span> String name;
+    <span class="kw">private int</span> age;
+
+    <span class="com">// 构造方法：与类同名，无返回值，创建对象时调用</span>
+    <span class="kw">public</span> <span class="cls">Person</span>() { }  <span class="com">// 无参构造</span>
+
+    <span class="kw">public</span> <span class="cls">Person</span>(String name, <span class="type">int</span> age) {  <span class="com">// 有参构造</span>
+        <span class="kw">this</span>.name = name;   <span class="com">// this 指代当前对象</span>
+        <span class="kw">this</span>.age = age;
+    }
+
+    <span class="com">// 方法（行为）</span>
+    <span class="kw">public void</span> <span class="fn">eat</span>() {
+        System.out.<span class="fn">println</span>(name + <span class="str">"在吃饭"</span>);
+    }
+
+    <span class="com">// getter / setter（封装）</span>
+    <span class="kw">public</span> String <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+    <span class="kw">public void</span> <span class="fn">setName</span>(String name) { <span class="kw">this</span>.name = name; }
+    <span class="kw">public int</span> <span class="fn">getAge</span>() { <span class="kw">return</span> age; }
+    <span class="kw">public void</span> <span class="fn">setAge</span>(<span class="type">int</span> age) {
+        <span class="kw">if</span> (age > <span class="num">0</span>) <span class="kw">this</span>.age = age;  <span class="com">// 可以做数据校验</span>
+    }
+}
+
+<span class="com">// 创建对象</span>
+Person p = <span class="kw">new</span> <span class="cls">Person</span>(<span class="str">"张三"</span>, <span class="num">20</span>);
+p.<span class="fn">eat</span>();              <span class="com">// 调用方法</span>
+System.out.<span class="fn">println</span>(p.<span class="fn">getName</span>());  <span class="com">// 获取属性</span></div>
+
+            <h3>封装</h3>
+            <p>把属性藏起来（private），通过 public 的 getter/setter 方法访问。好处：</p>
+            <ul>
+                <li>数据安全：可以在 setter 里做校验</li>
+                <li>隐藏实现：内部怎么存的外面不用管</li>
+                <li>便于维护：改了内部实现不影响外部使用</li>
+            </ul>
+
+            <h3>访问修饰符</h3>
+            <table>
+                <tr><th>修饰符</th><th>本类</th><th>同包</th><th>子类</th><th>不同包</th></tr>
+                <tr><td><code>public</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+                <tr><td><strong>默认</strong>（啥也不写）</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+                <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+            </table>
+
+            <h3>this 关键字</h3>
+            <ul>
+                <li><code>this.属性</code>：访问当前对象的成员变量</li>
+                <li><code>this.方法()</code>：调用当前对象的方法</li>
+                <li><code>this()</code>：调用本类的其他构造方法（必须在第一行）</li>
+            </ul>
+
+            <h3>static 关键字</h3>
+            <div class="code-block"><span class="kw">public class</span> <span class="cls">Demo</span> {
+    <span class="kw">static int</span> count = <span class="num">0</span>;  <span class="com">// 静态变量：所有对象共享，存在方法区</span>
+    <span class="type">int</span> id;              <span class="com">// 实例变量：每个对象一份，存在堆上</span>
+
+    <span class="kw">static void</span> <span class="fn">printCount</span>() {  <span class="com">// 静态方法</span>
+        <span class="com">// 只能访问静态成员，不能用 this，不能直接访问非静态</span>
+        System.out.<span class="fn">println</span>(count);
+    }
+}
+
+<span class="com">// 访问方式：</span>
+Demo.count;        <span class="com">// 类名.静态变量（推荐）</span>
+Demo.<span class="fn">printCount</span>();  <span class="com">// 类名.静态方法</span></div>
+
+            <h3>代码块</h3>
+            <div class="code-block"><span class="kw">public class</span> <span class="cls">Demo</span> {
+    <span class="com">// 静态代码块：类加载时执行，只执行一次</span>
+    <span class="kw">static</span> {
+        System.out.<span class="fn">println</span>(<span class="str">"静态代码块"</span>);
+    }
+
+    <span class="com">// 构造代码块：创建对象时执行，每次创建都执行，在构造方法之前</span>
+    {
+        System.out.<span class="fn">println</span>(<span class="str">"构造代码块"</span>);
+    }
+
+    <span class="kw">public</span> <span class="cls">Demo</span>() {
+        System.out.<span class="fn">println</span>(<span class="str">"构造方法"</span>);
+    }
+}
+
+<span class="com">// 执行顺序：静态代码块 → 构造代码块 → 构造方法</span>
+<span class="com">// 静态代码块只执行一次（类第一次加载时）</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 继承与多态 ===================== -->
+    <div class="section" id="inheritance">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128202;</div>
+            <h2>继承与多态</h2>
+            <span class="badge">重点难点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>继承（extends）</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Animal</span> {   <span class="com">// 父类</span>
+    <span class="kw">protected</span> String name;
+    <span class="kw">public void</span> <span class="fn">eat</span>() { System.out.<span class="fn">println</span>(<span class="str">"吃饭"</span>); }
+}
+
+<span class="kw">class</span> <span class="cls">Dog</span> <span class="kw">extends</span> Animal {  <span class="com">// 子类继承父类</span>
+    <span class="kw">public void</span> <span class="fn">bark</span>() { System.out.<span class="fn">println</span>(<span class="str">"汪汪"</span>); }
+}
+
+<span class="com">// Java 是单继承：一个类只能有一个直接父类</span>
+<span class="com">// 所有类都直接或间接继承自 Object 类</span>
+<span class="com">// 子类继承父类的非私有成员，private 的不能直接访问</span></div>
+
+            <h3>super 关键字</h3>
+            <ul>
+                <li><code>super.属性</code>：访问父类的成员变量</li>
+                <li><code>super.方法()</code>：调用父类的方法</li>
+                <li><code>super()</code>：调用父类的构造方法（必须在子类构造第一行）</li>
+            </ul>
+
+            <div class="callout tip">
+                <div class="callout-title">构造方法调用顺序</div>
+                创建子类对象时，<strong>先调用父类构造，再执行子类构造</strong>。<br>
+                如果子类构造第一行没有写 super()，编译器会自动加 super()（调用父类无参构造）。<br>
+                如果父类没有无参构造，子类必须手动 super(参数) 调用父类有参构造。
+            </div>
+
+            <h3>方法重写（Override）</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Animal</span> {
+    <span class="kw">public void</span> <span class="fn">speak</span>() {
+        System.out.<span class="fn">println</span>(<span class="str">"动物叫"</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="cls">Cat</span> <span class="kw">extends</span> Animal {
+    <span class="kw">@Override</span>   <span class="com">// 注解：告诉编译器我要重写，写错了会报错</span>
+    <span class="kw">public void</span> <span class="fn">speak</span>() {   <span class="com">// 重写父类方法</span>
+        System.out.<span class="fn">println</span>(<span class="str">"喵喵喵"</span>);
+    }
+}
+
+<span class="com">// 重写的要求：两同两小一大</span>
+<span class="com">// 两同：方法名相同、参数列表相同</span>
+<span class="com">// 两小：返回值类型更小或相等、抛出异常更小或相等</span>
+<span class="com">// 一大：访问权限更大或相等（public > protected > 默认 > private）</span></div>
+
+            <h3>多态</h3>
+            <div class="code-block"><span class="com">// 多态：父类引用指向子类对象</span>
+Animal a = <span class="kw">new</span> <span class="cls">Cat</span>();
+a.<span class="fn">speak</span>();  <span class="com">// 输出"喵喵喵"（调用的是 Cat 的 speak）</span>
+
+<span class="com">// 多态的三个条件：</span>
+<span class="com">// 1. 有继承关系</span>
+<span class="com">// 2. 子类重写父类方法</span>
+<span class="com">// 3. 父类引用指向子类对象</span>
+
+<span class="com">// 编译看左边，运行看右边</span>
+<span class="com">// - 能不能调用：看父类有没有这个方法（编译时检查）</span>
+<span class="com">// - 调用谁的：看子类有没有重写（运行时绑定）</span>
+
+Animal a2 = <span class="kw">new</span> <span class="cls">Dog</span>();
+a2.<span class="fn">bark</span>();  <span class="com">// 编译错误！Animal 里没有 bark 方法</span>
+((Dog)a2).<span class="fn">bark</span>();  <span class="com">// 向下转型后可以调用</span></div>
+
+            <h3>向上转型 & 向下转型</h3>
+            <div class="code-block"><span class="com">// 向上转型（自动）：子类 → 父类</span>
+Animal a = <span class="kw">new</span> <span class="cls">Dog</span>();   <span class="com">// 安全</span>
+
+<span class="com">// 向下转型（强制）：父类 → 子类</span>
+Dog d = (Dog) a;       <span class="com">// 有风险，可能 ClassCastException</span>
+
+<span class="com">// 安全转型：用 instanceof 判断</span>
+<span class="kw">if</span> (a <span class="kw">instanceof</span> Dog) {
+    Dog d = (Dog) a;
+    d.<span class="fn">bark</span>();
+}
+
+<span class="com">// Java 16+ 模式匹配</span>
+<span class="kw">if</span> (a <span class="kw">instanceof</span> Dog d) {  <span class="com">// 判断成功后直接有 d 变量</span>
+    d.<span class="fn">bark</span>();
+}</div>
+
+            <h3>抽象类（abstract）</h3>
+            <div class="code-block"><span class="kw">abstract class</span> <span class="cls">Shape</span> {  <span class="com">// 抽象类：包含抽象方法的类</span>
+    <span class="kw">abstract double</span> <span class="fn">area</span>();  <span class="com">// 抽象方法：只有声明没有实现</span>
+
+    <span class="kw">void</span> <span class="fn">printInfo</span>() {       <span class="com">// 抽象类也可以有普通方法</span>
+        System.out.<span class="fn">println</span>(<span class="str">"这是一个图形"</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="cls">Circle</span> <span class="kw">extends</span> Shape {
+    <span class="type">double</span> r;
+    <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> <span class="num">3.14</span> * r * r; }  <span class="com">// 必须实现抽象方法</span>
+}
+
+<span class="com">// 抽象类不能实例化</span>
+<span class="com">// Shape s = new Shape(); // 错误</span>
+Shape s = <span class="kw">new</span> <span class="cls">Circle</span>();  <span class="com">// 可以有多态</span></div>
+
+            <h3>接口（interface）</h3>
+            <div class="code-block"><span class="kw">interface</span> <span class="cls">Flyable</span> {
+    <span class="kw">void</span> <span class="fn">fly</span>();        <span class="com">// 抽象方法（默认 public abstract）</span>
+
+    <span class="kw">default void</span> <span class="fn">defaultMethod</span>() {  <span class="com">// Java 8+ 默认方法</span>
+        System.out.<span class="fn">println</span>(<span class="str">"默认方法"</span>);
+    }
+
+    <span class="kw">static void</span> <span class="fn">staticMethod</span>() {  <span class="com">// Java 8+ 静态方法</span>
+        System.out.<span class="fn">println</span>(<span class="str">"静态方法"</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="cls">Bird</span> <span class="kw">implements</span> Flyable {  <span class="com">// 实现接口</span>
+    <span class="kw">public void</span> <span class="fn">fly</span>() {  <span class="com">// 必须实现，且必须是 public</span>
+        System.out.<span class="fn">println</span>(<span class="str">"鸟在飞"</span>);
+    }
+}
+
+<span class="com">// 接口 vs 抽象类：</span>
+<span class="com">// 1. 类只能单继承，但可以实现多个接口</span>
+<span class="com">// 2. 抽象类有构造方法，接口没有</span>
+<span class="com">// 3. 抽象类可以有各种变量，接口只有 public static final 常量</span>
+<span class="com">// 4. 抽象类是"是不是"的关系，接口是"能不能"的关系</span></div>
+
+            <h3>final 关键字</h3>
+            <table>
+                <tr><th>修饰对象</th><th>作用</th></tr>
+                <tr><td>final 类</td><td>不能被继承（String 就是 final 类）</td></tr>
+                <tr><td>final 方法</td><td>不能被重写</td></tr>
+                <tr><td>final 变量</td><td>只能赋值一次，变成常量（常量名全大写）</td></tr>
+                <tr><td>final 引用</td><td>引用不能变（不能指向新对象），但对象内容可以改</td></tr>
+            </table>
+
+            <h3>Object 类的常用方法</h3>
+            <div class="code-block"><span class="com">// Object 是所有类的根类</span>
+
+<span class="fn">equals</span>(Object obj)   <span class="com">// 判断两个对象是否相等（默认比较地址，一般要重写）</span>
+<span class="fn">hashCode</span>()          <span class="com">// 返回对象的哈希码值</span>
+<span class="fn">toString</span>()          <span class="com">// 返回对象的字符串表示（默认是类名@哈希码，一般要重写）</span>
+<span class="fn">getClass</span>()          <span class="com">// 返回对象的运行时类（反射用）</span>
+<span class="fn">clone</span>()             <span class="com">// 克隆对象（需要实现 Cloneable 接口）</span>
+<span class="fn">finalize</span>()          <span class="com">// 垃圾回收时调用（不推荐用）</span>
+
+<span class="com">// equals 和 hashCode 的约定：</span>
+<span class="com">// 1. 两个对象 equals 相等，hashCode 一定相等</span>
+<span class="com">// 2. 两个对象 hashCode 相等，equals 不一定相等</span>
+<span class="com">// 3. 重写 equals 必须同时重写 hashCode</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 数组与字符串 ===================== -->
+    <div class="section" id="array-string">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128208;</div>
+            <h2>数组与字符串</h2>
+            <span class="badge">基础</span>
+        </div>
+        <div class="section-body">
+
+            <h3>数组</h3>
+            <div class="code-block"><span class="com">// 声明与创建</span>
+<span class="type">int</span>[] arr = <span class="kw">new int</span>[<span class="num">5</span>];         <span class="com">// 默认全0</span>
+<span class="type">int</span>[] arr = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>};  <span class="com">// 静态初始化</span>
+<span class="type">int</span>[] arr = <span class="kw">new int</span>[]{<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>};  <span class="com">// 动态初始化</span>
+
+arr.<span class="fn">length</span>;          <span class="com">// 数组长度（属性，不是方法！）</span>
+arr[<span class="num">0</span>];             <span class="com">// 下标访问，从0开始</span>
+
+<span class="com">// 遍历</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < arr.length; i++) { }
+<span class="kw">for</span> (<span class="type">int</span> x : arr) { }  <span class="com">// 增强for（只读遍历）</span>
+
+<span class="com">// 二维数组</span>
+<span class="type">int</span>[][] mat = <span class="kw">new int</span>[<span class="num">3</span>][<span class="num">4</span>];  <span class="com">// 3行4列</span>
+<span class="type">int</span>[][] mat = {{<span class="num">1</span>,<span class="num">2</span>}, {<span class="num">3</span>,<span class="num">4</span>}};
+
+<span class="com">// Arrays 工具类（java.util.Arrays）</span>
+Arrays.<span class="fn">sort</span>(arr);                    <span class="com">// 排序</span>
+Arrays.<span class="fn">binarySearch</span>(arr, <span class="num">5</span>);       <span class="com">// 二分查找</span>
+Arrays.<span class="fn">toString</span>(arr);               <span class="com">// 转字符串输出</span>
+Arrays.<span class="fn">copyOf</span>(arr, <span class="num">10</span>);           <span class="com">// 复制并扩容</span>
+Arrays.<span class="fn">equals</span>(arr1, arr2);          <span class="com">// 比较内容</span>
+Arrays.<span class="fn">fill</span>(arr, <span class="num">0</span>);              <span class="com">// 填充</span></div>
+
+            <h3>String 字符串</h3>
+            <div class="code-block">String s1 = <span class="str">"hello"</span>;          <span class="com">// 字符串常量池</span>
+String s2 = <span class="kw">new</span> <span class="cls">String</span>(<span class="str">"hello"</span>);  <span class="com">// 堆里的新对象</span>
+
+<span class="com">// 常用方法</span>
+s1.<span class="fn">length</span>();              <span class="com">// 长度</span>
+s1.<span class="fn">charAt</span>(<span class="num">0</span>);            <span class="com">// 获取指定位置字符</span>
+s1.<span class="fn">equals</span>(s2);            <span class="com">// 比较内容（重要！不要用 ==）</span>
+s1.<span class="fn">equalsIgnoreCase</span>(s2);  <span class="com">// 忽略大小写比较</span>
+s1.<span class="fn">contains</span>(<span class="str">"ll"</span>);      <span class="com">// 是否包含</span>
+s1.<span class="fn">indexOf</span>(<span class="str">"ll"</span>);       <span class="com">// 查找位置，找不到返回-1</span>
+s1.<span class="fn">substring</span>(<span class="num">1</span>, <span class="num">4</span>);    <span class="com">// 截取 [1,4)，左闭右开</span>
+s1.<span class="fn">startsWith</span>(<span class="str">"he"</span>);    <span class="com">// 是否以...开头</span>
+s1.<span class="fn">endsWith</span>(<span class="str">"lo"</span>);      <span class="com">// 是否以...结尾</span>
+s1.<span class="fn">toUpperCase</span>();         <span class="com">// 转大写</span>
+s1.<span class="fn">toLowerCase</span>();         <span class="com">// 转小写</span>
+s1.<span class="fn">trim</span>();                <span class="com">// 去前后空格</span>
+s1.<span class="fn">split</span>(<span class="str">","</span>);           <span class="com">// 分割成数组</span>
+s1.<span class="fn">replace</span>(<span class="str">'l'</span>, <span class="str">'L'</span>);   <span class="com">// 替换</span></div>
+
+            <div class="callout warn">
+                <div class="callout-title">String 是不可变的</div>
+                String 对象一旦创建就不能修改。所有的修改方法（substring、replace等）都是返回新字符串，原字符串不变。<br>
+                频繁拼接字符串用 <strong>StringBuilder</strong>（非线程安全，快）或 <strong>StringBuffer</strong>（线程安全，慢）。
+            </div>
+
+            <h3>StringBuilder</h3>
+            <div class="code-block">StringBuilder sb = <span class="kw">new</span> <span class="cls">StringBuilder</span>();
+sb.<span class="fn">append</span>(<span class="str">"hello"</span>);    <span class="com">// 追加</span>
+sb.<span class="fn">insert</span>(<span class="num">0</span>, <span class="str">"!"</span>);     <span class="com">// 插入</span>
+sb.<span class="fn">delete</span>(<span class="num">0</span>, <span class="num">2</span>);       <span class="com">// 删除 [0,2)</span>
+sb.<span class="fn">reverse</span>();             <span class="com">// 反转</span>
+sb.<span class="fn">toString</span>();            <span class="com">// 转 String</span></div>
+
+            <h3>字符串常量池</h3>
+            <div class="code-block">String s1 = <span class="str">"abc"</span>;
+String s2 = <span class="str">"abc"</span>;
+String s3 = <span class="kw">new</span> <span class="cls">String</span>(<span class="str">"abc"</span>);
+String s4 = <span class="kw">new</span> <span class="cls">String</span>(<span class="str">"abc"</span>);
+
+s1 == s2;     <span class="com">// true（都指向常量池的同一个）</span>
+s1 == s3;     <span class="com">// false（s3 在堆里）</span>
+s3 == s4;     <span class="com">// false（两个不同的堆对象）</span>
+s1.<span class="fn">equals</span>(s3); <span class="com">// true（内容一样）</span>
+
+s3.<span class="fn">intern</span>();  <span class="com">// 把字符串放入常量池（或返回池里已有的引用）</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 异常处理 ===================== -->
+    <div class="section" id="exception">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9888;</div>
+            <h2>异常处理</h2>
+            <span class="badge">基础</span>
+        </div>
+        <div class="section-body">
+
+            <h3>异常体系</h3>
+            <div class="code-block">Throwable
+  ├── Error        <span class="com">// 严重错误，程序无法处理（OOM、StackOverflowError）</span>
+  └── Exception    <span class="com">// 异常，程序可以处理</span>
+       ├── RuntimeException  <span class="com">// 运行时异常，不强制捕获（空指针、数组越界、类型转换...）</span>
+       └── 其他Exception      <span class="com">// 受检异常，必须捕获或声明（IOException、SQLException...）</span></div>
+
+            <h3>try-catch-finally</h3>
+            <div class="code-block"><span class="kw">try</span> {
+    <span class="com">// 可能出异常的代码</span>
+    <span class="type">int</span> a = <span class="num">10</span> / <span class="num">0</span>;
+} <span class="kw">catch</span> (ArithmeticException e) {
+    <span class="com">// 捕获并处理</span>
+    e.<span class="fn">printStackTrace</span>();  <span class="com">// 打印异常栈信息</span>
+    System.out.<span class="fn">println</span>(<span class="str">"除数不能为0"</span>);
+} <span class="kw">catch</span> (Exception e) {
+    <span class="com">// 多个 catch，从小到大写</span>
+    System.out.<span class="fn">println</span>(<span class="str">"其他异常"</span>);
+} <span class="kw">finally</span> {
+    <span class="com">// 不管有没有异常，都会执行（除非退出JVM）</span>
+    <span class="com">// 一般用来释放资源（关流、关连接）</span>
+    System.out.<span class="fn">println</span>(<span class="str">"finally 执行了"</span>);
+}</div>
+
+            <div class="callout warn">
+                <div class="callout-title">finally 的特殊情况</div>
+                try 里有 <code>return</code>，finally 也会执行（在 return 之前）。<br>
+                但如果 finally 里也有 return，会覆盖 try 里的 return（不推荐这么写）。
+            </div>
+
+            <h3>throws & throw</h3>
+            <div class="code-block"><span class="com">// throws：声明方法可能抛出异常（甩锅给调用者）</span>
+<span class="kw">public void</span> <span class="fn">readFile</span>(String path) <span class="kw">throws</span> IOException {
+    <span class="com">// ...</span>
+}
+
+<span class="com">// throw：手动抛出异常</span>
+<span class="kw">if</span> (age < <span class="num">0</span>) {
+    <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"年龄不能为负"</span>);
+}
+
+<span class="com">// 自定义异常</span>
+<span class="kw">class</span> <span class="cls">MyException</span> <span class="kw">extends</span> RuntimeException {
+    <span class="kw">public</span> <span class="cls">MyException</span>(String msg) {
+        <span class="kw">super</span>(msg);
+    }
+}</div>
+
+            <h3>try-with-resources</h3>
+            <div class="code-block"><span class="com">// Java 7+ 自动关闭资源，必须实现 AutoCloseable 接口</span>
+<span class="kw">try</span> (FileInputStream fis = <span class="kw">new</span> <span class="cls">FileInputStream</span>(<span class="str">"a.txt"</span>)) {
+    <span class="com">// 使用 fis</span>
+} <span class="kw">catch</span> (IOException e) {
+    e.<span class="fn">printStackTrace</span>();
+}
+<span class="com">// 不用手动关，try 结束自动关闭</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 集合框架 ===================== -->
+    <div class="section" id="collection">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128230;</div>
+            <h2>集合框架（Collection）</h2>
+            <span class="badge">必会</span>
+        </div>
+        <div class="section-body">
+
+            <h3>集合体系</h3>
+            <div class="code-block">Collection
+  ├── List              <span class="com">// 有序，可重复</span>
+  │    ├── ArrayList    <span class="com">// 动态数组，查询快，增删慢，非线程安全</span>
+  │    ├── LinkedList   <span class="com">// 双向链表，增删快，查询慢，非线程安全</span>
+  │    └── Vector       <span class="com">// 动态数组，线程安全，慢（已过时）</span>
+  │
+  └── Set               <span class="com">// 无序，不重复</span>
+       ├── HashSet      <span class="com">// 哈希表，最快，无序</span>
+       ├── LinkedHashSet <span class="com">// 哈希表+链表，有序（插入顺序）</span>
+       └── TreeSet      <span class="com">// 红黑树，有序（自然顺序）</span>
+
+Map                   <span class="com">// key-value 对</span>
+  ├── HashMap          <span class="com">// 哈希表，最快，允许null键值，非线程安全</span>
+  ├── LinkedHashMap    <span class="com">// 哈希表+链表，有序</span>
+  ├── TreeMap          <span class="com">// 红黑树，key有序</span>
+  └── Hashtable        <span class="com">// 线程安全，慢，不允许null（已过时）</span></div>
+
+            <h3>ArrayList</h3>
+            <div class="code-block">ArrayList<<span class="type">Integer</span>> list = <span class="kw">new</span> <span class="cls">ArrayList</span><>();
+
+list.<span class="fn">add</span>(<span class="num">1</span>);                    <span class="com">// 添加</span>
+list.<span class="fn">add</span>(<span class="num">0</span>, <span class="num">10</span>);            <span class="com">// 指定位置插入</span>
+list.<span class="fn">get</span>(<span class="num">0</span>);                   <span class="com">// 获取</span>
+list.<span class="fn">set</span>(<span class="num">0</span>, <span class="num">20</span>);            <span class="com">// 修改</span>
+list.<span class="fn">remove</span>(<span class="num">0</span>);               <span class="com">// 按索引删除</span>
+list.<span class="fn">remove</span>(Integer.<span class="fn">valueOf</span>(<span class="num">1</span>));  <span class="com">// 按值删除</span>
+list.<span class="fn">size</span>();                     <span class="com">// 大小</span>
+list.<span class="fn">isEmpty</span>();                  <span class="com">// 是否为空</span>
+list.<span class="fn">contains</span>(<span class="num">1</span>);                <span class="com">// 是否包含</span>
+list.<span class="fn">clear</span>();                    <span class="com">// 清空</span>
+
+<span class="com">// 遍历</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < list.<span class="fn">size</span>(); i++) { }
+<span class="kw">for</span> (<span class="type">int</span> x : list) { }
+<span class="com">// 迭代器（可以边遍历边删除）</span>
+Iterator<<span class="type">Integer</span>> it = list.<span class="fn">iterator</span>();
+<span class="kw">while</span> (it.<span class="fn">hasNext</span>()) {
+    <span class="type">int</span> x = it.<span class="fn">next</span>();
+    <span class="kw">if</span> (x < <span class="num">0</span>) it.<span class="fn">remove</span>();  <span class="com">// 安全删除</span>
+}</div>
+
+            <h3>HashSet</h3>
+            <div class="code-block">HashSet<String> set = <span class="kw">new</span> <span class="cls">HashSet</span><>();
+
+set.<span class="fn">add</span>(<span class="str">"a"</span>);      <span class="com">// 添加，已存在返回false</span>
+set.<span class="fn">remove</span>(<span class="str">"a"</span>);   <span class="com">// 删除</span>
+set.<span class="fn">contains</span>(<span class="str">"a"</span>); <span class="com">// 是否包含</span>
+set.<span class="fn">size</span>();        <span class="com">// 大小</span>
+
+<span class="com">// 去重原理：先比 hashCode，再比 equals</span>
+<span class="com">// 自定义类要正确去重，必须重写 hashCode 和 equals</span></div>
+
+            <h3>HashMap</h3>
+            <div class="code-block">HashMap<String, Integer> map = <span class="kw">new</span> <span class="cls">HashMap</span><>();
+
+map.<span class="fn">put</span>(<span class="str">"a"</span>, <span class="num">1</span>);        <span class="com">// 添加/修改</span>
+map.<span class="fn">get</span>(<span class="str">"a"</span>);          <span class="com">// 获取，没有返回 null</span>
+map.<span class="fn">getOrDefault</span>(<span class="str">"b"</span>, <span class="num">0</span>);  <span class="com">// 获取，没有返回默认值</span>
+map.<span class="fn">remove</span>(<span class="str">"a"</span>);       <span class="com">// 删除</span>
+map.<span class="fn">containsKey</span>(<span class="str">"a"</span>);  <span class="com">// 是否包含key</span>
+map.<span class="fn">containsValue</span>(<span class="num">1</span>);  <span class="com">// 是否包含value</span>
+map.<span class="fn">size</span>();            <span class="com">// 大小</span>
+
+<span class="com">// 遍历 key</span>
+<span class="kw">for</span> (String key : map.<span class="fn">keySet</span>()) { }
+
+<span class="com">// 遍历 value</span>
+<span class="kw">for</span> (Integer val : map.<span class="fn">values</span>()) { }
+
+<span class="com">// 遍历 entry（推荐，效率高）</span>
+<span class="kw">for</span> (Map.Entry<String, Integer> entry : map.<span class="fn">entrySet</span>()) {
+    String key = entry.<span class="fn">getKey</span>();
+    Integer val = entry.<span class="fn">getValue</span>();
+}</div>
+
+            <h3>Collections 工具类</h3>
+            <div class="code-block">Collections.<span class="fn">sort</span>(list);              <span class="com">// 排序</span>
+Collections.<span class="fn">reverse</span>(list);           <span class="com">// 反转</span>
+Collections.<span class="fn">max</span>(list);               <span class="com">// 最大值</span>
+Collections.<span class="fn">min</span>(list);               <span class="com">// 最小值</span>
+Collections.<span class="fn">swap</span>(list, <span class="num">0</span>, <span class="num">1</span>);    <span class="com">// 交换</span>
+Collections.<span class="fn">fill</span>(list, <span class="num">0</span>);        <span class="com">// 填充</span>
+Collections.<span class="fn">binarySearch</span>(list, <span class="num">5</span>); <span class="com">// 二分查找</span></div>
+
+            <h3>泛型</h3>
+            <div class="code-block"><span class="com">// 泛型：指定集合里存什么类型，编译期检查，避免强转</span>
+ArrayList<String> list = <span class="kw">new</span> <span class="cls">ArrayList</span><String>();
+ArrayList<String> list = <span class="kw">new</span> <span class="cls">ArrayList</span><>();  <span class="com">// Java 7+ 钻石语法</span>
+
+<span class="com">// 自定义泛型类</span>
+<span class="kw">class</span> <span class="cls">Box</span><T> {
+    <span class="kw">private</span> T data;
+    <span class="kw">public</span> T <span class="fn">getData</span>() { <span class="kw">return</span> data; }
+    <span class="kw">public void</span> <span class="fn">setData</span>(T data) { <span class="kw">this</span>.data = data; }
+}
+
+<span class="com">// 泛型方法</span>
+<span class="kw">public</span> <T> T <span class="fn">getData</span>(T[] arr, <span class="type">int</span> index) {
+    <span class="kw">return</span> arr[index];
+}
+
+<span class="com">// 通配符</span>
+<span class="com">// ? extends T：T 或 T 的子类（上界）</span>
+<span class="com">// ? super T：T 或 T 的父类（下界）</span>
+<span class="com">// ?：任意类型</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== IO流 ===================== -->
+    <div class="section" id="io">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128196;</div>
+            <h2>IO 流</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>流的分类</h3>
+            <table>
+                <tr><th>分类方式</th><th>类型</th><th>说明</th></tr>
+                <tr><td rowspan="2">按方向</td><td>输入流</td><td>读数据（InputStream / Reader）</td></tr>
+                <tr><td>输出流</td><td>写数据（OutputStream / Writer）</td></tr>
+                <tr><td rowspan="2">按单位</td><td>字节流</td><td>按字节读，什么文件都能处理（图片、视频、文本）</td></tr>
+                <tr><td>字符流</td><td>按字符读，只能处理文本（自动处理编码）</td></tr>
+                <tr><td rowspan="2">按功能</td><td>节点流</td><td>直接操作数据源（FileInputStream 等）</td></tr>
+                <tr><td>缓冲流</td><td>包装节点流，加缓冲区提高效率（Buffered...）</td></tr>
+            </table>
+
+            <h3>字节流读写文件</h3>
+            <div class="code-block"><span class="com">// 复制文件（字节流，可用任何文件）</span>
+<span class="kw">try</span> (
+    FileInputStream fis = <span class="kw">new</span> <span class="cls">FileInputStream</span>(<span class="str">"a.txt"</span>);
+    FileOutputStream fos = <span class="kw">new</span> <span class="cls">FileOutputStream</span>(<span class="str">"b.txt"</span>)
+) {
+    <span class="type">byte</span>[] buf = <span class="kw">new byte</span>[<span class="num">1024</span>];
+    <span class="type">int</span> len;
+    <span class="kw">while</span> ((len = fis.<span class="fn">read</span>(buf)) != -<span class="num">1</span>) {
+        fos.<span class="fn">write</span>(buf, <span class="num">0</span>, len);
+    }
+} <span class="kw">catch</span> (IOException e) {
+    e.<span class="fn">printStackTrace</span>();
+}
+
+<span class="com">// 缓冲流：更快</span>
+BufferedInputStream bis = <span class="kw">new</span> <span class="cls">BufferedInputStream</span>(<span class="kw">new</span> <span class="cls">FileInputStream</span>(<span class="str">"a.txt"</span>));
+BufferedOutputStream bos = <span class="kw">new</span> <span class="cls">BufferedOutputStream</span>(<span class="kw">new</span> <span class="cls">FileOutputStream</span>(<span class="str">"b.txt"</span>));</div>
+
+            <h3>字符流读写文件</h3>
+            <div class="code-block"><span class="com">// 字符流：只能读文本，但更方便</span>
+<span class="kw">try</span> (
+    FileReader fr = <span class="kw">new</span> <span class="cls">FileReader</span>(<span class="str">"a.txt"</span>);
+    FileWriter fw = <span class="kw">new</span> <span class="cls">FileWriter</span>(<span class="str">"b.txt"</span>)
+) {
+    <span class="type">char</span>[] buf = <span class="kw">new char</span>[<span class="num">1024</span>];
+    <span class="type">int</span> len;
+    <span class="kw">while</span> ((len = fr.<span class="fn">read</span>(buf)) != -<span class="num">1</span>) {
+        fw.<span class="fn">write</span>(buf, <span class="num">0</span>, len);
+    }
+}
+
+<span class="com">// 缓冲字符流：有 readLine() 和 newLine() 方法，按行读写</span>
+<span class="kw">try</span> (
+    BufferedReader br = <span class="kw">new</span> <span class="cls">BufferedReader</span>(<span class="kw">new</span> <span class="cls">FileReader</span>(<span class="str">"a.txt"</span>));
+    BufferedWriter bw = <span class="kw">new</span> <span class="cls">BufferedWriter</span>(<span class="kw">new</span> <span class="cls">FileWriter</span>(<span class="str">"b.txt"</span>))
+) {
+    String line;
+    <span class="kw">while</span> ((line = br.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
+        bw.<span class="fn">write</span>(line);
+        bw.<span class="fn">newLine</span>();
+    }
+}</div>
+
+            <h3>File 类</h3>
+            <div class="code-block">File f = <span class="kw">new</span> <span class="cls">File</span>(<span class="str">"a.txt"</span>);
+
+f.<span class="fn">exists</span>();            <span class="com">// 是否存在</span>
+f.<span class="fn">isFile</span>();            <span class="com">// 是不是文件</span>
+f.<span class="fn">isDirectory</span>();       <span class="com">// 是不是目录</span>
+f.<span class="fn">getName</span>();           <span class="com">// 文件名</span>
+f.<span class="fn">getAbsolutePath</span>();   <span class="com">// 绝对路径</span>
+f.<span class="fn">length</span>();            <span class="com">// 文件大小（字节）</span>
+f.<span class="fn">createNewFile</span>();     <span class="com">// 创建文件</span>
+f.<span class="fn">mkdir</span>();             <span class="com">// 创建目录</span>
+f.<span class="fn">mkdirs</span>();            <span class="com">// 创建多级目录</span>
+f.<span class="fn">delete</span>();            <span class="com">// 删除</span>
+f.<span class="fn">list</span>();              <span class="com">// 列出子文件名字符串数组</span>
+f.<span class="fn">listFiles</span>();         <span class="com">// 列出子文件 File 对象数组</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 多线程 ===================== -->
+    <div class="section" id="thread">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128279;</div>
+            <h2>多线程</h2>
+            <span class="badge">重点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>进程 vs 线程</h3>
+            <ul>
+                <li><strong>进程</strong>：一个运行中的程序，有独立的内存空间</li>
+                <li><strong>线程</strong>：进程里的执行路径，一个进程可以有多个线程，共享进程资源</li>
+                <li>进程切换开销大，线程切换开销小</li>
+            </ul>
+
+            <h3>创建线程的三种方式</h3>
+            <div class="code-block"><span class="com">// 方式1：继承 Thread 类</span>
+<span class="kw">class</span> <span class="cls">MyThread</span> <span class="kw">extends</span> Thread {
+    <span class="kw">@Override</span>
+    <span class="kw">public void</span> <span class="fn">run</span>() {
+        <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < <span class="num">10</span>; i++) {
+            System.out.<span class="fn">println</span>(getName() + <span class="str">": "</span> + i);
+        }
+    }
+}
+<span class="com">// 启动：new MyThread().start();</span>
+
+<span class="com">// 方式2：实现 Runnable 接口（推荐，因为可以继承其他类）</span>
+<span class="kw">class</span> <span class="cls">MyRunnable</span> <span class="kw">implements</span> Runnable {
+    <span class="kw">@Override</span>
+    <span class="kw">public void</span> <span class="fn">run</span>() {
+        System.out.<span class="fn">println</span>(Thread.<span class="fn">currentThread</span>().<span class="fn">getName</span>());
+    }
+}
+<span class="com">// 启动：new Thread(new MyRunnable()).start();</span>
+
+<span class="com">// 方式3：实现 Callable 接口（有返回值）</span>
+<span class="kw">class</span> <span class="cls">MyCallable</span> <span class="kw">implements</span> Callable<Integer> {
+    <span class="kw">@Override</span>
+    <span class="kw">public</span> Integer <span class="fn">call</span>() <span class="kw">throws</span> Exception {
+        <span class="kw">return</span> <span class="num">100</span>;
+    }
+}
+<span class="com">// 配合 FutureTask 获取返回值</span></div>
+
+            <h3>线程的生命周期</h3>
+            <div class="code-block">新建(NEW) → 就绪(RUNNABLE) → 运行(RUNNING) → 终止(TERMINATED)
+                       ↑               ↓
+                       └── 阻塞(WAITING/TIMED_WAITING/BLOCKED) ←┘
+
+<span class="com">// 常用方法</span>
+Thread.<span class="fn">currentThread</span>()   <span class="com">// 当前线程对象</span>
+Thread.<span class="fn">sleep</span>(<span class="num">1000</span>)        <span class="com">// 休眠（毫秒），不会释放锁</span>
+t.<span class="fn">start</span>()                  <span class="com">// 启动线程（不要直接调run！）</span>
+t.<span class="fn">join</span>()                   <span class="com">// 等待该线程执行完</span>
+t.<span class="fn">setPriority</span>(<span class="num">10</span>)         <span class="com">// 设置优先级（1~10，默认5）</span>
+t.<span class="fn">setDaemon</span>(<span class="kw">true</span>)          <span class="com">// 设置为守护线程（用户线程结束，守护线程也结束）</span>
+t.<span class="fn">interrupt</span>()              <span class="com">// 中断线程</span>
+t.<span class="fn">yield</span>()                  <span class="com">// 让出CPU，回到就绪状态</span></div>
+
+            <h3>线程安全与 synchronized</h3>
+            <div class="code-block"><span class="com">// 多个线程同时操作共享数据时，会出现线程安全问题</span>
+<span class="com">// 解决方案：加锁 synchronized</span>
+
+<span class="com">// 方式1：同步代码块</span>
+<span class="kw">synchronized</span> (锁对象) {
+    <span class="com">// 需要同步的代码</span>
+}
+
+<span class="com">// 方式2：同步方法（锁是 this）</span>
+<span class="kw">public synchronized void</span> <span class="fn">method</span>() { }
+
+<span class="com">// 方式3：静态同步方法（锁是 类.class）</span>
+<span class="kw">public static synchronized void</span> <span class="fn">method</span>() { }</div>
+
+            <h3>Lock 锁</h3>
+            <div class="code-block"><span class="kw">import</span> java.util.concurrent.locks.ReentrantLock;
+
+<span class="kw">class</span> <span class="cls">MyClass</span> {
+    <span class="kw">private</span> ReentrantLock lock = <span class="kw">new</span> <span class="cls">ReentrantLock</span>();
+
+    <span class="kw">public void</span> <span class="fn">method</span>() {
+        lock.<span class="fn">lock</span>();        <span class="com">// 加锁</span>
+        <span class="kw">try</span> {
+            <span class="com">// 业务代码</span>
+        } <span class="kw">finally</span> {
+            lock.<span class="fn">unlock</span>();  <span class="com">// 解锁（一定要在finally里）</span>
+        }
+    }
+}
+
+<span class="com">// synchronized vs Lock：</span>
+<span class="com">// 1. synchronized 是关键字，JVM实现；Lock 是接口，代码实现</span>
+<span class="com">// 2. synchronized 自动释放锁；Lock 必须手动释放</span>
+<span class="com">// 3. Lock 功能更多：可中断、可超时、可公平锁</span></div>
+
+            <h3>死锁</h3>
+            <p>两个线程互相持有对方想要的锁，都不肯释放，就会产生死锁。</p>
+            <p><strong>产生条件：</strong>互斥、持有并等待、不可剥夺、循环等待</p>
+            <p><strong>避免方法：</strong>破坏其中一个条件即可，比如按固定顺序加锁</p>
+        </div>
+    </div>
+
+    <!-- ===================== JVM 基础 ===================== -->
+    <div class="section" id="jvm">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9881;</div>
+            <h2>JVM 基础</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>JVM 内存区域</h3>
+            <table>
+                <tr><th>区域</th><th>作用</th><th>线程共享/私有</th></tr>
+                <tr><td><strong>堆（Heap）</strong></td><td>存对象实例和数组，GC主要区域</td><td>共享</td></tr>
+                <tr><td><strong>方法区（Method Area）</strong></td><td>类信息、常量、静态变量、JIT编译代码</td><td>共享</td></tr>
+                <tr><td><strong>虚拟机栈</strong></td><td>每个方法调用一个栈帧，存局部变量、操作数栈等</td><td>私有</td></tr>
+                <tr><td><strong>本地方法栈</strong></td><td>为 native 方法服务</td><td>私有</td></tr>
+                <tr><td><strong>程序计数器</strong></td><td>记录当前线程执行到哪条字节码</td><td>私有</td></tr>
+            </table>
+
+            <h3>堆内存分代</h3>
+            <div class="code-block">堆（Heap）
+  ├── 新生代（Young）
+  │    ├── Eden 区       <span class="com">// 新对象都在这</span>
+  │    ├── Survivor 0    <span class="com">// 存活区</span>
+  │    └── Survivor 1    <span class="com">// 存活区</span>
+  └── 老年代（Old）       <span class="com">// 长期存活的对象</span>
+
+<span class="com">// 默认比例：新生代:老年代 = 1:2</span>
+<span class="com">// Eden:S0:S1 = 8:1:1</span>
+
+<span class="com">// Minor GC：回收新生代，频繁，快</span>
+<span class="com">// Major GC/Full GC：回收老年代+新生代，慢</span></div>
+
+            <h3>垃圾回收（GC）</h3>
+            <div class="code-block"><span class="com">// 哪些对象可以回收？</span>
+<span class="com">// 可达性分析：从 GC Roots 出发，不可达的对象可以回收</span>
+<span class="com">// GC Roots：栈中引用的对象、静态变量引用的对象、常量引用的对象等</span>
+
+<span class="com">// 垃圾回收算法：</span>
+<span class="com">// 1. 标记-清除：标记后直接清除 → 有内存碎片</span>
+<span class="com">// 2. 复制算法：两块区域，把存活的复制过去 → 没有碎片，但浪费空间（新生代用）</span>
+<span class="com">// 3. 标记-整理：标记后把存活的移到一起 → 没有碎片，但要移动（老年代用）</span>
+<span class="com">// 4. 分代收集：新生代用复制，老年代用标记-整理</span></div>
+
+            <h3>类加载过程</h3>
+            <div class="code-block">加载 → 验证 → 准备 → 解析 → 初始化 → 使用 → 卸载
+              \____ 连接 ____/
+
+<span class="com">// 加载：读字节码，生成Class对象</span>
+<span class="com">// 验证：确保字节码符合规范</span>
+<span class="com">// 准备：给静态变量分配内存，赋默认值</span>
+<span class="com">// 解析：符号引用变直接引用</span>
+<span class="com">// 初始化：执行静态代码块和静态变量赋值</span></div>
+
+            <h3>类加载器</h3>
+            <div class="code-block">Bootstrap ClassLoader   <span class="com">// 启动类加载器：加载核心类库（rt.jar）</span>
+  ↑
+Extension ClassLoader   <span class="com">// 扩展类加载器：加载扩展类（jre/lib/ext）</span>
+  ↑
+Application ClassLoader <span class="com">// 应用程序类加载器：加载用户类路径的类</span>
+  ↑
+自定义 ClassLoader       <span class="com">// 自己写的类加载器</span>
+
+<span class="com">// 双亲委派模型：</span>
+<span class="com">// 收到类加载请求，先让父加载器去加载</span>
+<span class="com">// 父加载器加载不了，自己才加载</span>
+<span class="com">// 好处：安全（核心类不会被篡改）、避免重复加载</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>== 和 equals 的区别？</td>
+                    <td>== 比较基本类型是比较值，比较引用类型是比较地址<br>
+                        equals 默认比较地址（Object的实现），很多类（String、Integer等）重写了 equals 来比较内容<br>
+                        比较字符串内容一定要用 equals</td>
+                </tr>
+                <tr>
+                    <td>String 为什么不可变？</td>
+                    <td>String 内部用 final 修饰的 char 数组存储（Java 9 后是 byte 数组），并且没有提供修改它的方法。不可变的好处：可以共享字符串常量池、安全、哈希值可以缓存</td>
+                </tr>
+                <tr>
+                    <td>String、StringBuilder、StringBuffer 区别？</td>
+                    <td>String 不可变，频繁拼接会产生很多临时对象<br>
+                        StringBuilder 可变，非线程安全，快（推荐单线程用）<br>
+                        StringBuffer 可变，线程安全（synchronized），慢（多线程用）</td>
+                </tr>
+                <tr>
+                    <td>重载和重写的区别？</td>
+                    <td>重载（Overload）：同一类中，方法名相同参数不同，编译时多态<br>
+                        重写（Override）：父子类中，方法名参数返回值都相同，运行时多态</td>
+                </tr>
+                <tr>
+                    <td>接口和抽象类的区别？</td>
+                    <td>1. 类只能单继承，但可以实现多个接口<br>
+                        2. 抽象类有构造方法，接口没有<br>
+                        3. 抽象类可以有各种成员变量，接口只有常量<br>
+                        4. 抽象类是"是不是"，接口是"能不能"</td>
+                </tr>
+                <tr>
+                    <td>Java 只有值传递？</td>
+                    <td>是的。基本类型传值的副本，引用类型传引用的副本（地址值）。改形参本身不会影响实参，但通过引用可以改对象的内容</td>
+                </tr>
+                <tr>
+                    <td>final 关键字的作用？</td>
+                    <td>final 类：不能被继承<br>
+                        final 方法：不能被重写<br>
+                        final 变量：只能赋值一次，变成常量<br>
+                        final 引用：不能指向新对象，但对象内容可以改</td>
+                </tr>
+                <tr>
+                    <td>static 关键字的作用？</td>
+                    <td>静态变量：所有对象共享，属于类，在方法区<br>
+                        静态方法：属于类，只能访问静态成员，没有this<br>
+                        静态代码块：类加载时执行，只执行一次，用来初始化</td>
+                </tr>
+                <tr>
+                    <td>HashMap 的底层原理？</td>
+                    <td>JDK1.7：数组+链表，头插法<br>
+                        JDK1.8：数组+链表+红黑树，尾插法。链表长度超过8且数组长度超过64时转红黑树，提高查询效率（O(n) → O(logn)）<br>
+                        默认容量16，负载因子0.75，扩容为原来的2倍</td>
+                </tr>
+                <tr>
+                    <td>HashMap 和 Hashtable 的区别？</td>
+                    <td>HashMap 非线程安全，允许 null 键值，效率高<br>
+                        Hashtable 线程安全（方法加 synchronized），不允许 null，效率低<br>
+                        多线程推荐用 ConcurrentHashMap</td>
+                </tr>
+                <tr>
+                    <td>ArrayList 和 LinkedList 的区别？</td>
+                    <td>ArrayList 底层是动态数组，随机访问快，中间插入删除慢（要移动元素）<br>
+                        LinkedList 底层是双向链表，随机访问慢，头尾插入删除快<br>
+                        一般情况用 ArrayList 就行</td>
+                </tr>
+                <tr>
+                    <td>sleep 和 wait 的区别？</td>
+                    <td>1. sleep 是 Thread 的静态方法，wait 是 Object 的方法<br>
+                        2. sleep 不会释放锁，wait 会释放锁<br>
+                        3. sleep 不需要在同步块中，wait 需要<br>
+                        4. sleep 到时间自动醒，wait 需要 notify/notifyAll 唤醒</td>
+                </tr>
+                <tr>
+                    <td>synchronized 和 Lock 的区别？</td>
+                    <td>synchronized 是关键字，JVM实现，自动释放锁，不可中断<br>
+                        Lock 是接口，代码实现，手动释放锁（finally），可中断、可超时、可公平锁</td>
+                </tr>
+                <tr>
+                    <td>什么是死锁？怎么避免？</td>
+                    <td>两个或多个线程互相持有对方需要的锁，都不释放，永久等待。<br>
+                        四个必要条件：互斥、持有并等待、不可剥夺、循环等待<br>
+                        避免方法：破坏任一条件，比如按固定顺序加锁</td>
+                </tr>
+                <tr>
+                    <td>JVM 内存结构？</td>
+                    <td>线程共享：堆（对象）、方法区（类信息、常量、静态变量）<br>
+                        线程私有：虚拟机栈（栈帧-局部变量表等）、本地方法栈、程序计数器</td>
+                </tr>
+                <tr>
+                    <td>垃圾回收算法有哪些？</td>
+                    <td>标记-清除：快，但有碎片<br>
+                        复制算法：无碎片，但浪费空间（新生代用，Eden+Survivor）<br>
+                        标记-整理：无碎片，但要移动对象（老年代用）<br>
+                        分代收集：新生代复制算法，老年代标记-整理</td>
+                </tr>
+                <tr>
+                    <td>什么是双亲委派模型？</td>
+                    <td>类加载时先让父加载器加载，父加载器加载不了自己才加载。<br>
+                        好处：保证核心类的安全（不会被篡改）、避免重复加载<br>
+                        层级：Bootstrap → Extension → Application → 自定义</td>
+                </tr>
+                <tr>
+                    <td>强软弱虚四种引用？</td>
+                    <td>强引用：new 出来的，OOM 也不回收<br>
+                        软引用（SoftReference）：内存不足时回收（缓存用）<br>
+                        弱引用（WeakReference）：下次 GC 就回收<br>
+                        虚引用（PhantomReference）：跟踪对象回收，get 不到</td>
+                </tr>
+                <tr>
+                    <td>JDK 和 JRE 的区别？</td>
+                    <td>JDK = JRE + 开发工具（javac, java, javadoc等）<br>
+                        JRE = JVM + 核心类库<br>
+                        开发人员装 JDK，只运行程序装 JRE 就行</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST Java 学习笔记 &nbsp;|&nbsp; 2026-09-29</p>
+    <p>基础语法 → 面向对象 → 继承多态 → 数组字符串 → 异常 → 集合 → IO → 多线程 → JVM → 面试速答</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C/C++ & 面向对象 复习完全指南 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117; --card: #161b22; --border: #30363d;
+            --text: #c9d1d9; --heading: #f0f6fc; --accent: #58a6ff;
+            --green: #3fb950; --yellow: #d29922; --red: #f85149;
+            --purple: #bc8cff; --orange: #e8873a; --code-bg: #1c2128; --pink: #db61a2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.75; font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        .header {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.82em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+        .section {
+            margin-bottom: 40px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 18px 24px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.3em; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.2em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.78em;
+        }
+        .section-body { padding: 20px 24px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th {
+            text-align: left; padding: 8px 12px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.82em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9em; }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.85em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px 18px; margin: 10px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82em; line-height: 1.55; color: var(--text); white-space: pre;
+        }
+        .code-block .kw { color: var(--purple); font-weight: bold; }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .type { color: var(--yellow); }
+        .code-block .cls { color: var(--pink); }
+        .callout {
+            border-left: 4px solid; padding: 14px 18px; margin: 12px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 5px; font-size: 0.92em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.75em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .tag-essential { background: rgba(88,166,255,0.15); color: var(--accent); }
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px; margin: 12px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 6px; font-size: 0.9em; }
+        .card .card-desc { color: #8b949e; font-size: 0.82em; }
+        h3 { color: var(--accent); margin: 18px 0 10px; font-size: 1.05em; }
+        h4 { color: var(--yellow); margin: 14px 0 8px; font-size: 0.95em; }
+        p { margin-bottom: 10px; }
+        ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        li { margin-bottom: 4px; font-size: 0.92em; }
+        .footer {
+            text-align: center; padding: 30px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.82em;
+        }
+        .compare-row { display: flex; gap: 12px; margin: 12px 0; }
+        .compare-col { flex: 1; }
+        .compare-col h4 { text-align: center; margin-bottom: 8px; }
+        .c-col h4 { color: var(--accent); }
+        .cpp-col h4 { color: var(--pink); }
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+            .compare-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>C/C++ &amp; 面向对象 复习完全指南</h1>
+    <div class="meta">从C到C++ · 面向对象三大特性 · STL · 内存管理 · 面试速答 &nbsp;|&nbsp; 2026-09-29</div>
+</div>
+
+<div class="nav">
+    <a href="#c-basics">C语言基础</a>
+    <a href="#c-pointer">指针与内存</a>
+    <a href="#cpp-basics">C++入门</a>
+    <a href="#oop">面向对象</a>
+    <a href="#inheritance">继承多态</a>
+    <a href="#stl">STL容器</a>
+    <a href="#memory">内存管理</a>
+    <a href="#modern-cpp">现代C++</a>
+    <a href="#interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <!-- ===================== C 语言基础 ===================== -->
+    <div class="section" id="c-basics">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128187;</div>
+            <h2>C 语言核心复习</h2>
+            <span class="badge">基础</span>
+        </div>
+        <div class="section-body">
+
+            <h3>基本数据类型</h3>
+            <table>
+                <tr><th>类型</th><th>大小(字节)</th><th>范围</th><th>说明</th></tr>
+                <tr><td><code>char</code></td><td>1</td><td>-128 ~ 127</td><td>字符型，本质是整数</td></tr>
+                <tr><td><code>short</code></td><td>2</td><td>-32768 ~ 32767</td><td>短整型</td></tr>
+                <tr><td><code>int</code></td><td>4</td><td>-2^31 ~ 2^31-1</td><td>整型，最常用</td></tr>
+                <tr><td><code>long</code></td><td>4/8</td><td>—</td><td>32位系统4字节，64位8字节(Linux)</td></tr>
+                <tr><td><code>long long</code></td><td>8</td><td>-2^63 ~ 2^63-1</td><td>长长整型</td></tr>
+                <tr><td><code>float</code></td><td>4</td><td>约6~7位有效数字</td><td>单精度浮点</td></tr>
+                <tr><td><code>double</code></td><td>8</td><td>约15~16位有效数字</td><td>双精度浮点</td></tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">sizeof 速记</div>
+                char=1, short=2, int=4, long long=8, float=4, double=8, 指针=4/8(32/64位)
+            </div>
+
+            <h3>运算符优先级（高频考点）</h3>
+            <div class="code-block"><span class="com">// 从高到低：</span>
+<span class="com">// 1. () [] -> .</span>
+<span class="com">// 2. ! ~ ++ -- +(正) -(负) *(取址) &(取地址) sizeof (类型)  -- 单目</span>
+<span class="com">// 3. * / %   -- 乘除模</span>
+<span class="com">// 4. + -     -- 加减</span>
+<span class="com">// 5. << >>   -- 移位</span>
+<span class="com">// 6. < <= > >=  -- 关系</span>
+<span class="com">// 7. == !=   -- 等于不等于</span>
+<span class="com">// 8. &       -- 按位与</span>
+<span class="com">// 9. ^       -- 按位异或</span>
+<span class="com">// 10. |      -- 按位或</span>
+<span class="com">// 11. &&     -- 逻辑与</span>
+<span class="com">// 12. ||     -- 逻辑或</span>
+<span class="com">// 13. ?:     -- 三目</span>
+<span class="com">// 14. = += -= *= /= %= &= |= ^= <<= >>=  -- 赋值</span>
+<span class="com">// 15. ,      -- 逗号</span></div>
+
+            <div class="callout warn">
+                <div class="callout-title">短路求值</div>
+                <code>&amp;&amp;</code> 左边为假，右边不执行；<code>||</code> 左边为真，右边不执行。面试常考！
+            </div>
+
+            <h3>三大循环</h3>
+            <div class="code-block"><span class="com">// for 循环（已知次数用）</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n; i++) { }
+
+<span class="com">// while 循环（条件判断用）</span>
+<span class="kw">while</span> (条件) { }
+
+<span class="com">// do-while（至少执行一次）</span>
+<span class="kw">do</span> { } <span class="kw">while</span> (条件);</div>
+
+            <h3>数组</h3>
+            <div class="code-block"><span class="com">// 定义与初始化</span>
+<span class="type">int</span> arr[<span class="num">5</span>];                  <span class="com">// 5个元素，未初始化</span>
+<span class="type">int</span> arr[<span class="num">5</span>] = {<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>};    <span class="com">// 前3个初始化，后面补0</span>
+<span class="type">int</span> arr[] = {<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>};   <span class="com">// 自动推断大小=5</span>
+
+<span class="com">// 二维数组</span>
+<span class="type">int</span> mat[<span class="num">3</span>][<span class="num">4</span>];             <span class="com">// 3行4列</span>
+<span class="type">int</span> mat[][<span class="num">4</span>] = {{<span class="num">1</span>,<span class="num">2</span>},{<span class="num">3</span>,<span class="num">4</span>}}; <span class="com">// 行可省，列不能省</span>
+
+<span class="com">// 数组名 = 首元素地址（常量指针，不能改）</span>
+<span class="com">// arr == &arr[0]</span></div>
+
+            <h3>字符串</h3>
+            <div class="code-block"><span class="com">// C 语言字符串 = char 数组 + '\0' 结尾</span>
+<span class="type">char</span> str[] = <span class="str">"hello"</span>;   <span class="com">// 实际占6字节：h e l l o \0</span>
+<span class="type">char</span> str[<span class="num">6</span>] = {<span class="str">'h'</span>,<span class="str">'e'</span>,<span class="str">'l'</span>,<span class="str">'l'</span>,<span class="str">'o'</span>,<span class="str">'\0'</span>};
+
+<span class="com">// 常用字符串函数（#include <string.h>）</span>
+<span class="fn">strlen</span>(str);        <span class="com">// 长度（不含\0）</span>
+<span class="fn">strcpy</span>(dest, src);  <span class="com">// 复制（不安全，可能越界）</span>
+<span class="fn">strncpy</span>(d, s, n);  <span class="com">// 安全复制</span>
+<span class="fn">strcmp</span>(s1, s2);    <span class="com">// 比较：0相等 / <0 s1小 / >0 s1大</span>
+<span class="fn">strcat</span>(dest, src);  <span class="com">// 拼接</span>
+<span class="fn">strchr</span>(str, <span class="str">'a'</span>);   <span class="com">// 找字符</span>
+<span class="fn">strstr</span>(str, <span class="str">"abc"</span>); <span class="com">// 找子串</span></div>
+
+            <h3>函数</h3>
+            <div class="code-block"><span class="com">// 函数定义</span>
+<span class="type">int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b) {
+    <span class="kw">return</span> a + b;
+}
+
+<span class="com">// 函数声明（写在调用前，或放头文件）</span>
+<span class="type">int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b);
+
+<span class="com">// 值传递：形参是实参的副本，改形参不影响实参</span>
+<span class="com">// 地址传递：传指针，可以修改实参</span>
+<span class="kw">void</span> <span class="fn">swap</span>(<span class="type">int</span> *a, <span class="type">int</span> *b) {
+    <span class="type">int</span> tmp = *a; *a = *b; *b = tmp;
+}</div>
+
+            <h3>宏定义 & typedef</h3>
+            <div class="code-block"><span class="com">// 宏定义（纯文本替换，编译前处理）</span>
+<span class="kw">#define</span> PI 3.14159
+<span class="kw">#define</span> MAX(a,b) ((a)>(b)?(a):(b))  <span class="com">// 注意加括号！</span>
+
+<span class="com">// typedef（类型别名）</span>
+<span class="kw">typedef unsigned int</span> uint;
+<span class="kw">typedef struct</span> { <span class="type">int</span> x, y; } Point;
+
+<span class="com">// 条件编译</span>
+<span class="kw">#ifdef</span> DEBUG
+    <span class="fn">printf</span>(<span class="str">"debug mode\n"</span>);
+<span class="kw">#endif</span></div>
+
+            <h3>结构体 & 联合体 & 枚举</h3>
+            <div class="code-block"><span class="com">// 结构体（各成员独立存储）</span>
+<span class="kw">struct</span> Student {
+    <span class="type">char</span> name[<span class="num">50</span>];
+    <span class="type">int</span> age;
+    <span class="type">float</span> score;
+};
+<span class="kw">struct</span> Student s1 = {<span class="str">"张三"</span>, <span class="num">20</span>, <span class="num">95.5</span>};
+
+<span class="com">// 联合体（共用一块内存，大小=最大成员）</span>
+<span class="kw">union</span> Data {
+    <span class="type">int</span> i;
+    <span class="type">float</span> f;
+    <span class="type">char</span> c;
+};  <span class="com">// 大小=4字节（最大的是int和float）</span>
+
+<span class="com">// 枚举（整数常量集合）</span>
+<span class="kw">enum</span> Color { RED, GREEN, BLUE };
+<span class="com">// 默认从0开始：RED=0, GREEN=1, BLUE=2</span>
+<span class="kw">enum</span> Color { RED=<span class="num">1</span>, GREEN=<span class="num">5</span>, BLUE };
+<span class="com">// 手动赋值：RED=1, GREEN=5, BLUE=6</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 指针与内存 ===================== -->
+    <div class="section" id="c-pointer">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#128208;</div>
+            <h2>指针与内存管理</h2>
+            <span class="badge">重难点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>指针基础</h3>
+            <div class="code-block"><span class="type">int</span> a = <span class="num">10</span>;
+<span class="type">int</span> *p = &a;   <span class="com">// p 指向 a 的地址</span>
+
+*p = <span class="num">20</span>;       <span class="com">// *p 就是 a，改 *p 就是改 a</span>
+                <span class="com">// 现在 a = 20</span>
+
+<span class="com">// 指针大小：32位=4字节，64位=8字节</span>
+<span class="com">// 指针类型决定了 *p 读多少字节、怎么解析</span></div>
+
+            <h3>指针与数组</h3>
+            <div class="code-block"><span class="type">int</span> arr[<span class="num">5</span>] = {<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>};
+<span class="type">int</span> *p = arr;   <span class="com">// arr 是首元素地址</span>
+
+<span class="com">// 以下等价：</span>
+arr[<span class="num">2</span>] == *(arr+<span class="num">2</span>) == p[<span class="num">2</span>] == *(p+<span class="num">2</span>)
+<span class="com">// 指针 +1 = 地址 + sizeof(类型)</span>
+
+<span class="com">// 指针运算：</span>
+p++;       <span class="com">// 向后移一个元素</span>
+p--;       <span class="com">// 向前移一个元素</span>
+p - arr;   <span class="com">// 两个指针相减 = 相差几个元素</span></div>
+
+            <h3>二级指针 & 指针数组 & 数组指针</h3>
+            <div class="code-block"><span class="com">// 二级指针：指向指针的指针</span>
+<span class="type">int</span> a = <span class="num">10</span>;
+<span class="type">int</span> *p = &a;
+<span class="type">int</span> **pp = &p;   <span class="com">// **pp == *p == a</span>
+
+<span class="com">// 指针数组：数组里存的是指针</span>
+<span class="type">char</span> *names[<span class="num">3</span>] = {<span class="str">"张三"</span>, <span class="str">"李四"</span>, <span class="str">"王五"</span>};
+<span class="com">// names[0] 是"张三"的地址</span>
+
+<span class="com">// 数组指针：指向数组的指针</span>
+<span class="type">int</span> (*p)[<span class="num">5</span>];    <span class="com">// 指向一个 int[5] 的数组</span>
+<span class="com">// 常用来指向二维数组的一行</span></div>
+
+            <h3>函数指针</h3>
+            <div class="code-block"><span class="type">int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b) { <span class="kw">return</span> a+b; }
+
+<span class="type">int</span> (*p)(<span class="type">int</span>, <span class="type">int</span>);  <span class="com">// 函数指针：返回int，两个int参数</span>
+p = add;
+<span class="fn">p</span>(<span class="num">1</span>, <span class="num">2</span>);  <span class="com">// 调用，结果=3</span>
+
+<span class="com">// 典型用途：回调函数、qsort 比较函数</span></div>
+
+            <h3>动态内存分配（堆内存）</h3>
+            <div class="code-block"><span class="com">// 栈内存：自动分配自动释放，小，快</span>
+<span class="com">// 堆内存：手动申请手动释放，大，慢一点</span>
+
+<span class="type">int</span> *p = (<span class="type">int</span>*)<span class="fn">malloc</span>(<span class="num">10</span> * <span class="kw">sizeof</span>(<span class="type">int</span>));
+<span class="com">// 申请 10 个 int 的空间，返回首地址</span>
+
+<span class="type">int</span> *p2 = (<span class="type">int</span>*)<span class="fn">calloc</span>(<span class="num">10</span>, <span class="kw">sizeof</span>(<span class="type">int</span>));
+<span class="com">// 申请并初始化为0</span>
+
+p = (<span class="type">int</span>*)<span class="fn">realloc</span>(p, <span class="num">20</span> * <span class="kw">sizeof</span>(<span class="type">int</span>));
+<span class="com">// 扩容到 20 个 int</span>
+
+<span class="fn">free</span>(p);   <span class="com">// 释放！必须释放，否则内存泄漏</span>
+p = <span class="kw">NULL</span>;  <span class="com">// 置空，避免野指针</span></div>
+
+            <div class="callout danger">
+                <div class="callout-title">常见内存错误</div>
+                <strong>1. 内存泄漏</strong>：malloc 了不 free<br>
+                <strong>2. 野指针</strong>：指针没初始化或释放后还使用<br>
+                <strong>3. 空指针解引用</strong>：NULL 指针直接 *p<br>
+                <strong>4. 越界访问</strong>：数组下标超了<br>
+                <strong>5. 重复释放</strong>：同一块内存 free 两次<br>
+                <strong>6. 栈溢出</strong>：局部数组太大或递归太深
+            </div>
+
+            <h3>内存四区</h3>
+            <table>
+                <tr><th>区域</th><th>存什么</th><th>分配方式</th><th>大小</th><th>生命周期</th></tr>
+                <tr><td><strong>栈区 (stack)</strong></td><td>局部变量、函数参数、返回地址</td><td>自动</td><td>小（几MB）</td><td>函数结束自动释放</td></tr>
+                <tr><td><strong>堆区 (heap)</strong></td><td>malloc/new 的数据</td><td>手动</td><td>大（几GB）</td><td>free/delete 才释放</td></tr>
+                <tr><td><strong>全局/静态区</strong></td><td>全局变量、static 变量</td><td>自动</td><td>—</td><td>整个程序运行期</td></tr>
+                <tr><td><strong>代码/常量区</strong></td><td>代码、字符串常量</td><td>自动</td><td>—</td><td>整个程序运行期</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== C++ 入门 ===================== -->
+    <div class="section" id="cpp-basics">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(219,97,162,0.15);color:#db61a2;">&#10133;</div>
+            <h2>C++ 入门 &amp; 新特性</h2>
+            <span class="badge">过渡</span>
+        </div>
+        <div class="section-body">
+
+            <h3>C 与 C++ 的核心区别</h3>
+            <table>
+                <tr><th>方面</th><th>C 语言</th><th>C++</th></tr>
+                <tr><td>编程范式</td><td>面向过程</td><td>面向过程 + 面向对象 + 泛型 + 函数式</td></tr>
+                <tr><td>输入输出</td><td>printf / scanf</td><td>cin / cout（类型安全）</td></tr>
+                <tr><td>函数重载</td><td>不支持</td><td>支持（同名不同参）</td></tr>
+                <tr><td>默认参数</td><td>不支持</td><td>支持</td></tr>
+                <tr><td>引用</td><td>只有指针</td><td>有引用（变量别名）</td></tr>
+                <tr><td>动态内存</td><td>malloc/free</td><td>new/delete（调用构造析构）</td></tr>
+                <tr><td>数据结构</td><td>自己实现</td><td>STL 标准模板库</td></tr>
+                <tr><td>异常处理</td><td>返回错误码</td><td>try/catch/throw</td></tr>
+            </table>
+
+            <h3>输入输出</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><iostream></span>
+<span class="kw">using namespace</span> <span class="cls">std</span>;  <span class="com">// 偷懒写法，实际项目少用</span>
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">int</span> a;
+    cin >> a;                  <span class="com">// 输入</span>
+    cout << <span class="str">"a = "</span> << a << endl;  <span class="com">// 输出 + 换行</span>
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="com">// 加速 cin/cout（比 printf 慢，加这两行就快了）</span>
+ios::<span class="fn">sync_with_stdio</span>(<span class="num">false</span>);
+cin.<span class="fn">tie</span>(<span class="num">0</span>);</div>
+
+            <h3>引用（Reference）</h3>
+            <div class="code-block"><span class="type">int</span> a = <span class="num">10</span>;
+<span class="type">int</span> &ref = a;  <span class="com">// ref 是 a 的别名，两个指向同一块内存</span>
+
+ref = <span class="num">20</span>;      <span class="com">// 改 ref 就是改 a，a 现在 = 20</span>
+
+<span class="com">// 引用 vs 指针：</span>
+<span class="com">// 1. 引用必须初始化，指针可以不初始化</span>
+<span class="com">// 2. 引用不能改指向，指针可以改</span>
+<span class="com">// 3. 引用不能为空，指针可以是 NULL</span>
+<span class="com">// 4. 引用大小 = 原变量大小，指针是 4/8 字节</span>
+
+<span class="com">// 最常用场景：函数传参（避免拷贝）</span>
+<span class="kw">void</span> <span class="fn">swap</span>(<span class="type">int</span> &a, <span class="type">int</span> &b) {
+    <span class="type">int</span> tmp = a; a = b; b = tmp;
+}  <span class="com">// 比指针写法更简洁</span></div>
+
+            <h3>函数重载</h3>
+            <div class="code-block"><span class="com">// 同名函数，参数不同（类型/个数/顺序）</span>
+<span class="type">int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b) { <span class="kw">return</span> a + b; }
+<span class="type">double</span> <span class="fn">add</span>(<span class="type">double</span> a, <span class="type">double</span> b) { <span class="kw">return</span> a + b; }
+<span class="type">int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b, <span class="type">int</span> c) { <span class="kw">return</span> a + b + c; }
+
+<span class="com">// 返回值不同不算重载！</span>
+<span class="com">// 底层实现：名字修饰（name mangling）</span></div>
+
+            <h3>默认参数</h3>
+            <div class="code-block"><span class="com">// 默认参数必须从右往左给</span>
+<span class="type">int</span> <span class="fn">func</span>(<span class="type">int</span> a, <span class="type">int</span> b = <span class="num">10</span>, <span class="type">int</span> c = <span class="num">20</span>) {
+    <span class="kw">return</span> a + b + c;
+}
+
+<span class="fn">func</span>(<span class="num">1</span>);       <span class="com">// 1 + 10 + 20 = 31</span>
+<span class="fn">func</span>(<span class="num">1</span>, <span class="num">2</span>);    <span class="com">// 1 + 2 + 20 = 23</span>
+<span class="fn">func</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>); <span class="com">// 1 + 2 + 3 = 6</span></div>
+
+            <h3>new / delete</h3>
+            <div class="code-block"><span class="com">// 申请单个对象</span>
+<span class="type">int</span> *p = <span class="kw">new</span> <span class="type">int</span>(<span class="num">10</span>);  <span class="com">// 申请并初始化为10</span>
+<span class="kw">delete</span> p;
+
+<span class="com">// 申请数组</span>
+<span class="type">int</span> *arr = <span class="kw">new</span> <span class="type">int</span>[<span class="num">10</span>];
+<span class="kw">delete</span>[] arr;          <span class="com">// 注意 []</span>
+
+<span class="com">// new vs malloc：</span>
+<span class="com">// 1. new 调用构造函数，malloc 不会</span>
+<span class="com">// 2. new 返回具体类型指针，malloc 返回 void*</span>
+<span class="com">// 3. new 失败抛异常，malloc 失败返回 NULL</span>
+<span class="com">// 4. new 是操作符，malloc 是函数</span></div>
+
+            <h3>string 字符串</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><string></span>
+
+string s1 = <span class="str">"hello"</span>;
+string s2(<span class="str">"world"</span>);
+
+<span class="com">// 常用操作</span>
+s1 + s2;            <span class="com">// 拼接："helloworld"</span>
+s1 == s2;           <span class="com">// 比较（可以直接用 == != > <）</span>
+s1.<span class="fn">size</span>();         <span class="com">// 长度</span>
+s1.<span class="fn">length</span>();       <span class="com">// 和 size 一样</span>
+s1[<span class="num">0</span>];             <span class="com">// 下标访问</span>
+s1.<span class="fn">substr</span>(<span class="num">1</span>, <span class="num">3</span>);  <span class="com">// 截取：从索引1开始取3个 = "ell"</span>
+s1.<span class="fn">find</span>(<span class="str">"ll"</span>);     <span class="com">// 查找：返回索引2，找不到返回 string::npos</span>
+s1.<span class="fn">append</span>(<span class="str">"!"</span>);   <span class="com">// 追加</span>
+s1.<span class="fn">c_str</span>();        <span class="com">// 转 const char*（给C函数用）</span></div>
+
+            <h3>命名空间</h3>
+            <div class="code-block"><span class="kw">namespace</span> <span class="cls">MyLib</span> {
+    <span class="type">int</span> <span class="fn">add</span>(<span class="type">int</span> a, <span class="type">int</span> b) { <span class="kw">return</span> a + b; }
+}
+
+MyLib::<span class="fn">add</span>(<span class="num">1</span>, <span class="num">2</span>);  <span class="com">// 调用方式</span>
+
+<span class="kw">using namespace</span> <span class="cls">MyLib</span>;  <span class="com">// 引入命名空间</span>
+<span class="fn">add</span>(<span class="num">1</span>, <span class="num">2</span>);              <span class="com">// 直接用</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 面向对象 ===================== -->
+    <div class="section" id="oop">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#127959;</div>
+            <h2>面向对象（OOP）</h2>
+            <span class="badge">核心</span>
+        </div>
+        <div class="section-body">
+
+            <h3>三大特性</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">封装（Encapsulation）</div>
+                    <div class="card-desc">把数据和方法打包到类里，隐藏内部细节，只暴露必要接口。用 public/private/protected 控制访问权限</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">继承（Inheritance）</div>
+                    <div class="card-desc">子类复用父类的属性和方法，同时可以扩展自己的功能。实现代码复用</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">多态（Polymorphism）</div>
+                    <div class="card-desc">同一接口不同实现。编译时多态（重载、模板）+ 运行时多态（虚函数）</div>
+                </div>
+            </div>
+
+            <h3>类的定义</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Person</span> {
+<span class="kw">private</span>:                     <span class="com">// 私有：类外面不能访问（默认就是private）</span>
+    string name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:                      <span class="com">// 公有：类外面可以访问</span>
+    <span class="com">// 构造函数：创建对象时自动调用</span>
+    <span class="cls">Person</span>() { age = <span class="num">0</span>; }
+    <span class="cls">Person</span>(string n, <span class="type">int</span> a) : <span class="fn">name</span>(n), <span class="fn">age</span>(a) {}  <span class="com">// 初始化列表</span>
+
+    <span class="com">// 析构函数：对象销毁时自动调用</span>
+    ~<span class="cls">Person</span>() {}
+
+    <span class="com">// 成员函数</span>
+    <span class="kw">void</span> <span class="fn">setName</span>(string n) { name = n; }
+    string <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+
+    <span class="kw">void</span> <span class="fn">eat</span>();   <span class="com">// 声明</span>
+
+<span class="kw">protected</span>:                   <span class="com">// 保护：自己和子类能访问</span>
+    string secret;
+};
+
+<span class="com">// 类外定义成员函数</span>
+<span class="kw">void</span> <span class="cls">Person</span>::<span class="fn">eat</span>() {
+    cout << name << <span class="str">"在吃饭"</span> << endl;
+}</div>
+
+            <h3>访问权限</h3>
+            <table>
+                <tr><th>访问修饰符</th><th>类内部</th><th>子类</th><th>类外部</th></tr>
+                <tr><td><code>public</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>❌</td></tr>
+                <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td></tr>
+            </table>
+
+            <h3>构造函数 & 析构函数</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">A</span> {
+<span class="kw">public</span>:
+    A() { cout << <span class="str">"构造"</span> << endl; }
+    ~A() { cout << <span class="str">"析构"</span> << endl; }
+};
+
+<span class="com">// 构造函数特点：</span>
+<span class="com">// 1. 与类同名，无返回值</span>
+<span class="com">// 2. 创建对象时自动调用</span>
+<span class="com">// 3. 可以重载</span>
+<span class="com">// 4. 不写的话编译器自动生成默认构造</span>
+
+<span class="com">// 析构函数特点：</span>
+<span class="com">// 1. ~类名，无返回值，无参数</span>
+<span class="com">// 2. 对象销毁时自动调用</span>
+<span class="com">// 3. 不能重载（只有一个）</span>
+<span class="com">// 4. 顺序：先构造的后析构（栈式）</span></div>
+
+            <h3>初始化列表</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Person</span> {
+    string name;
+    <span class="type">int</span> age;
+    <span class="kw">const</span> <span class="type">int</span> id;     <span class="com">// const 成员必须用初始化列表</span>
+    <span class="type">int</span> &ref;        <span class="com">// 引用成员必须用初始化列表</span>
+<span class="kw">public</span>:
+    <span class="cls">Person</span>(string n, <span class="type">int</span> a, <span class="type">int</span> i, <span class="type">int</span> &r)
+        : <span class="fn">name</span>(n), <span class="fn">age</span>(a), <span class="fn">id</span>(i), <span class="fn">ref</span>(r) {}  <span class="com">// 初始化列表</span>
+};
+
+<span class="com">// 初始化列表 vs 构造函数内赋值：</span>
+<span class="com">// 初始化列表：直接构造（效率更高，只调用一次构造）</span>
+<span class="com">// 构造函数内赋值：先默认构造，再赋值（调用两次）</span></div>
+
+            <h3>this 指针</h3>
+            <div class="code-block"><span class="com">// this 指向当前对象，是成员函数的隐含参数</span>
+<span class="kw">class</span> <span class="cls">A</span> {
+    <span class="type">int</span> x;
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">setX</span>(<span class="type">int</span> x) {
+        <span class="kw">this</span>->x = x;   <span class="com">// this->x 是成员变量，x 是参数</span>
+    }
+
+    A& <span class="fn">getSelf</span>() {
+        <span class="kw">return</span> *<span class="kw">this</span>;  <span class="com">// 返回自身引用，用于链式调用</span>
+    }
+};</div>
+
+            <h3>静态成员（static）</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">A</span> {
+<span class="kw">public</span>:
+    <span class="kw">static</span> <span class="type">int</span> count;   <span class="com">// 静态成员变量：所有对象共享一份</span>
+
+    <span class="kw">static</span> <span class="type">void</span> <span class="fn">printCount</span>() {  <span class="com">// 静态成员函数</span>
+        cout << count;     <span class="com">// 只能访问静态成员，没有 this 指针</span>
+    }
+};
+
+<span class="type">int</span> A::count = <span class="num">0</span>;  <span class="com">// 类外初始化</span>
+
+<span class="com">// 访问方式：</span>
+A::count;        <span class="com">// 通过类名</span>
+obj.count;       <span class="com">// 通过对象</span></div>
+
+            <h3>友元（friend）</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">A</span> {
+<span class="kw">private</span>:
+    <span class="type">int</span> x;
+    <span class="kw">friend void</span> <span class="fn">func</span>(A &a);  <span class="com">// 友元函数：可以访问私有成员</span>
+    <span class="kw">friend class</span> B;            <span class="com">// 友元类：B 的所有函数都能访问 A 的私有</span>
+};
+
+<span class="com">// 注意：友元不继承、不传递、不对称</span></div>
+
+            <h3>运算符重载</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Complex</span> {
+    <span class="type">double</span> real, imag;
+<span class="kw">public</span>:
+    <span class="cls">Complex</span>(<span class="type">double</span> r=<span class="num">0</span>, <span class="type">double</span> i=<span class="num">0</span>) : <span class="fn">real</span>(r), <span class="fn">imag</span>(i) {}
+
+    <span class="com">// 成员函数方式重载 +</span>
+    Complex <span class="kw">operator</span>+(<span class="kw">const</span> Complex &other) {
+        <span class="kw">return</span> <span class="cls">Complex</span>(real + other.real, imag + other.imag);
+    }
+
+    <span class="com">// 友元方式重载 <<（必须用友元，因为左操作数是 ostream）</span>
+    <span class="kw">friend</span> ostream& <span class="kw">operator</span><<(ostream &os, <span class="kw">const</span> Complex &c) {
+        os << c.real << <span class="str">"+"</span> << c.imag << <span class="str">"i"</span>;
+        <span class="kw">return</span> os;
+    }
+};
+
+Complex <span class="fn">c1</span>(<span class="num">1</span>,<span class="num">2</span>), <span class="fn">c2</span>(<span class="num">3</span>,<span class="num">4</span>);
+Complex c3 = c1 + c2;  <span class="com">// 4+6i</span>
+cout << c3;            <span class="com">// 输出 4+6i</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 继承与多态 ===================== -->
+    <div class="section" id="inheritance">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128202;</div>
+            <h2>继承与多态</h2>
+            <span class="badge">重点难点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>继承语法</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Animal</span> {   <span class="com">// 父类（基类）</span>
+<span class="kw">protected</span>:
+    string name;
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">eat</span>() { cout << name << <span class="str">"在吃饭"</span> << endl; }
+};
+
+<span class="kw">class</span> <span class="cls">Dog</span> : <span class="kw">public</span> Animal {  <span class="com">// 子类（派生类），公有继承</span>
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">bark</span>() { cout << <span class="str">"汪汪汪"</span> << endl; }
+};
+
+<span class="com">// 继承方式影响成员在子类中的访问权限：</span>
+<span class="com">// public继承：   public→public,   protected→protected, private→不可访问</span>
+<span class="com">// protected继承：public→protected,protected→protected, private→不可访问</span>
+<span class="com">// private继承：  public→private,  protected→private,  private→不可访问</span></div>
+
+            <h3>继承中的构造析构顺序</h3>
+            <div class="code-block"><span class="com">// 构造顺序：父类 → 成员对象 → 子类</span>
+<span class="com">// 析构顺序：子类 → 成员对象 → 父类（相反）</span>
+
+<span class="kw">class</span> <span class="cls">A</span> {
+<span class="kw">public</span>:
+    A() { cout << <span class="str">"A构造"</span>; }
+    ~A() { cout << <span class="str">"A析构"</span>; }
+};
+
+<span class="kw">class</span> <span class="cls">B</span> : <span class="kw">public</span> A {
+    A a;  <span class="com">// 成员对象</span>
+<span class="kw">public</span>:
+    B() { cout << <span class="str">"B构造"</span>; }
+    ~B() { cout << <span class="str">"B析构"</span>; }
+};
+
+<span class="com">// 创建 B 对象输出：A构造 A构造 B构造</span>
+<span class="com">// 销毁 B 对象输出：B析构 A析构 A析构</span></div>
+
+            <h3>函数重写（Override）</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Animal</span> {
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">speak</span>() { cout << <span class="str">"动物叫"</span> << endl; }
+};
+
+<span class="kw">class</span> <span class="cls">Cat</span> : <span class="kw">public</span> Animal {
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">speak</span>() { cout << <span class="str">"喵喵喵"</span> << endl; }  <span class="com">// 重写父类方法</span>
+};
+
+<span class="com">// 注意：重写 vs 重载</span>
+<span class="com">// 重载：同一作用域，同名不同参</span>
+<span class="com">// 重写：父子类，同名同参同返回（虚函数时才是多态）</span></div>
+
+            <h3>虚函数与多态</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Animal</span> {
+<span class="kw">public</span>:
+    <span class="kw">virtual void</span> <span class="fn">speak</span>() { cout << <span class="str">"动物叫"</span>; }  <span class="com">// 虚函数</span>
+    <span class="kw">virtual</span> ~<span class="cls">Animal</span>() {}  <span class="com">// 虚析构函数（重要！）</span>
+};
+
+<span class="kw">class</span> <span class="cls">Dog</span> : <span class="kw">public</span> Animal {
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">speak</span>() <span class="kw">override</span> { cout << <span class="str">"汪汪汪"</span>; }
+};
+
+<span class="kw">class</span> <span class="cls">Cat</span> : <span class="kw">public</span> Animal {
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">speak</span>() <span class="kw">override</span> { cout << <span class="str">"喵喵喵"</span>; }
+};
+
+<span class="com">// 多态：父类指针指向子类对象，调用虚函数</span>
+Animal *p = <span class="kw">new</span> Dog();
+p-><span class="fn">speak</span>();   <span class="com">// 输出 "汪汪汪"（调用的是 Dog 的 speak）</span>
+<span class="kw">delete</span> p;
+
+p = <span class="kw">new</span> Cat();
+p-><span class="fn">speak</span>();   <span class="com">// 输出 "喵喵喵"</span>
+<span class="kw">delete</span> p;</div>
+
+            <div class="callout tip">
+                <div class="callout-title">多态的三个条件</div>
+                1. 有继承关系<br>
+                2. 子类重写父类的<strong>虚函数</strong><br>
+                3. 父类指针/引用指向子类对象，调用虚函数
+            </div>
+
+            <h3>多态实现原理：虚函数表（vtable）</h3>
+            <div class="code-block"><span class="com">// 每个有虚函数的类都有一张虚函数表</span>
+<span class="com">// 每个对象都有一个虚函数指针（vptr）指向自己类的虚函数表</span>
+<span class="com">// 调用虚函数时，通过 vptr 找到 vtable，再找到真正的函数地址</span>
+
+<span class="com">// 所以有虚函数的对象会多 4/8 字节（vptr 的大小）</span>
+<span class="com">// 虚函数调用比普通函数慢一点（多了一次查表）</span></div>
+
+            <div class="callout danger">
+                <div class="callout-title">虚析构函数</div>
+                只要类里有虚函数，<strong>析构函数一定要声明为 virtual</strong>！<br>
+                否则用父类指针 delete 子类对象时，只会调用父类析构，子类析构不执行，导致内存泄漏。
+            </div>
+
+            <h3>纯虚函数 & 抽象类</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">Shape</span> {   <span class="com">// 抽象类：包含纯虚函数的类</span>
+<span class="kw">public</span>:
+    <span class="kw">virtual double</span> <span class="fn">area</span>() = <span class="num">0</span>;  <span class="com">// 纯虚函数</span>
+    <span class="kw">virtual</span> ~<span class="cls">Shape</span>() {}
+};
+
+<span class="kw">class</span> <span class="cls">Circle</span> : <span class="kw">public</span> Shape {
+    <span class="type">double</span> r;
+<span class="kw">public</span>:
+    <span class="cls">Circle</span>(<span class="type">double</span> r) : <span class="fn">r</span>(r) {}
+    <span class="type">double</span> <span class="fn">area</span>() <span class="kw">override</span> { <span class="kw">return</span> <span class="num">3.14</span> * r * r; }
+};
+
+<span class="com">// 抽象类不能实例化</span>
+<span class="com">// Shape s;  // 错误！</span>
+Shape *p = <span class="kw">new</span> <span class="cls">Circle</span>(<span class="num">5</span>);  <span class="com">// 可以用指针/引用</span></div>
+
+            <h3>多重继承 & 菱形继承</h3>
+            <div class="code-block"><span class="com">// 多重继承：一个子类有多个父类</span>
+<span class="kw">class</span> <span class="cls">A</span> { <span class="kw">public</span>: <span class="type">int</span> a; };
+<span class="kw">class</span> <span class="cls">B</span> { <span class="kw">public</span>: <span class="type">int</span> b; };
+<span class="kw">class</span> <span class="cls">C</span> : <span class="kw">public</span> A, <span class="kw">public</span> B { <span class="kw">public</span>: <span class="type">int</span> c; };
+
+<span class="com">// 菱形继承问题：</span>
+<span class="com">//   A</span>
+<span class="com">//  / \</span>
+<span class="com">// B   C</span>
+<span class="com">//  \ /</span>
+<span class="com">//   D</span>
+<span class="com">// D 继承了两份 A 的成员，有二义性和数据冗余</span>
+
+<span class="com">// 解决：虚继承</span>
+<span class="kw">class</span> <span class="cls">B</span> : <span class="kw">virtual public</span> A {};
+<span class="kw">class</span> <span class="cls">C</span> : <span class="kw">virtual public</span> A {};
+<span class="kw">class</span> <span class="cls">D</span> : <span class="kw">public</span> B, <span class="kw">public</span> C {};
+<span class="com">// 现在 D 只有一份 A 的成员了</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== STL ===================== -->
+    <div class="section" id="stl">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128230;</div>
+            <h2>STL 标准模板库</h2>
+            <span class="badge">必会</span>
+        </div>
+        <div class="section-body">
+
+            <h3>六大组件</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">容器（Container）</div>
+                    <div class="card-desc">vector, list, deque, set, map, stack, queue 等</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">算法（Algorithm）</div>
+                    <div class="card-desc">sort, find, copy, reverse, for_each 等</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">迭代器（Iterator）</div>
+                    <div class="card-desc">连接容器和算法的桥梁，像指针一样</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">仿函数（Functor）</div>
+                    <div class="card-desc">重载了 () 的类，当作函数用</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">适配器（Adapter）</div>
+                    <div class="card-desc">stack, queue（底层用 deque 实现）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">空间配置器</div>
+                    <div class="card-desc">内存分配与管理（一般不用管）</div>
+                </div>
+            </div>
+
+            <h3>vector（动态数组）</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><vector></span>
+
+vector<<span class="type">int</span>> v;
+vector<<span class="type">int</span>> <span class="fn">v2</span>(<span class="num">5</span>);         <span class="com">// 5个元素，默认0</span>
+vector<<span class="type">int</span>> <span class="fn">v3</span>(<span class="num">5</span>, <span class="num">10</span>);     <span class="com">// 5个10</span>
+
+<span class="com">// 常用操作</span>
+v.<span class="fn">push_back</span>(<span class="num">1</span>);   <span class="com">// 末尾加元素</span>
+v.<span class="fn">pop_back</span>();      <span class="com">// 末尾删元素</span>
+v[<span class="num">0</span>];             <span class="com">// 下标访问</span>
+v.<span class="fn">size</span>();          <span class="com">// 元素个数</span>
+v.<span class="fn">capacity</span>();      <span class="com">// 容量（不用扩容能存多少）</span>
+v.<span class="fn">empty</span>();         <span class="com">// 是否为空</span>
+v.<span class="fn">clear</span>();         <span class="com">// 清空</span>
+v.<span class="fn">resize</span>(<span class="num">10</span>);      <span class="com">// 改变大小</span>
+v.<span class="fn">reserve</span>(<span class="num">100</span>);    <span class="com">// 预留容量（减少扩容）</span>
+v.<span class="fn">insert</span>(v.<span class="fn">begin</span>(), <span class="num">5</span>);  <span class="com">// 在开头插入</span>
+v.<span class="fn">erase</span>(v.<span class="fn">begin</span>());      <span class="com">// 删除第一个</span>
+
+<span class="com">// 遍历</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < v.<span class="fn">size</span>(); i++) cout << v[i];
+<span class="kw">for</span> (vector<<span class="type">int</span>>::iterator it = v.<span class="fn">begin</span>(); it != v.<span class="fn">end</span>(); ++it) cout << *it;
+<span class="kw">for</span> (<span class="kw">auto</span> x : v) cout << x;  <span class="com">// C++11 范围for</span></div>
+
+            <h3>string（字符串）</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><string></span>
+
+string s = <span class="str">"hello"</span>;
+s += <span class="str">" world"</span>;       <span class="com">// 拼接</span>
+s == <span class="str">"hello"</span>;          <span class="com">// 比较</span>
+s.<span class="fn">size</span>(); s.<span class="fn">length</span>();  <span class="com">// 长度</span>
+s[<span class="num">0</span>]; s.<span class="fn">at</span>(<span class="num">0</span>);       <span class="com">// 访问（at会检查越界）</span>
+s.<span class="fn">substr</span>(<span class="num">1</span>, <span class="num">3</span>);      <span class="com">// 截取：从1开始取3个</span>
+s.<span class="fn">find</span>(<span class="str">"ll"</span>);         <span class="com">// 查找，返回索引或 string::npos</span>
+s.<span class="fn">insert</span>(<span class="num">2</span>, <span class="str">"xx"</span>);   <span class="com">// 插入</span>
+s.<span class="fn">erase</span>(<span class="num">1</span>, <span class="num">3</span>);      <span class="com">// 删除：从1开始删3个</span>
+s.<span class="fn">c_str</span>();            <span class="com">// 转 C 风格字符串</span></div>
+
+            <h3>list（双向链表）</h3>
+            <div class="code-block">list<<span class="type">int</span>> lst;
+
+lst.<span class="fn">push_back</span>(<span class="num">1</span>);    <span class="com">// 尾插</span>
+lst.<span class="fn">push_front</span>(<span class="num">0</span>);   <span class="com">// 头插</span>
+lst.<span class="fn">pop_back</span>();        <span class="com">// 尾删</span>
+lst.<span class="fn">pop_front</span>();       <span class="com">// 头删</span>
+lst.<span class="fn">size</span>();            <span class="com">// 元素个数</span>
+lst.<span class="fn">sort</span>();            <span class="com">// 排序（list自己的sort，不能用std::sort）</span>
+
+<span class="com">// vs vector：</span>
+<span class="com">// vector：连续内存，随机访问快，中间插入慢</span>
+<span class="com">// list：不连续内存，随机访问慢，中间插入快</span></div>
+
+            <h3>stack / queue</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><stack></span>
+<span class="kw">#include</span> <span class="str"><queue></span>
+
+<span class="com">// 栈：后进先出</span>
+stack<<span class="type">int</span>> st;
+st.<span class="fn">push</span>(<span class="num">1</span>);     <span class="com">// 压栈</span>
+st.<span class="fn">top</span>();        <span class="com">// 栈顶元素</span>
+st.<span class="fn">pop</span>();        <span class="com">// 弹栈</span>
+st.<span class="fn">empty</span>();      <span class="com">// 是否为空</span>
+
+<span class="com">// 队列：先进先出</span>
+queue<<span class="type">int</span>> q;
+q.<span class="fn">push</span>(<span class="num">1</span>);      <span class="com">// 入队</span>
+q.<span class="fn">front</span>();      <span class="com">// 队头</span>
+q.<span class="fn">back</span>();       <span class="com">// 队尾</span>
+q.<span class="fn">pop</span>();        <span class="com">// 出队</span></div>
+
+            <h3>set / multiset</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><set></span>
+
+set<<span class="type">int</span>> s;      <span class="com">// 有序，不重复（红黑树实现）</span>
+
+s.<span class="fn">insert</span>(<span class="num">3</span>);     <span class="com">// 插入</span>
+s.<span class="fn">insert</span>(<span class="num">1</span>);
+s.<span class="fn">insert</span>(<span class="num">2</span>);
+s.<span class="fn">insert</span>(<span class="num">1</span>);     <span class="com">// 重复元素不会插入，自动去重</span>
+
+s.<span class="fn">size</span>();        <span class="com">// 元素个数 = 3</span>
+s.<span class="fn">count</span>(<span class="num">1</span>);      <span class="com">// 元素出现次数（set里只能是0或1）</span>
+s.<span class="fn">find</span>(<span class="num">2</span>);       <span class="com">// 查找，返回迭代器，找不到返回 s.end()</span>
+s.<span class="fn">erase</span>(<span class="num">1</span>);      <span class="com">// 删除</span>
+
+<span class="com">// 遍历（自动从小到大）</span>
+<span class="kw">for</span> (<span class="kw">auto</span> x : s) cout << x;  <span class="com">// 1 2 3</span>
+
+<span class="com">// multiset：允许重复元素</span>
+multiset<<span class="type">int</span>> ms;</div>
+
+            <h3>map / multimap</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><map></span>
+
+map<string, <span class="type">int</span>> m;     <span class="com">// key-value 对，key有序不重复</span>
+
+m[<span class="str">"apple"</span>] = <span class="num">5</span>;        <span class="com">// 插入/修改</span>
+m[<span class="str">"banana"</span>] = <span class="num">3</span>;
+m.<span class="fn">insert</span>({<span class="str">"cherry"</span>, <span class="num">8</span>});  <span class="com">// 另一种插入方式</span>
+
+cout << m[<span class="str">"apple"</span>];     <span class="com">// 5</span>
+m.<span class="fn">size</span>();               <span class="com">// 3</span>
+m.<span class="fn">count</span>(<span class="str">"banana"</span>);     <span class="com">// 1（key存在返回1，不存在返回0）</span>
+m.<span class="fn">find</span>(<span class="str">"apple"</span>);       <span class="com">// 查找，返回迭代器</span>
+m.<span class="fn">erase</span>(<span class="str">"banana"</span>);     <span class="com">// 删除</span>
+
+<span class="com">// 遍历（按key排序）</span>
+<span class="kw">for</span> (<span class="kw">auto</span> &p : m) {
+    cout << p.first << <span class="str">": "</span> << p.second << endl;
+}
+
+<span class="com">// unordered_map：哈希表实现，无序，查找更快（C++11）</span></div>
+
+            <h3>常用算法（algorithm）</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><algorithm></span>
+<span class="kw">#include</span> <span class="str"><numeric></span>
+
+vector<<span class="type">int</span>> v = {<span class="num">3</span>,<span class="num">1</span>,<span class="num">4</span>,<span class="num">1</span>,<span class="num">5</span>,<span class="num">9</span>};
+
+<span class="fn">sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());           <span class="com">// 升序排序</span>
+<span class="fn">sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="fn">greater</span><<span class="type">int</span>>());  <span class="com">// 降序排序</span>
+
+<span class="fn">find</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="num">5</span>);   <span class="com">// 查找，返回迭代器</span>
+<span class="fn">count</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="num">1</span>);  <span class="com">// 计数 = 2</span>
+
+<span class="fn">reverse</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());   <span class="com">// 反转</span>
+<span class="fn">swap</span>(a, b);                   <span class="com">// 交换</span>
+
+<span class="fn">accumulate</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="num">0</span>);  <span class="com">// 求和（需要 #include <numeric>）</span>
+
+<span class="fn">max_element</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());  <span class="com">// 最大值位置</span>
+<span class="fn">min_element</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());  <span class="com">// 最小值位置</span>
+
+<span class="fn">unique</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());     <span class="com">// 去重（相邻重复元素移到末尾，返回新结尾）</span>
+<span class="com">// 用法：先 sort 再 unique 再 erase</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 内存管理 ===================== -->
+    <div class="section" id="memory">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#129520;</div>
+            <h2>C++ 内存管理</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>C++ 内存分区</h3>
+            <table>
+                <tr><th>区域</th><th>存储内容</th><th>管理方式</th><th>特点</th></tr>
+                <tr><td><strong>栈</strong></td><td>局部变量、函数参数</td><td>编译器自动</td><td>小、快、自动释放</td></tr>
+                <tr><td><strong>堆</strong></td><td>new/malloc 的对象</td><td>程序员手动</td><td>大、手动管理</td></tr>
+                <tr><td><strong>全局/静态区</strong></td><td>全局变量、static 变量</td><td>编译器自动</td><td>程序运行期都存在</td></tr>
+                <tr><td><strong>常量区</strong></td><td>字符串常量、const 全局变量</td><td>编译器自动</td><td>只读</td></tr>
+                <tr><td><strong>代码区</strong></td><td>函数体的二进制代码</td><td>操作系统</td><td>只读，共享</td></tr>
+            </table>
+
+            <h3>new/delete vs malloc/free</h3>
+            <table>
+                <tr><th>特性</th><th>malloc/free</th><th>new/delete</th></tr>
+                <tr><td>是什么</td><td>C 库函数</td><td>C++ 操作符</td></tr>
+                <tr><td>构造/析构</td><td>不调用</td><td>调用</td></tr>
+                <tr><td>返回类型</td><td>void*，需强转</td><td>具体类型指针</td></tr>
+                <tr><td>分配大小</td><td>手动计算字节数</td><td>自动计算</td></tr>
+                <tr><td>失败处理</td><td>返回 NULL</td><td>抛 bad_alloc 异常</td></tr>
+                <tr><td>数组</td><td>无特殊处理</td><td>new[] / delete[]</td></tr>
+                <tr><td>可重载</td><td>不能</td><td>可以</td></tr>
+            </table>
+
+            <h3>浅拷贝 vs 深拷贝</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">String</span> {
+    <span class="type">char</span> *str;
+<span class="kw">public</span>:
+    <span class="cls">String</span>(<span class="type">const char</span> *s) {
+        str = <span class="kw">new char</span>[<span class="fn">strlen</span>(s)+<span class="num">1</span>];
+        <span class="fn">strcpy</span>(str, s);
+    }
+
+    <span class="com">// 默认拷贝构造 = 浅拷贝：只复制指针地址</span>
+    <span class="com">// 两个对象指向同一块内存，析构时double free</span>
+
+    <span class="com">// 深拷贝：重新申请内存，复制内容</span>
+    <span class="cls">String</span>(<span class="kw">const</span> String &other) {
+        str = <span class="kw">new char</span>[<span class="fn">strlen</span>(other.str)+<span class="num">1</span>];
+        <span class="fn">strcpy</span>(str, other.str);
+    }
+
+    <span class="com">// 赋值运算符重载也要深拷贝</span>
+    String& <span class="kw">operator</span>=(<span class="kw">const</span> String &other) {
+        <span class="kw">if</span> (<span class="kw">this</span> != &other) {     <span class="com">// 防止自赋值</span>
+            <span class="kw">delete</span>[] str;           <span class="com">// 释放旧资源</span>
+            str = <span class="kw">new char</span>[<span class="fn">strlen</span>(other.str)+<span class="num">1</span>];
+            <span class="fn">strcpy</span>(str, other.str);
+        }
+        <span class="kw">return</span> *<span class="kw">this</span>;
+    }
+
+    ~<span class="cls">String</span>() { <span class="kw">delete</span>[] str; }
+};</div>
+
+            <div class="callout warn">
+                <div class="callout-title">什么时候需要自己写拷贝构造？</div>
+                类里有<strong>指针成员</strong>或<strong>动态分配的资源</strong>（文件、网络连接等）时，必须自己写深拷贝和赋值运算符重载。这就是<strong>三/五法则</strong>。
+            </div>
+
+            <h3>三法则 / 五法则 / 零法则</h3>
+            <div class="code-block"><span class="com">// 三法则（C++98）：</span>
+<span class="com">// 如果你需要写析构函数、拷贝构造、赋值运算符中的任意一个，</span>
+<span class="com">// 那三个几乎都要写。</span>
+
+<span class="com">// 五法则（C++11）：</span>
+<span class="com">// 加上移动构造和移动赋值，共5个</span>
+<span class="kw">class</span> <span class="cls">A</span> {
+<span class="kw">public</span>:
+    ~A();                          <span class="com">// 析构</span>
+    A(<span class="kw">const</span> A&);                  <span class="com">// 拷贝构造</span>
+    A& <span class="kw">operator</span>=(<span class="kw">const</span> A&);     <span class="com">// 拷贝赋值</span>
+    A(A&&);                        <span class="com">// 移动构造（C++11）</span>
+    A& <span class="kw">operator</span>=(A&&);          <span class="com">// 移动赋值（C++11）</span>
+};
+
+<span class="com">// 零法则（最佳实践）：</span>
+<span class="com">// 尽量不用裸指针，用智能指针/STL容器，</span>
+<span class="com">// 让编译器自动生成这5个函数，你一个都不用写。</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 现代 C++ ===================== -->
+    <div class="section" id="modern-cpp">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128640;</div>
+            <h2>现代 C++ 特性（C++11+）</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>auto 类型推导</h3>
+            <div class="code-block"><span class="kw">auto</span> i = <span class="num">10</span>;            <span class="com">// int</span>
+<span class="kw">auto</span> d = <span class="num">3.14</span>;          <span class="com">// double</span>
+<span class="kw">auto</span> s = <span class="str">"hello"</span>;       <span class="com">// const char*</span>
+<span class="kw">auto</span> it = v.<span class="fn">begin</span>();     <span class="com">// vector<int>::iterator</span>
+
+<span class="com">// 注意：auto 会丢掉引用和顶层 const</span>
+<span class="kw">const int</span> &a = b;
+<span class="kw">auto</span> c = a;   <span class="com">// c 是 int，不是 const int&</span>
+<span class="kw">auto</span> &d = a;  <span class="com">// d 是 const int&</span></div>
+
+            <h3>范围 for 循环</h3>
+            <div class="code-block">vector<<span class="type">int</span>> v = {<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>};
+
+<span class="kw">for</span> (<span class="kw">auto</span> x : v)       <span class="com">// 值拷贝</span>
+    cout << x;
+
+<span class="kw">for</span> (<span class="kw">auto</span> &x : v)      <span class="com">// 引用（避免拷贝，可修改）</span>
+    x++;
+
+<span class="kw">for</span> (<span class="kw">const auto</span> &x : v) <span class="com">// const引用（只读，高效）</span>
+    cout << x;</div>
+
+            <h3>智能指针</h3>
+            <div class="code-block"><span class="kw">#include</span> <span class="str"><memory></span>
+
+<span class="com">// unique_ptr：独占所有权，不能拷贝，只能移动</span>
+unique_ptr<<span class="type">int</span>> p1(<span class="kw">new int</span>(<span class="num">10</span>));
+unique_ptr<<span class="type">int</span>> p2 = <span class="fn">make_unique</span><<span class="type">int</span>>(<span class="num">10</span>);  <span class="com">// C++14 推荐</span>
+<span class="com">// unique_ptr<int> p3 = p1;  // 错误！不能拷贝</span>
+unique_ptr<<span class="type">int</span>> p3 = <span class="fn">move</span>(p1); <span class="com">// 可以移动，p1 变成空</span>
+
+<span class="com">// shared_ptr：共享所有权，引用计数</span>
+shared_ptr<<span class="type">int</span>> sp1 = <span class="fn">make_shared</span><<span class="type">int</span>>(<span class="num">10</span>);
+shared_ptr<<span class="type">int</span>> sp2 = sp1;   <span class="com">// 引用计数=2</span>
+sp1.<span class="fn">reset</span>();              <span class="com">// sp1放弃所有权，计数=1</span>
+sp2.<span class="fn">use_count</span>();         <span class="com">// 引用计数</span>
+
+<span class="com">// weak_ptr：不增加引用计数，解决循环引用</span>
+weak_ptr<<span class="type">int</span>> wp = sp2;
+wp.<span class="fn">lock</span>();  <span class="com">// 提升为 shared_ptr（对象还在的话）</span>
+wp.<span class="fn">expired</span>();  <span class="com">// 对象是否已释放</span></div>
+
+            <h3>右值引用 & 移动语义</h3>
+            <div class="code-block"><span class="type">int</span> a = <span class="num">10</span>;
+<span class="type">int</span> &lref = a;       <span class="com">// 左值引用（绑定左值）</span>
+<span class="type">int</span> &&rref = <span class="num">10</span>;    <span class="com">// 右值引用（绑定右值/临时对象）</span>
+
+<span class="com">// move：把左值转成右值引用</span>
+string s1 = <span class="str">"hello"</span>;
+string s2 = <span class="fn">move</span>(s1);  <span class="com">// 移动构造，s1变成空，s2接管资源</span>
+<span class="com">// 比拷贝快（只交换指针，不复制数据）</span></div>
+
+            <h3>Lambda 表达式</h3>
+            <div class="code-block"><span class="com">// 语法：[捕获列表](参数) -> 返回值类型 { 函数体 }</span>
+
+<span class="kw">auto</span> add = [](<span class="type">int</span> a, <span class="type">int</span> b) { <span class="kw">return</span> a + b; };
+<span class="fn">add</span>(<span class="num">1</span>, <span class="num">2</span>);  <span class="com">// 3</span>
+
+<span class="com">// 捕获列表</span>
+<span class="type">int</span> x = <span class="num">10</span>;
+[=]() { <span class="kw">return</span> x; };    <span class="com">// = ：值捕获所有变量</span>
+[&]() { x++; };         <span class="com">// & ：引用捕获所有变量</span>
+[x]() { <span class="kw">return</span> x; };   <span class="com">// 只值捕获x</span>
+[&x]() { x++; };        <span class="com">// 只引用捕获x</span>
+[=, &x]() { x++; };     <span class="com">// 值捕获所有，x除外（引用）</span>
+
+<span class="com">// 典型用途：STL 算法</span>
+<span class="fn">sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), [](<span class="type">int</span> a, <span class="type">int</span> b) { <span class="kw">return</span> a > b; });
+<span class="fn">for_each</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), [](<span class="type">int</span> x) { cout << x; });</div>
+
+            <h3>nullptr</h3>
+            <div class="code-block"><span class="com">// C++11 之前用 NULL（本质是 0）</span>
+<span class="com">// C++11 之后用 nullptr（专门的空指针类型）</span>
+
+<span class="type">int</span> *p = <span class="kw">nullptr</span>;   <span class="com">// 推荐</span>
+<span class="com">// 比 NULL 更安全，不会和整数 0 混淆</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>C 和 C++ 的区别？</td>
+                    <td>C是面向过程，C++支持面向对象、泛型编程、STL、异常处理、引用、new/delete、函数重载等。C++是C的超集</td>
+                </tr>
+                <tr>
+                    <td>面向对象的三大特性？</td>
+                    <td>封装：隐藏实现细节，只暴露接口（public/private/protected）<br>
+                        继承：子类复用父类属性和方法，实现代码复用<br>
+                        多态：同一接口不同实现，分编译时多态（重载、模板）和运行时多态（虚函数）</td>
+                </tr>
+                <tr>
+                    <td>多态的实现原理？</td>
+                    <td>运行时多态通过虚函数表(vtable)实现。每个有虚函数的类有一张虚函数表，每个对象有一个虚指针(vptr)指向自己类的虚函数表。调用虚函数时，通过vptr找到vtable再找到函数地址</td>
+                </tr>
+                <tr>
+                    <td>构造函数可以是虚函数吗？析构函数呢？</td>
+                    <td>构造函数不能是虚函数（对象还没完全构造好，vptr还没初始化）。<br>
+                        析构函数建议是虚函数，尤其是有虚函数的类。否则用父类指针delete子类对象时，只会调用父类析构，导致内存泄漏</td>
+                </tr>
+                <tr>
+                    <td>虚函数和纯虚函数的区别？</td>
+                    <td>虚函数有实现，子类可以重写也可以不重写。纯虚函数只有声明没有实现（=0），包含纯虚函数的类是抽象类，不能实例化，子类必须实现纯虚函数才能实例化</td>
+                </tr>
+                <tr>
+                    <td>重载、重写、隐藏的区别？</td>
+                    <td>重载：同一作用域，函数名相同参数不同<br>
+                        重写（覆盖）：子类重写父类的虚函数，函数名参数返回值都相同<br>
+                        隐藏：子类的函数名和父类一样（不管参数），父类的同名函数被隐藏</td>
+                </tr>
+                <tr>
+                    <td>指针和引用的区别？</td>
+                    <td>1. 引用必须初始化，指针可以不<br>
+                        2. 引用不能改指向，指针可以<br>
+                        3. 引用不能为空，指针可以是NULL<br>
+                        4. sizeof引用是变量大小，sizeof指针是4/8字节<br>
+                        5. 引用是变量别名，指针是存地址的变量</td>
+                </tr>
+                <tr>
+                    <td>malloc/free 和 new/delete 的区别？</td>
+                    <td>malloc是函数，new是操作符；malloc不调用构造，new调用；malloc返回void*，new返回具体类型；malloc失败返回NULL，new抛异常；new可以重载</td>
+                </tr>
+                <tr>
+                    <td>什么是内存泄漏？怎么检测？</td>
+                    <td>申请的内存用完不释放就是内存泄漏。检测工具：Linux下valgrind，Windows下Visual Studio的CRT调试库、Intel Inspector等。避免方法：用智能指针、RAII</td>
+                </tr>
+                <tr>
+                    <td>什么是 RAII？</td>
+                    <td>资源获取即初始化（Resource Acquisition Is Initialization）。用对象管理资源，构造时获取资源，析构时释放资源。智能指针、lock_guard都是典型应用</td>
+                </tr>
+                <tr>
+                    <td>深拷贝和浅拷贝的区别？</td>
+                    <td>浅拷贝：只复制指针的值，两个对象指向同一块内存，析构时double free<br>
+                        深拷贝：重新申请内存并复制内容，各有各的资源，互不影响<br>
+                        类里有指针成员时必须用深拷贝</td>
+                </tr>
+                <tr>
+                    <td>static 关键字的作用？</td>
+                    <td>C语言中：1. 静态局部变量（延长生命周期）2. 静态全局变量/函数（限制作用域在本文件）<br>
+                        C++中：1. 静态成员变量（所有对象共享）2. 静态成员函数（只能访问静态成员，没有this指针）</td>
+                </tr>
+                <tr>
+                    <td>const 关键字的作用？</td>
+                    <td>1. const变量：只读，不能修改<br>
+                        2. const指针：指向const的指针 / const指针<br>
+                        3. const成员函数：不能修改成员变量<br>
+                        4. const引用：只读传参，避免拷贝</td>
+                </tr>
+                <tr>
+                    <td>vector 的底层原理？</td>
+                    <td>底层是动态数组，连续内存。容量不够时自动扩容（通常1.5倍或2倍），扩容时要重新分配内存、拷贝元素、释放旧内存。所以push_back均摊时间复杂度是O(1)。可以用reserve预分配减少扩容</td>
+                </tr>
+                <tr>
+                    <td>map 和 unordered_map 的区别？</td>
+                    <td>map底层是红黑树，有序，查找O(logn)，插入删除O(logn)<br>
+                        unordered_map底层是哈希表，无序，查找平均O(1)，最坏O(n)，消耗更多内存<br>
+                        需要有序用map，追求速度用unordered_map</td>
+                </tr>
+                <tr>
+                    <td>什么是智能指针？</td>
+                    <td>C++11引入，用RAII管理动态内存，自动释放防止泄漏。<br>
+                        unique_ptr：独占所有权，不能拷贝<br>
+                        shared_ptr：共享所有权，引用计数<br>
+                        weak_ptr：辅助shared_ptr，解决循环引用问题</td>
+                </tr>
+                <tr>
+                    <td>shared_ptr 的线程安全？</td>
+                    <td>引用计数是原子操作，是线程安全的。但对象本身的读写不是线程安全的，多线程读写同一个对象需要加锁</td>
+                </tr>
+                <tr>
+                    <td>什么是循环引用？怎么解决？</td>
+                    <td>两个对象互相用shared_ptr指向对方，导致引用计数永远不为0，内存泄漏。解决方法：把其中一方改成weak_ptr，weak_ptr不增加引用计数</td>
+                </tr>
+                <tr>
+                    <td>左值和右值的区别？</td>
+                    <td>左值：可以取地址、有名字、持久存在（如变量）<br>
+                        右值：不能取地址、没名字、临时的（如字面量、临时对象、std::move后的对象）<br>
+                        C++11引入右值引用(&&)实现移动语义，减少拷贝提高效率</td>
+                </tr>
+                <tr>
+                    <td>什么是 Lambda？</td>
+                    <td>匿名函数，可以捕获外部变量。组成：[捕获列表](参数列表) mutable -> 返回类型 {函数体}。捕获方式：=值捕获全部、&引用捕获全部、指定变量捕获</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST C/C++ & 面向对象复习笔记 &nbsp;|&nbsp; 2026-09-29</p>
+    <p>C语言基础 → 指针内存 → C++新特性 → 面向对象 → 继承多态 → STL → 内存管理 → 现代C++ → 面试速答</p>
+</div>
+
+</body>
+</html>
