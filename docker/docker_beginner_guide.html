@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker 入门完全指南 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117; --card: #161b22; --border: #30363d;
+            --text: #c9d1d9; --heading: #f0f6fc; --accent: #2496ed;
+            --green: #3fb950; --yellow: #d29922; --red: #f85149;
+            --purple: #bc8cff; --orange: #e8873a; --code-bg: #1c2128; --pink: #db61a2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.75; font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        .header {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.82em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+        .section {
+            margin-bottom: 40px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 18px 24px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.3em; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.2em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.78em;
+        }
+        .section-body { padding: 20px 24px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th {
+            text-align: left; padding: 8px 12px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.82em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9em; }
+        tr:hover td { background: rgba(36, 150, 237, 0.06); }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.85em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px 18px; margin: 10px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82em; line-height: 1.55; color: var(--text); white-space: pre;
+        }
+        .code-block .kw { color: var(--purple); font-weight: bold; }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .opt { color: var(--yellow); }
+        .callout {
+            border-left: 4px solid; padding: 14px 18px; margin: 12px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 5px; font-size: 0.92em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.75em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px; margin: 12px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 6px; font-size: 0.9em; }
+        .card .card-desc { color: #8b949e; font-size: 0.82em; }
+        h3 { color: var(--accent); margin: 18px 0 10px; font-size: 1.05em; }
+        h4 { color: var(--yellow); margin: 14px 0 8px; font-size: 0.95em; }
+        p { margin-bottom: 10px; }
+        ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        li { margin-bottom: 4px; font-size: 0.92em; }
+        .footer {
+            text-align: center; padding: 30px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.82em;
+        }
+        .arch-box {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 20px; margin: 12px 0;
+            font-family: 'Cascadia Code', monospace; font-size: 0.85em;
+            text-align: center; line-height: 2.2;
+        }
+        .arch-box .layer { padding: 8px; margin: 4px; border-radius: 6px; }
+        .arch-box .client { background: rgba(88,166,255,0.15); color: #58a6ff; }
+        .arch-box .host { background: rgba(210,153,34,0.15); color: #d29922; }
+        .arch-box .containers { background: rgba(63,185,80,0.15); color: #3fb950; }
+        .arch-box .os { background: rgba(188,140,255,0.15); color: #bc8cff; }
+        .arch-box .hw { background: rgba(248,81,73,0.15); color: #f85149; }
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>Docker 入门完全指南</h1>
+    <div class="meta">容器化技术 · 镜像容器 · Dockerfile · 数据卷 · 网络 · Compose &nbsp;|&nbsp; 2026-09-29</div>
+</div>
+
+<div class="nav">
+    <a href="#intro">什么是Docker</a>
+    <a href="#install">安装配置</a>
+    <a href="#basic">基本概念</a>
+    <a href="#commands">常用命令</a>
+    <a href="#dockerfile">Dockerfile</a>
+    <a href="#volume">数据卷</a>
+    <a href="#network">网络</a>
+    <a href="#compose">Docker Compose</a>
+    <a href="#bestpractice">最佳实践</a>
+    <a href="#interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <!-- ===================== 什么是 Docker ===================== -->
+    <div class="section" id="intro">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(36,150,237,0.15);color:#2496ed;">&#128007;</div>
+            <h2>什么是 Docker</h2>
+            <span class="badge">入门</span>
+        </div>
+        <div class="section-body">
+
+            <p><strong>Docker</strong> 是一个容器化平台，把应用和它的依赖打包到一个<strong>轻量、可移植的容器</strong>里，然后可以在任何 Linux/Windows/macOS 机器上运行。</p>
+
+            <div class="callout tip">
+                <div class="callout-title">一句话理解</div>
+                Docker 解决了 <strong>"在我机器上能跑啊，怎么在你机器上就不行了？"</strong> 的世纪难题。<br>
+                有了 Docker，你的应用 + 运行环境 + 配置全部打包在一起，到哪都能跑，而且环境完全一致。
+            </div>
+
+            <h3>容器 vs 虚拟机</h3>
+            <table>
+                <tr><th>对比项</th><th>容器（Docker）</th><th>虚拟机（VM）</th></tr>
+                <tr><td>体积</td><td>小（MB 级）</td><td>大（GB 级）</td></tr>
+                <tr><td>启动速度</td><td>秒级</td><td>分钟级</td></tr>
+                <tr><td>资源占用</td><td>少（共享宿主机内核）</td><td>多（每个都有完整 OS）</td></tr>
+                <tr><td>隔离性</td><td>进程级隔离</td><td>系统级隔离（更强）</td></tr>
+                <tr><td>性能</td><td>接近原生</td><td>有损耗</td></tr>
+                <tr><td>可移植性</td><td>强，跨平台一致</td><td>较强，但镜像大</td></tr>
+            </table>
+
+            <div class="arch-box">
+                <div class="layer client">应用 A | 应用 B | 应用 C</div>
+                <div class="layer containers">Docker 容器（每个有自己的依赖和运行时）</div>
+                <div class="layer host">Docker 引擎</div>
+                <div class="layer os">宿主机操作系统（共享内核）</div>
+                <div class="layer hw">物理硬件</div>
+                <p style="margin-top:12px;color:#8b949e;">容器架构（快、轻）</p>
+            </div>
+
+            <h3>Docker 的核心优势</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">一致的运行环境</div>
+                    <div class="card-desc">开发、测试、生产环境完全一样，再也没有"在我机器上能跑"的问题</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">快速部署</div>
+                    <div class="card-desc">有镜像就能秒级启动容器，部署上线快得飞起</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">资源利用率高</div>
+                    <div class="card-desc">一台机器可以跑几百个容器，比 VM 省多了</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">版本管理</div>
+                    <div class="card-desc">镜像有版本号，可以回滚，可以追溯</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">微服务友好</div>
+                    <div class="card-desc">每个微服务一个容器，隔离部署，互不影响</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">生态丰富</div>
+                    <div class="card-desc">Docker Hub 上有几十万个现成镜像，拿来就用</div>
+                </div>
+            </div>
+
+            <h3>三大核心概念</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">镜像（Image）</div>
+                    <div class="card-desc">
+                        <strong>只读</strong>的模板，包含应用和运行环境。<br>
+                        类比：软件安装包 / 类（class）<br>
+                        一个镜像可以创建多个容器
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">容器（Container）</div>
+                    <div class="card-desc">
+                        镜像运行的实例，<strong>可读写</strong>。<br>
+                        类比：安装好的软件 / 对象（instance）<br>
+                        容器之间互相隔离
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">仓库（Repository）</div>
+                    <div class="card-desc">
+                        存放镜像的地方。<br>
+                        类比：应用商店 / GitHub<br>
+                        Docker Hub 是最大的公共仓库
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div class="callout-title">镜像 vs 容器</div>
+                就像面向对象里的 <strong>类和对象</strong>：<br>
+                镜像是类（模板），容器是对象（实例）。<br>
+                一个类可以 new 很多对象，一个镜像可以创建很多容器。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 安装配置 ===================== -->
+    <div class="section" id="install">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128265;</div>
+            <h2>安装与配置</h2>
+            <span class="badge">入门</span>
+        </div>
+        <div class="section-body">
+
+            <h3>Windows 安装 Docker Desktop</h3>
+            <ol>
+                <li>去官网下载 Docker Desktop for Windows</li>
+                <li>双击安装，勾选 "Use WSL 2 instead of Hyper-V"</li>
+                <li>安装完成后重启电脑</li>
+                <li>打开 Docker Desktop，等待启动完成</li>
+                <li>打开 cmd 或 PowerShell，输入 <code>docker --version</code> 验证</li>
+            </ol>
+
+            <div class="callout warn">
+                <div class="callout-title">WSL2 后端推荐</div>
+                Docker Desktop 推荐用 WSL2 后端，比 Hyper-V 更快、资源占用更少。<br>
+                在 Docker Desktop → Settings → General 里确认 "Use the WSL 2 based engine" 已勾选。
+            </div>
+
+            <h3>配置镜像加速（国内必做！）</h3>
+            <p>默认从 Docker Hub 拉镜像很慢，配置国内镜像站：</p>
+            <div class="code-block"><span class="com">// Docker Desktop → Settings → Docker Engine</span>
+<span class="com">// 在 JSON 里添加 registry-mirrors：</span>
+
+{
+  <span class="str">"registry-mirrors"</span>: [
+    <span class="str">"https://docker.mirrors.ustc.edu.cn"</span>,
+    <span class="str">"https://hub-mirror.c.163.com"</span>,
+    <span class="str">"https://mirror.baidubce.com"</span>
+  ]
+}
+
+<span class="com">// Apply & restart 重启生效</span></div>
+
+            <h3>验证安装</h3>
+            <div class="code-block"><span class="com"># 查看版本</span>
+docker --version
+docker version     <span class="com"># 更详细</span>
+
+<span class="com"># 运行 hello-world 测试</span>
+docker run hello-world
+
+<span class="com"># 看到 "Hello from Docker!" 就说明装好了</span></div>
+
+            <h3>开启 WSL2 集成</h3>
+            <p>在 Docker Desktop → Settings → Resources → WSL Integration 里，把你的 Ubuntu-22.04 开关打开。这样你在 WSL 里也能用 docker 命令。</p>
+        </div>
+    </div>
+
+    <!-- ===================== 基本概念 ===================== -->
+    <div class="section" id="basic">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(219,97,162,0.15);color:#db61a2;">&#128218;</div>
+            <h2>核心概念详解</h2>
+            <span class="badge">基础</span>
+        </div>
+        <div class="section-body">
+
+            <h3>镜像（Image）</h3>
+            <p>镜像是<strong>分层</strong>的。每一条 Dockerfile 指令创建一层，每层都是只读的。容器在最上面加了一层可写层。</p>
+
+            <div class="code-block"><span class="com">// 镜像分层示例：</span>
+┌─────────────────────┐
+│   可写层（容器层）     │  ← 只有容器有，可读写
+├─────────────────────┤
+│   应用代码层          │  ← 镜像层，只读
+├─────────────────────┤
+│   依赖库层           │  ← 镜像层，只读
+├─────────────────────┤
+│   操作系统基础层       │  ← 镜像层，只读
+└─────────────────────┘
+
+<span class="com">// 好处：多个镜像可以共享底层，节省空间</span>
+<span class="com">// 比如两个都用 Ubuntu 基础镜像的应用，只存一份 Ubuntu</span></div>
+
+            <h3>容器（Container）</h3>
+            <p>容器是镜像的运行实例。每个容器有自己的：</p>
+            <ul>
+                <li>文件系统（在镜像上加一层可写层）</li>
+                <li>进程空间（独立的 PID）</li>
+                <li>网络空间（独立的 IP 和端口）</li>
+                <li>用户空间（独立的用户）</li>
+            </ul>
+
+            <div class="callout warn">
+                <div class="callout-title">注意：容器里的数据不持久！</div>
+                容器被删除时，可写层的数据也会一起删掉。<br>
+                需要持久化的数据要用 <strong>数据卷（Volume）</strong> 或 <strong>挂载目录</strong>。
+            </div>
+
+            <h3>容器的生命周期</h3>
+            <div class="code-block">docker create    创建（不启动）
+docker start     启动
+docker run       创建并启动（常用！）
+docker pause     暂停
+docker unpause   恢复
+docker stop      停止（优雅退出，发 SIGTERM，等10秒再 SIGKILL）
+docker kill      强制停止（直接 SIGKILL）
+docker restart   重启
+docker rm        删除（先停止才能删，加 -f 强制删）
+
+<span class="com">// 状态：created → running → paused → stopped → deleted</span></div>
+
+            <h3>仓库（Registry）</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">Docker Hub</div>
+                    <div class="card-desc">官方公共仓库，镜像最全，国内访问慢</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">阿里云镜像仓库</div>
+                    <div class="card-desc">国内速度快，个人版免费</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">腾讯云镜像仓库</div>
+                    <div class="card-desc">国内速度快，有免费额度</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">私有仓库</div>
+                    <div class="card-desc">公司内部用，用 Harbor 或 registry 自建</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 常用命令 ===================== -->
+    <div class="section" id="commands">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#9000;</div>
+            <h2>常用命令速查</h2>
+            <span class="badge">必会</span>
+        </div>
+        <div class="section-body">
+
+            <h3>镜像操作</h3>
+            <div class="code-block"><span class="com"># 查看本地镜像</span>
+docker images
+docker image ls
+
+<span class="com"># 拉取镜像</span>
+docker pull ubuntu:22.04       <span class="com"># :22.04 是标签（版本号），不写默认 latest</span>
+docker pull nginx
+docker pull mysql:8.0
+
+<span class="com"># 删除镜像</span>
+docker rmi 镜像名/ID
+docker image rm 镜像名/ID
+docker rmi -f 镜像名/ID        <span class="com"># 强制删除</span>
+
+<span class="com"># 清理无用镜像</span>
+docker image prune             <span class="com"># 删除悬空镜像（没有标签的）</span>
+docker image prune -a          <span class="com"># 删除所有没被容器使用的镜像</span>
+
+<span class="com"># 查看镜像详情</span>
+docker inspect 镜像名/ID
+
+<span class="com"># 镜像历史（看分层）</span>
+docker history 镜像名/ID
+
+<span class="com"># 导出镜像为文件</span>
+docker save -o myimage.tar 镜像名
+
+<span class="com"># 从文件导入镜像</span>
+docker load -i myimage.tar
+
+<span class="com"># 给镜像打标签</span>
+docker tag 源镜像:标签 新镜像:新标签</div>
+
+            <h3>容器操作</h3>
+            <div class="code-block"><span class="com"># 创建并启动容器</span>
+docker run nginx                                    <span class="com"># 前台运行</span>
+docker run -d nginx                                 <span class="com"># 后台运行（detached）</span>
+docker run -d --name mynginx nginx                  <span class="com"># 指定名字</span>
+docker run -d -p 8080:80 nginx                      <span class="com"># 端口映射：主机8080 → 容器80</span>
+docker run -d -p 127.0.0.1:8080:80 nginx            <span class="com"># 只允许本机访问</span>
+docker run -e MYSQL_ROOT_PASSWORD=123456 mysql      <span class="com"># 设置环境变量</span>
+docker run -v /host/path:/container/path nginx      <span class="com"># 挂载目录</span>
+docker run -it ubuntu:22.04 /bin/bash               <span class="com"># 交互式进入容器</span>
+docker run --rm nginx                               <span class="com"># 容器停止后自动删除</span>
+docker run --restart=always nginx                   <span class="com"># 总是自动重启</span>
+
+<span class="com"># 查看容器列表</span>
+docker ps                   <span class="com"># 正在运行的</span>
+docker ps -a                <span class="com"># 所有的（包括停止的）</span>
+docker ps -q                <span class="com"># 只显示ID</span>
+
+<span class="com"># 启动/停止/重启</span>
+docker start 容器名/ID
+docker stop 容器名/ID
+docker restart 容器名/ID
+docker kill 容器名/ID        <span class="com"># 强制停止</span>
+
+<span class="com"># 进入容器</span>
+docker exec -it 容器名 /bin/bash    <span class="com"># 在运行的容器里执行命令（推荐）</span>
+docker attach 容器名                <span class="com"># 附加到容器（exit 会停掉容器，不推荐）</span>
+
+<span class="com"># 查看日志</span>
+docker logs 容器名
+docker logs -f 容器名          <span class="com"># 持续跟踪（follow）</span>
+docker logs --tail 100 容器名  <span class="com"># 最后100行</span>
+docker logs -t 容器名          <span class="com"># 显示时间戳</span>
+
+<span class="com"># 查看容器详情</span>
+docker inspect 容器名/ID
+
+<span class="com"># 查看容器进程</span>
+docker top 容器名/ID
+
+<span class="com"># 查看资源占用</span>
+docker stats                    <span class="com"># 所有容器的 CPU/内存/网络</span>
+
+<span class="com"># 删除容器</span>
+docker rm 容器名/ID             <span class="com"># 只能删停止的</span>
+docker rm -f 容器名/ID          <span class="com"># 强制删除（运行中的也删）</span>
+docker rm $(docker ps -aq)      <span class="com"># 删除所有容器</span>
+docker container prune          <span class="com"># 删除所有停止的容器</span>
+
+<span class="com"># 从容器拷贝文件</span>
+docker cp 容器名:/path /host/path       <span class="com"># 容器 → 主机</span>
+docker cp /host/path 容器名:/path       <span class="com"># 主机 → 容器</span>
+
+<span class="com"># 把容器保存为镜像</span>
+docker commit 容器名 新镜像名:标签</div>
+
+            <div class="callout tip">
+                <div class="callout-title">docker run 常用参数速记</div>
+                <code>-d</code> 后台运行 &nbsp;
+                <code>--name</code> 起名字 &nbsp;
+                <code>-p</code> 端口映射 &nbsp;
+                <code>-v</code> 挂载卷 &nbsp;
+                <code>-e</code> 环境变量 &nbsp;
+                <code>-it</code> 交互式 &nbsp;
+                <code>--rm</code> 自动删除 &nbsp;
+                <code>--restart</code> 重启策略
+            </div>
+
+            <h3>仓库操作</h3>
+            <div class="code-block"><span class="com"># 登录仓库</span>
+docker login
+docker login registry.example.com    <span class="com"># 私有仓库</span>
+
+<span class="com"># 登出</span>
+docker logout
+
+<span class="com"># 推送镜像（先打标签，再推送）</span>
+docker tag myapp:v1 username/myapp:v1
+docker push username/myapp:v1
+
+<span class="com"># 搜索镜像</span>
+docker search nginx</div>
+
+            <h3>其他常用</h3>
+            <div class="code-block"><span class="com"># 查看 Docker 信息</span>
+docker info
+
+<span class="com"># 查看磁盘使用情况</span>
+docker system df
+
+<span class="com"># 一键清理（未使用的镜像/容器/卷/网络）</span>
+docker system prune
+docker system prune -a     <span class="com"># 更彻底</span>
+
+<span class="com"># 查看 Docker 版本</span>
+docker version
+docker --version</div>
+        </div>
+    </div>
+
+    <!-- ===================== Dockerfile ===================== -->
+    <div class="section" id="dockerfile">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128221;</div>
+            <h2>Dockerfile 镜像构建</h2>
+            <span class="badge">重点</span>
+        </div>
+        <div class="section-body">
+
+            <p><strong>Dockerfile</strong> 是一个文本文件，里面写了构建镜像的一条条指令。Docker 照着它就能自动构建镜像。</p>
+
+            <h3>常用指令</h3>
+            <table>
+                <tr><th>指令</th><th>作用</th><th>说明</th></tr>
+                <tr><td><code>FROM</code></td><td>基础镜像</td><td>第一条指令，指定基于哪个镜像构建</td></tr>
+                <tr><td><code>MAINTAINER</code></td><td>作者信息</td><td>已过时，用 LABEL 代替</td></tr>
+                <tr><td><code>LABEL</code></td><td>元数据</td><td>添加镜像标签（作者、版本、描述等）</td></tr>
+                <tr><td><code>RUN</code></td><td>执行命令</td><td>构建时执行，每一个 RUN 会创建新层</td></tr>
+                <tr><td><code>CMD</code></td><td>启动命令</td><td>容器启动时执行的默认命令，docker run 后面有命令会覆盖</td></tr>
+                <tr><td><code>ENTRYPOINT</code></td><td>入口命令</td><td>容器启动时执行，不会被 run 的命令覆盖（会当参数传进去）</td></tr>
+                <tr><td><code>EXPOSE</code></td><td>暴露端口</td><td>声明容器监听的端口（只是声明，实际 -p 才映射）</td></tr>
+                <tr><td><code>ENV</code></td><td>环境变量</td><td>设置环境变量，构建和运行时都能用</td></tr>
+                <tr><td><code>ARG</code></td><td>构建参数</td><td>只在构建时有效，build --build-arg 传参</td></tr>
+                <tr><td><code>ADD</code></td><td>复制文件</td><td>复制到镜像里，tar 自动解压，支持 URL</td></tr>
+                <tr><td><code>COPY</code></td><td>复制文件</td><td>普通复制，推荐用这个（更透明）</td></tr>
+                <tr><td><code>VOLUME</code></td><td>匿名卷</td><td>声明挂载点，自动创建数据卷</td></tr>
+                <tr><td><code>WORKDIR</code></td><td>工作目录</td><td>设置当前工作目录（类似 cd）</td></tr>
+                <tr><td><code>USER</code></td><td>用户</td><td>指定运行命令的用户</td></tr>
+                <tr><td><code>HEALTHCHECK</code></td><td>健康检查</td><td>定时检查容器是否健康</td></tr>
+                <tr><td><code>ONBUILD</code></td><td>触发器</td><td>当这个镜像被当作基础镜像时执行</td></tr>
+            </table>
+
+            <h3>示例：Node.js 应用的 Dockerfile</h3>
+            <div class="code-block"><span class="com"># 1. 基础镜像</span>
+<span class="kw">FROM</span> node:<span class="num">18</span>-alpine
+
+<span class="com"># 2. 元数据</span>
+<span class="kw">LABEL</span> maintainer=<span class="str">"geist@example.com"</span>
+<span class="kw">LABEL</span> version=<span class="str">"1.0"</span>
+
+<span class="com"># 3. 工作目录（后面的命令都在这个目录下执行）</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="com"># 4. 先复制依赖文件（利用缓存，依赖没变就不用重装）</span>
+<span class="kw">COPY</span> package*.json ./
+
+<span class="com"># 5. 安装依赖</span>
+<span class="kw">RUN</span> npm install --production && npm cache clean --force
+
+<span class="com"># 6. 复制应用代码</span>
+<span class="kw">COPY</span> . .
+
+<span class="com"># 7. 暴露端口</span>
+<span class="kw">EXPOSE</span> <span class="num">3000</span>
+
+<span class="com"># 8. 健康检查</span>
+<span class="kw">HEALTHCHECK</span> --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:<span class="num">3000</span>/health || exit <span class="num">1</span>
+
+<span class="com"># 9. 启动命令</span>
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"app.js"</span>]</div>
+
+            <h3>构建命令</h3>
+            <div class="code-block"><span class="com"># 在 Dockerfile 所在目录构建</span>
+docker build -t myapp:v1 .
+<span class="com"># -t 给镜像打标签（名字:版本）</span>
+<span class="com"># . 表示当前目录（构建上下文）</span>
+
+<span class="com"># 指定 Dockerfile 路径</span>
+docker build -f ./docker/Dockerfile -t myapp:v1 .
+
+<span class="com"># 传构建参数</span>
+docker build --build-arg APP_ENV=production -t myapp:v1 .
+
+<span class="com"># 不使用缓存（强制重新构建）</span>
+docker build --no-cache -t myapp:v1 .</div>
+
+            <h3>.dockerignore 文件</h3>
+            <p>和 <code>.gitignore</code> 类似，告诉 Docker 构建时哪些文件不要打包进上下文：</p>
+            <div class="code-block">node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+*.md
+.vscode
+.idea
+__pycache__
+*.pyc
+.DS_Store</div>
+
+            <h3>Dockerfile 最佳实践</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">1. 选合适的基础镜像</div>
+                    <div class="card-desc">优先用 alpine 版本（体积小），能用官方镜像就别自己做</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. 减少层数</div>
+                    <div class="card-desc">多个 RUN 命令用 && 连起来写成一条，减少镜像层数</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. 利用缓存</div>
+                    <div class="card-desc">把不常变的（依赖安装）放前面，常变的（代码）放后面</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. 用 COPY 不用 ADD</div>
+                    <div class="card-desc">除非你需要自动解压或从 URL 下载，否则用 COPY 更明确</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. 多阶段构建</div>
+                    <div class="card-desc">编译阶段和运行阶段分开，最终镜像只包含运行时需要的东西</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">6. 用 .dockerignore</div>
+                    <div class="card-desc">忽略 node_modules、.git 等，减少上下文大小</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">7. 不要用 latest</div>
+                    <div class="card-desc">生产环境指定具体版本号，latest 不稳定</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">8. 不要以 root 运行</div>
+                    <div class="card-desc">创建普通用户，用 USER 指令切换，更安全</div>
+                </div>
+            </div>
+
+            <h3>多阶段构建示例</h3>
+            <div class="code-block"><span class="com"># 构建阶段：有完整编译环境</span>
+<span class="kw">FROM</span> golang:<span class="num">1.21</span> <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> go build -o myapp .
+
+<span class="com"># 运行阶段：只有运行时，镜像很小</span>
+<span class="kw">FROM</span> alpine:<span class="num">3.18</span>
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=builder /app/myapp .
+<span class="kw">CMD</span> [<span class="str">"./myapp"</span>]
+
+<span class="com">// 最终镜像里没有 Go 编译器，只有编译好的二进制，体积大大减小</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 数据卷 ===================== -->
+    <div class="section" id="volume">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#128190;</div>
+            <h2>数据卷（Volume）</h2>
+            <span class="badge">重点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>为什么需要数据卷？</h3>
+            <p>容器的文件系统是临时的，容器删了数据就没了。数据卷可以：</p>
+            <ul>
+                <li><strong>持久化数据</strong>：容器删了数据还在</li>
+                <li><strong>共享数据</strong>：多个容器可以共享同一个数据卷</li>
+                <li><strong>配置文件</strong>：把配置文件挂载进去，不用改镜像</li>
+                <li><strong>日志输出</strong>：容器日志直接写到宿主机</li>
+            </ul>
+
+            <h3>三种挂载方式</h3>
+            <table>
+                <tr><th>方式</th><th>语法</th><th>说明</th><th>场景</th></tr>
+                <tr><td><strong>匿名卷</strong></td><td><code>-v /data</code></td><td>Docker 自动创建和管理，不知道在哪</td><td>临时数据、不需要手动管理</td></tr>
+                <tr><td><strong>具名卷</strong></td><td><code>-v myvol:/data</code></td><td>有名字，Docker 管理，可以重复用</td><td>推荐！持久化数据</td></tr>
+                <tr><td><strong>绑定挂载</strong></td><td><code>-v /host/path:/data</code></td><td>挂载宿主机的具体目录</td><td>配置文件、开发时代码同步</td></tr>
+            </table>
+
+            <h3>数据卷命令</h3>
+            <div class="code-block"><span class="com"># 创建卷</span>
+docker volume create myvolume
+
+<span class="com"># 查看所有卷</span>
+docker volume ls
+
+<span class="com"># 查看卷详情</span>
+docker volume inspect myvolume
+
+<span class="com"># 删除卷</span>
+docker volume rm myvolume
+
+<span class="com"># 清理无用的卷</span>
+docker volume prune
+
+<span class="com"># 使用卷</span>
+docker run -d -v myvolume:/data nginx
+<span class="com"># -v 卷名:容器内路径</span>
+
+<span class="com"># 绑定挂载（指定宿主机路径）</span>
+docker run -d -v /home/user/data:/data nginx
+docker run -d -v ./data:/data nginx     <span class="com"># 相对路径</span>
+
+<span class="com"># 只读挂载</span>
+docker run -d -v myvolume:/data:ro nginx
+<span class="com"># :ro = read only，容器里只能读不能改</span></div>
+
+            <h3>示例：MySQL 数据持久化</h3>
+            <div class="code-block"><span class="com"># 不挂载数据卷：容器删了数据就没了</span>
+docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=123456 mysql:8.0
+
+<span class="com"># 挂载数据卷：容器删了数据还在</span>
+docker run -d --name mysql \
+  -e MYSQL_ROOT_PASSWORD=123456 \
+  -v mysql_data:/var/lib/mysql \
+  mysql:8.0
+
+<span class="com"># mysql_data 是具名卷，数据存在 Docker 管理的目录里</span>
+<span class="com"># 就算删掉容器，重新创建时挂同一个卷，数据就回来了</span></div>
+
+            <div class="callout warn">
+                <div class="callout-title">注意：挂载空卷到有数据的目录</div>
+                如果你把一个<strong>空的卷</strong>挂载到容器里一个<strong>有数据的目录</strong>，<br>
+                Docker 会把容器里那个目录里的内容<strong>复制到卷里</strong>，然后再挂载。<br>
+                但如果是<strong>绑定挂载</strong>（宿主机目录），就是直接覆盖，宿主机目录是什么样就是什么样。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 网络 ===================== -->
+    <div class="section" id="network">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#127760;</div>
+            <h2>Docker 网络</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>网络模式</h3>
+            <table>
+                <tr><th>模式</th><th>说明</th><th>特点</th></tr>
+                <tr><td><strong>bridge</strong></td><td>桥接模式（默认）</td><td>每个容器有独立IP，通过网桥和宿主机通信，容器之间可以互相访问</td></tr>
+                <tr><td><strong>host</strong></td><td>主机模式</td><td>容器和宿主机共用网络，没有隔离，性能好，但端口不能冲突</td></tr>
+                <tr><td><strong>none</strong></td><td>无网络</td><td>容器没有网络，完全隔离</td></tr>
+                <tr><td><strong>container</strong></td><td>容器模式</td><td>和另一个容器共享网络栈（共用 IP 和端口）</td></tr>
+            </table>
+
+            <h3>网络命令</h3>
+            <div class="code-block"><span class="com"># 查看所有网络</span>
+docker network ls
+
+<span class="com"># 查看网络详情</span>
+docker network inspect 网络名
+
+<span class="com"># 创建网络</span>
+docker network create mynetwork
+docker network create --driver bridge mynetwork
+
+<span class="com"># 删除网络</span>
+docker network rm 网络名
+
+<span class="com"># 清理无用网络</span>
+docker network prune
+
+<span class="com"># 把容器连接到网络</span>
+docker network connect 网络名 容器名
+
+<span class="com"># 把容器从网络断开</span>
+docker network disconnect 网络名 容器名
+
+<span class="com"># 启动容器时指定网络</span>
+docker run -d --name c1 --network mynetwork nginx
+docker run -d --name c2 --network mynetwork nginx
+<span class="com"># c1 和 c2 在同一个自定义网络里，可以用名字互访</span></div>
+
+            <h3>容器间通信</h3>
+            <div class="code-block"><span class="com"># 方式1：通过 IP 访问（不推荐，IP 会变）</span>
+docker inspect c1 | grep IPAddress   <span class="com"># 查 IP</span>
+<span class="com"># 然后 c2 里用 IP 访问 c1</span>
+
+<span class="com"># 方式2：自定义网络 + 容器名访问（推荐！）</span>
+docker network create mynet
+docker run -d --name web --network mynet nginx
+docker run -d --name app --network mynet myapp
+<span class="com"># 在 app 容器里直接用 http://web:80 就能访问 web 容器</span>
+
+<span class="com"># 方式3：--link（已过时，不推荐）</span>
+docker run -d --name app --link web:web myapp</div>
+
+            <div class="callout tip">
+                <div class="callout-title">推荐做法</div>
+                1. 每个项目创建一个自定义网络<br>
+                2. 相关的容器都加入这个网络<br>
+                3. 容器之间用容器名互相访问<br>
+                4. 只有需要对外暴露的端口才用 -p 映射
+            </div>
+
+            <h3>端口映射</h3>
+            <div class="code-block"><span class="com"># 格式：-p 主机端口:容器端口</span>
+docker run -d -p 8080:80 nginx
+<span class="com"># 访问主机的 8080 端口 → 转发到容器的 80 端口</span>
+
+<span class="com"># 指定绑定 IP（只允许本机访问）</span>
+docker run -d -p 127.0.0.1:8080:80 nginx
+
+<span class="com"># 映射多个端口</span>
+docker run -d -p 8080:80 -p 443:443 nginx
+
+<span class="com"># 随机端口（宿主机随机分配）</span>
+docker run -d -P nginx
+
+<span class="com"># 查看端口映射</span>
+docker port 容器名</div>
+        </div>
+    </div>
+
+    <!-- ===================== Docker Compose ===================== -->
+    <div class="section" id="compose">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128220;</div>
+            <h2>Docker Compose</h2>
+            <span class="badge">重点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>什么是 Docker Compose？</h3>
+            <p>一个应用往往需要多个容器（比如 Web + MySQL + Redis）。一个一个启动太麻烦了。<strong>Docker Compose</strong> 让你用一个 YAML 文件定义所有容器，一条命令就能全部启动/停止。</p>
+
+            <h3>docker-compose.yml 示例</h3>
+            <div class="code-block"><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">services</span>:
+  <span class="com"># Web 服务（Nginx）</span>
+  <span class="kw">web</span>:
+    <span class="kw">image</span>: nginx:alpine
+    <span class="kw">ports</span>:
+      - <span class="str">"8080:80"</span>
+    <span class="kw">volumes</span>:
+      - ./html:/usr/share/nginx/html
+    <span class="kw">depends_on</span>:
+      - app
+    <span class="kw">networks</span>:
+      - mynet
+    <span class="kw">restart</span>: always
+
+  <span class="com"># 应用服务（Node.js）</span>
+  <span class="kw">app</span>:
+    <span class="kw">build</span>: ./app          <span class="com"># 从 Dockerfile 构建</span>
+    <span class="kw">image</span>: myapp:v1
+    <span class="kw">environment</span>:
+      - NODE_ENV=production
+      - DB_HOST=mysql
+      - DB_PASSWORD=123456
+    <span class="kw">depends_on</span>:
+      - mysql
+      - redis
+    <span class="kw">networks</span>:
+      - mynet
+    <span class="kw">restart</span>: always
+
+  <span class="com"># MySQL 数据库</span>
+  <span class="kw">mysql</span>:
+    <span class="kw">image</span>: mysql:8.0
+    <span class="kw">environment</span>:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=myapp
+    <span class="kw">volumes</span>:
+      - mysql_data:/var/lib/mysql
+    <span class="kw">networks</span>:
+      - mynet
+    <span class="kw">restart</span>: always
+
+  <span class="com"># Redis 缓存</span>
+  <span class="kw">redis</span>:
+    <span class="kw">image</span>: redis:alpine
+    <span class="kw">volumes</span>:
+      - redis_data:/data
+    <span class="kw">networks</span>:
+      - mynet
+    <span class="kw">restart</span>: always
+
+<span class="com"># 数据卷（services 里用的具名卷要在这里声明）</span>
+<span class="kw">volumes</span>:
+  <span class="kw">mysql_data</span>:
+  <span class="kw">redis_data</span>:
+
+<span class="com"># 自定义网络</span>
+<span class="kw">networks</span>:
+  <span class="kw">mynet</span>:
+    <span class="kw">driver</span>: bridge</div>
+
+            <h3>常用命令</h3>
+            <div class="code-block"><span class="com"># 启动所有服务（后台运行）</span>
+docker-compose up -d
+docker compose up -d        <span class="com"># 新版 Docker 用 docker compose（没有横杠）</span>
+
+<span class="com"># 停止并删除</span>
+docker-compose down
+
+<span class="com"># 停止（不删除）</span>
+docker-compose stop
+
+<span class="com"># 启动已停止的</span>
+docker-compose start
+
+<span class="com"># 重启</span>
+docker-compose restart
+
+<span class="com"># 查看状态</span>
+docker-compose ps
+
+<span class="com"># 查看日志</span>
+docker-compose logs
+docker-compose logs -f
+docker-compose logs web          <span class="com"># 只看某个服务</span>
+
+<span class="com"># 重新构建镜像</span>
+docker-compose build
+docker-compose up -d --build     <span class="com"># 构建并启动</span>
+
+<span class="com"># 进入某个服务的容器</span>
+docker-compose exec web /bin/sh
+
+<span class="com"># 指定 compose 文件</span>
+docker-compose -f docker-compose.dev.yml up -d
+
+<span class="com"># 拉取所有镜像</span>
+docker-compose pull</div>
+
+            <div class="callout tip">
+                <div class="callout-title">depends_on 的注意事项</div>
+                <code>depends_on</code> 只保证启动顺序，<strong>不保证服务就绪</strong>。<br>
+                比如 MySQL 启动了，但还没初始化完，这时候应用连上去会报错。<br>
+                解决方法：1. 应用里加重试机制 2. 用 healthcheck + condition
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 最佳实践 ===================== -->
+    <div class="section" id="bestpractice">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#11088;</div>
+            <h2>最佳实践</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>镜像构建最佳实践</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">镜像要小</div>
+                    <div class="card-desc">用 alpine 基础镜像、多阶段构建、清理缓存（apt clean 等）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">构建要快</div>
+                    <div class="card-desc">合理安排 Dockerfile 顺序，利用缓存；用 .dockerignore 减少上下文</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">不要在镜像里存密码</div>
+                    <div class="card-desc">敏感信息用环境变量或 secrets，不要写死在 Dockerfile 里</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">一个容器一个进程</div>
+                    <div class="card-desc">每个容器只跑一个主进程，多个服务就起多个容器</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">不要用 root</div>
+                    <div class="card-desc">创建普通用户，用 USER 指令切换，安全第一</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">打标签不用 latest</div>
+                    <div class="card-desc">用版本号（v1.0.0）或 git commit id，方便回滚</div>
+                </div>
+            </div>
+
+            <h3>容器运行最佳实践</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">数据放卷里</div>
+                    <div class="card-desc">数据库、用户上传等需要持久化的数据，一定要用 Volume</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">设置 restart</div>
+                    <div class="card-desc">生产环境用 restart: always 或 unless-stopped，服务挂了自动重启</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">限制资源</div>
+                    <div class="card-desc">用 --memory 和 --cpus 限制容器资源，防止一个容器吃光所有资源</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">只暴露必要端口</div>
+                    <div class="card-desc">只把需要对外的端口映射出来，内部通信走自定义网络</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">健康检查</div>
+                    <div class="card-desc">加 HEALTHCHECK，Docker 自动检测容器是否健康，不健康就重启</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">日志管理</div>
+                    <div class="card-desc">不要把日志写在容器文件里，用 stdout/stderr 输出，Docker 统一管理</div>
+                </div>
+            </div>
+
+            <h3>安全最佳实践</h3>
+            <ul>
+                <li>用官方镜像，不要随便用不知名的镜像</li>
+                <li>定期更新基础镜像，修复安全漏洞</li>
+                <li>用 docker scan 或 trivy 扫描镜像漏洞</li>
+                <li>不要用 --privileged（特权模式），除非真的需要</li>
+                <li>容器以非 root 用户运行</li>
+                <li>用 Docker Content Trust 验证镜像签名</li>
+            </ul>
+
+            <h3>常用服务 docker-compose 模板</h3>
+            <h4>WordPress + MySQL</h4>
+            <div class="code-block"><span class="kw">version</span>: <span class="str">'3.8'</span>
+<span class="kw">services</span>:
+  <span class="kw">wordpress</span>:
+    <span class="kw">image</span>: wordpress:latest
+    <span class="kw">ports</span>:
+      - <span class="str">"8080:80"</span>
+    <span class="kw">environment</span>:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=wpuser
+      - WORDPRESS_DB_PASSWORD=wppass
+      - WORDPRESS_DB_NAME=wordpress
+    <span class="kw">volumes</span>:
+      - wp_data:/var/www/html
+    <span class="kw">depends_on</span>:
+      - mysql
+    <span class="kw">restart</span>: always
+
+  <span class="kw">mysql</span>:
+    <span class="kw">image</span>: mysql:8.0
+    <span class="kw">environment</span>:
+      - MYSQL_ROOT_PASSWORD=rootpass
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wpuser
+      - MYSQL_PASSWORD=wppass
+    <span class="kw">volumes</span>:
+      - mysql_data:/var/lib/mysql
+    <span class="kw">restart</span>: always
+
+<span class="kw">volumes</span>:
+  <span class="kw">wp_data</span>:
+  <span class="kw">mysql_data</span>:</div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>什么是 Docker？和虚拟机的区别？</td>
+                    <td>Docker 是容器化平台，把应用和依赖打包到轻量可移植的容器里。<br>
+                        和 VM 比：容器共享宿主机内核，体积小（MB级）、启动快（秒级）、性能接近原生；VM 有完整操作系统，体积大（GB级）、启动慢、有性能损耗。容器是进程级隔离，VM 是系统级隔离。</td>
+                </tr>
+                <tr>
+                    <td>镜像和容器的区别？</td>
+                    <td>镜像是只读模板（类比类），容器是镜像运行的实例（类比对象）。一个镜像可以创建多个容器。镜像分层存储，容器在镜像上加了一层可写层。</td>
+                </tr>
+                <tr>
+                    <td>Docker 的底层原理？</td>
+                    <td>主要用了 Linux 的三个核心技术：<br>
+                        1. Namespace（命名空间）：实现隔离（PID、NET、IPC、UTS、Mount、User）<br>
+                        2. Cgroups（控制组）：限制和隔离资源使用（CPU、内存、IO）<br>
+                        3. UnionFS（联合文件系统）：实现镜像分层和写时复制</td>
+                </tr>
+                <tr>
+                    <td>什么是容器的写时复制（CoW）？</td>
+                    <td>镜像分层，所有层都是只读的。容器启动时在最上面加一层可写层。当要修改文件时，才把文件从下面的只读层复制到可写层再修改。没修改的文件大家共享，节省空间。</td>
+                </tr>
+                <tr>
+                    <td>Dockerfile 中 COPY 和 ADD 的区别？</td>
+                    <td>都能复制文件到镜像。ADD 额外支持：1. 自动解压 tar 文件 2. 从 URL 下载文件。<br>
+                        一般推荐用 COPY，更明确。需要解压或下载时才用 ADD。</td>
+                </tr>
+                <tr>
+                    <td>CMD 和 ENTRYPOINT 的区别？</td>
+                    <td>都是容器启动时执行的命令。<br>
+                        CMD 会被 docker run 后面的命令覆盖；ENTRYPOINT 不会被覆盖（而是把命令当参数传给它）。<br>
+                        一般 ENTRYPOINT 用来定死启动命令，CMD 用来给默认参数。</td>
+                </tr>
+                <tr>
+                    <td>数据卷有几种方式？</td>
+                    <td>三种：<br>
+                        1. 匿名卷：-v /path，Docker 自动管理<br>
+                        2. 具名卷：-v name:/path，有名字，推荐用于持久化<br>
+                        3. 绑定挂载：-v /host/path:/path，挂载宿主机具体目录<br>
+                        另外还有 tmpfs 挂载（内存里，临时数据）</td>
+                </tr>
+                <tr>
+                    <td>Docker 网络模式有哪些？</td>
+                    <td>bridge（默认，桥接，各容器独立IP）、host（共用宿主机网络）、none（无网络）、container（共享另一个容器的网络）。<br>
+                        生产环境一般用自定义 bridge 网络，容器之间用名字互访。</td>
+                </tr>
+                <tr>
+                    <td>容器之间怎么通信？</td>
+                    <td>1. 同一网络下通过容器名/服务名访问（推荐）<br>
+                        2. 通过容器 IP 访问（不推荐，IP 会变）<br>
+                        3. 通过宿主机 IP + 端口映射（绕一圈，不推荐）<br>
+                        4. --link（已过时）</td>
+                </tr>
+                <tr>
+                    <td>什么是 Docker Compose？</td>
+                    <td>用于定义和运行多容器 Docker 应用的工具。用一个 YAML 文件配置所有服务，一条命令就能启动/停止整个应用栈。适合开发环境和小型部署。</td>
+                </tr>
+                <tr>
+                    <td>怎么减少 Docker 镜像体积？</td>
+                    <td>1. 用 alpine/slim 基础镜像<br>
+                        2. 多阶段构建（编译和运行分开）<br>
+                        3. 合并 RUN 指令，减少层数<br>
+                        4. 安装完清理缓存（apt clean, npm cache clean）<br>
+                        5. .dockerignore 排除不必要的文件</td>
+                </tr>
+                <tr>
+                    <td>容器退出了怎么排查？</td>
+                    <td>1. docker ps -a 看退出状态码<br>
+                        2. docker logs 容器名 看日志<br>
+                        3. docker inspect 容器名 看详细信息（OOMKilled、ExitCode等）<br>
+                        4. docker start -i 容器名 交互模式启动看输出</td>
+                </tr>
+                <tr>
+                    <td>什么是 OOMKilled？</td>
+                    <td>容器使用内存超过了限制，被系统 OOM killer 杀掉了。Exit Code 是 137。解决方法：优化程序内存使用，或增加内存限制。</td>
+                </tr>
+                <tr>
+                    <td>Docker 怎么实现资源限制？</td>
+                    <td>用 Cgroups。常用参数：<br>
+                        --memory：限制内存使用<br>
+                        --cpus：限制 CPU 核心数<br>
+                        --cpu-shares：CPU 相对权重<br>
+                        --blkio-weight：IO 权重</td>
+                </tr>
+                <tr>
+                    <td>Kubernetes 和 Docker 的关系？</td>
+                    <td>Docker 是容器运行时，负责单个容器的创建和管理。K8s 是容器编排平台，管理成百上千个容器，负责调度、伸缩、负载均衡、自愈等。Docker 是 K8s 下面的容器运行时之一。</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST Docker 学习笔记 &nbsp;|&nbsp; 2026-09-29</p>
+    <p>基础概念 → 安装配置 → 常用命令 → Dockerfile → 数据卷 → 网络 → Compose → 最佳实践 → 面试速答</p>
+</div>
+
+</body>
+</html>

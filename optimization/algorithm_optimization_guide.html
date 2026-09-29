@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法与优化入门完全指南 - GEIST 学习笔记</title>
+    <style>
+        :root {
+            --bg: #0d1117; --card: #161b22; --border: #30363d;
+            --text: #c9d1d9; --heading: #f0f6fc; --accent: #3fb950;
+            --green: #3fb950; --yellow: #d29922; --red: #f85149;
+            --purple: #bc8cff; --orange: #e8873a; --code-bg: #1c2128; --pink: #db61a2;
+            --blue: #58a6ff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.75; font-size: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        .header {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 2.4em; color: var(--heading); margin-bottom: 12px; letter-spacing: 1px; }
+        .header .subtitle { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+        .header .meta { color: #8b949e; font-size: 0.9em; }
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        }
+        .nav a {
+            color: var(--text); text-decoration: none; padding: 6px 14px;
+            border-radius: 6px; font-size: 0.82em; transition: all 0.2s; background: var(--code-bg);
+        }
+        .nav a:hover { color: var(--accent); background: var(--border); }
+        .section {
+            margin-bottom: 40px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+        }
+        .section-header {
+            padding: 18px 24px; background: linear-gradient(135deg, #1c2128, #161b22);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.3em; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .section-header h2 { color: var(--heading); font-size: 1.2em; }
+        .section-header .badge {
+            margin-left: auto; background: var(--code-bg); color: #8b949e;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.78em;
+        }
+        .section-body { padding: 20px 24px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th {
+            text-align: left; padding: 8px 12px; background: var(--code-bg);
+            color: var(--accent); font-weight: 600; font-size: 0.82em;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9em; }
+        tr:hover td { background: rgba(63, 185, 80, 0.04); }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+            font-size: 0.85em; color: var(--green);
+        }
+        .code-block {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px 18px; margin: 10px 0;
+            overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82em; line-height: 1.55; color: var(--text); white-space: pre;
+        }
+        .code-block .kw { color: var(--purple); font-weight: bold; }
+        .code-block .str { color: var(--green); }
+        .code-block .num { color: var(--orange); }
+        .code-block .com { color: #8b949e; font-style: italic; }
+        .code-block .fn { color: var(--accent); }
+        .code-block .type { color: var(--yellow); }
+        .code-block .cls { color: var(--pink); }
+        .callout {
+            border-left: 4px solid; padding: 14px 18px; margin: 12px 0; border-radius: 0 8px 8px 0;
+        }
+        .callout.tip { border-color: var(--green); background: rgba(63, 185, 80, 0.08); }
+        .callout.warn { border-color: var(--yellow); background: rgba(210, 153, 34, 0.08); }
+        .callout.danger { border-color: var(--red); background: rgba(248, 81, 73, 0.08); }
+        .callout-title { font-weight: 700; margin-bottom: 5px; font-size: 0.92em; }
+        .callout.tip .callout-title { color: var(--green); }
+        .callout.warn .callout-title { color: var(--yellow); }
+        .callout.danger .callout-title { color: var(--red); }
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.75em; font-weight: 600; margin-right: 4px;
+        }
+        .tag-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+        .tag-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+        .tag-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px; margin: 12px 0;
+        }
+        .card {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card .card-title { color: var(--accent); font-weight: 600; margin-bottom: 6px; font-size: 0.9em; }
+        .card .card-desc { color: #8b949e; font-size: 0.82em; }
+        h3 { color: var(--accent); margin: 18px 0 10px; font-size: 1.05em; }
+        h4 { color: var(--yellow); margin: 14px 0 8px; font-size: 0.95em; }
+        p { margin-bottom: 10px; }
+        ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        li { margin-bottom: 4px; font-size: 0.92em; }
+        .footer {
+            text-align: center; padding: 30px 24px; border-top: 1px solid var(--border);
+            color: #8b949e; font-size: 0.82em;
+        }
+        .complexity-table td:first-child { font-family: 'Cascadia Code', monospace; color: var(--yellow); }
+        .flow-box {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; margin: 12px 0;
+            font-family: 'Cascadia Code', monospace; font-size: 0.85em;
+            text-align: center; line-height: 2;
+        }
+        .flow-arrow { color: var(--accent); font-weight: bold; }
+        @media (max-width: 768px) {
+            .nav { overflow-x: auto; flex-wrap: nowrap; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="subtitle">GEIST 学习笔记</div>
+    <h1>算法与优化入门完全指南</h1>
+    <div class="meta">复杂度分析 · 排序 · 搜索 · 动态规划 · 贪心 · 优化思维 &nbsp;|&nbsp; 2026-09-29</div>
+</div>
+
+<div class="nav">
+    <a href="#intro">什么是算法</a>
+    <a href="#complexity">复杂度分析</a>
+    <a href="#sort">排序算法</a>
+    <a href="#search">搜索算法</a>
+    <a href="#dp">动态规划</a>
+    <a href="#greedy">贪心算法</a>
+    <a href="#datastruct">数据结构</a>
+    <a href="#optimize">代码优化</a>
+    <a href="#interview">面试速答</a>
+</div>
+
+<div class="container">
+
+    <!-- ===================== 什么是算法 ===================== -->
+    <div class="section" id="intro">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(63,185,80,0.15);color:#3fb950;">&#129504;</div>
+            <h2>什么是算法</h2>
+            <span class="badge">入门</span>
+        </div>
+        <div class="section-body">
+
+            <p><strong>算法</strong>就是解决问题的<strong>步骤和方法</strong>。就像菜谱——要做一道菜，需要哪些食材、先放什么后放什么、火候多大、炒多久，这就是算法。</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">输入</div>
+                    <div class="card-desc">算法有 0 个或多个输入（已知条件）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">输出</div>
+                    <div class="card-desc">算法至少有一个输出（问题的解）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">确定性</div>
+                    <div class="card-desc">每一步都是明确的，不会有歧义</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">有穷性</div>
+                    <div class="card-desc">执行有限步后一定会结束</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">可行性</div>
+                    <div class="card-desc">每一步都能通过有限次操作完成</div>
+                </div>
+            </div>
+
+            <h3>为什么要学算法？</h3>
+            <ul>
+                <li><strong>面试必备</strong>：大厂技术岗面试必考算法</li>
+                <li><strong>解决问题能力</strong>：学会把复杂问题拆解成可计算的步骤</li>
+                <li><strong>写出更优的代码</strong>：知道什么方案快、什么方案慢</li>
+                <li><strong>思维训练</strong>：锻炼逻辑思维和抽象能力</li>
+            </ul>
+
+            <h3>算法的分类</h3>
+            <div class="code-block">按解题思想分：
+  ├── 暴力枚举      最简单，遍历所有可能
+  ├── 分治算法      大问题拆成小问题，分别解决再合并
+  ├── 动态规划      记住子问题的解，避免重复计算
+  ├── 贪心算法      每一步选当前最优，希望全局最优
+  ├── 回溯算法      一条路走到底，走不通就退回来
+  └── 图论算法      针对图结构的算法（BFS/DFS/最短路等）
+
+按应用场景分：
+  ├── 排序算法      冒泡/选择/插入/快排/归并/堆排序
+  ├── 搜索算法      二分查找/DFS/BFS
+  ├── 字符串算法    KMP/正则/Trie树
+  ├── 数学算法      素数/最大公约数/快速幂
+  └── 几何算法      凸包/最近点对</div>
+        </div>
+    </div>
+
+    <!-- ===================== 复杂度分析 ===================== -->
+    <div class="section" id="complexity">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9201;</div>
+            <h2>时间 &amp; 空间复杂度分析</h2>
+            <span class="badge">必会核心</span>
+        </div>
+        <div class="section-body">
+
+            <h3>为什么需要复杂度分析？</h3>
+            <p>同一个问题可以有多种解法，怎么判断哪个更好？<strong>跑一下测时间？</strong>不行，因为不同机器、不同数据量结果不一样。我们需要一种<strong>不依赖具体环境</strong>的分析方法——这就是复杂度分析。</p>
+
+            <h3>大 O 表示法（Big O Notation）</h3>
+            <p>描述算法随数据量增长，<strong>运行时间/占用空间</strong>的增长趋势。只看最高阶项，忽略常数和低阶项。</p>
+
+            <div class="code-block"><span class="com">// 例子：计算 1+2+...+n</span>
+
+<span class="com">// 方法1：循环累加   →  O(n)</span>
+<span class="type">int</span> sum = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i <= n; i++) sum += i;
+
+<span class="com">// 方法2：公式计算   →  O(1)</span>
+<span class="type">int</span> sum = n * (n + <span class="num">1</span>) / <span class="num">2</span>;
+
+<span class="com">// 显然方法2更好，不管n多大都是一步搞定</span></div>
+
+            <h3>常见时间复杂度（从快到慢）</h3>
+            <table class="complexity-table">
+                <tr><th>复杂度</th><th>名称</th><th>例子</th><th>n=1000时的操作数</th></tr>
+                <tr><td>O(1)</td><td>常数阶</td><td>数组下标访问、哈希表查找</td><td>1</td></tr>
+                <tr><td>O(log n)</td><td>对数阶</td><td>二分查找</td><td>10</td></tr>
+                <tr><td>O(n)</td><td>线性阶</td><td>遍历数组、顺序查找</td><td>1,000</td></tr>
+                <tr><td>O(n log n)</td><td>线性对数阶</td><td>快速排序、归并排序</td><td>10,000</td></tr>
+                <tr><td>O(n²)</td><td>平方阶</td><td>冒泡排序、双重循环</td><td>1,000,000</td></tr>
+                <tr><td>O(n³)</td><td>立方阶</td><td>三重循环、Floyd算法</td><td>1,000,000,000</td></tr>
+                <tr><td>O(2ⁿ)</td><td>指数阶</td><td>递归斐波那契</td><td>天文数字！</td></tr>
+                <tr><td>O(n!)</td><td>阶乘阶</td><td>全排列</td><td>想都不敢想</td></tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">经验法则</div>
+                一般 OJ 评测机 1 秒约等于 <strong>10^7 ~ 10^8 次操作</strong>。<br>
+                如果 n = 10^5，O(n²) = 10^10 → 超时！只能用 O(n log n) 及以下的算法。
+            </div>
+
+            <h3>怎么分析时间复杂度？</h3>
+            <div class="code-block"><span class="com">// 规则1：只看循环次数最多的那层</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n; i++) {  <span class="com">// n次</span>
+    <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j < n; j++) {  <span class="com">// n次 → 总共 n*n = n² 次</span>
+        <span class="com">// ...</span>
+    }
+}
+<span class="com">// O(n²)</span>
+
+<span class="com">// 规则2：每次砍一半 → log n</span>
+<span class="kw">while</span> (n > <span class="num">1</span>) {
+    n = n / <span class="num">2</span>;
+}
+<span class="com">// 多少次？log2(n) 次 → O(log n)</span>
+
+<span class="com">// 规则3：并列的相加，取最大的</span>
+<span class="kw">for</span> (...) { }       <span class="com">// O(n)</span>
+<span class="kw">for</span> (...) {         <span class="com">// O(n²)</span>
+    <span class="kw">for</span> (...) { }
+}
+<span class="com">// 总复杂度 = O(n + n²) = O(n²) （取最大的）</span>
+
+<span class="com">// 规则4：递归的复杂度 = 递归次数 × 每次的工作量</span></div>
+
+            <h3>空间复杂度</h3>
+            <p>算法运行过程中需要的<strong>额外内存空间</strong>的增长趋势（不算输入数据本身）。</p>
+
+            <div class="code-block"><span class="com">// O(1) 空间：只用了几个变量</span>
+<span class="type">int</span> <span class="fn">max</span>(<span class="type">int</span> a, <span class="type">int</span> b) {
+    <span class="kw">return</span> a > b ? a : b;
+}
+
+<span class="com">// O(n) 空间：开了一个长度为n的数组</span>
+<span class="type">int</span>[] dp = <span class="kw">new int</span>[n];
+
+<span class="com">// O(n²) 空间：开了二维数组</span>
+<span class="type">int</span>[][] dp = <span class="kw">new int</span>[n][n];</div>
+
+            <h3>最好、最坏、平均情况</h3>
+            <div class="code-block"><span class="com">// 顺序查找：在数组里找一个数</span>
+<span class="type">int</span> <span class="fn">search</span>(<span class="type">int</span>[] arr, <span class="type">int</span> target) {
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < arr.length; i++) {
+        <span class="kw">if</span> (arr[i] == target) <span class="kw">return</span> i;
+    }
+    <span class="kw">return</span> -<span class="num">1</span>;
+}
+
+最好情况：第一个就是 → O(1)
+最坏情况：最后一个才是（或没有） → O(n)
+平均情况：假设概率均匀 → O(n/2) = O(n)
+
+<span class="com">// 面试和分析时，一般说的是「最坏时间复杂度」</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 排序算法 ===================== -->
+    <div class="section" id="sort">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#8645;</div>
+            <h2>排序算法</h2>
+            <span class="badge">必会</span>
+        </div>
+        <div class="section-body">
+
+            <h3>七大排序对比</h3>
+            <table>
+                <tr><th>算法</th><th>平均时间</th><th>最坏</th><th>空间</th><th>稳定性</th><th>思想</th></tr>
+                <tr><td>冒泡排序</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>✅ 稳定</td><td>交换</td></tr>
+                <tr><td>选择排序</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>❌ 不稳定</td><td>选择</td></tr>
+                <tr><td>插入排序</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>✅ 稳定</td><td>插入</td></tr>
+                <tr><td>希尔排序</td><td>O(n^1.3)</td><td>O(n²)</td><td>O(1)</td><td>❌ 不稳定</td><td>分组插入</td></tr>
+                <tr><td>快速排序</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>❌ 不稳定</td><td>分治</td></tr>
+                <tr><td>归并排序</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>✅ 稳定</td><td>分治</td></tr>
+                <tr><td>堆排序</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>❌ 不稳定</td><td>选择</td></tr>
+            </table>
+
+            <div class="callout tip">
+                <div class="callout-title">什么是稳定排序？</div>
+                如果两个相等的元素，排序后相对位置不变，就是稳定排序。<br>
+                比如 [3a, 2, 3b] 排序后，如果 3a 还在 3b 前面，就是稳定的。
+            </div>
+
+            <h3>1. 冒泡排序</h3>
+            <div class="code-block"><span class="com">// 思想：相邻元素两两比较，大的往后冒，像气泡往上浮</span>
+<span class="kw">void</span> <span class="fn">bubbleSort</span>(<span class="type">int</span>[] arr) {
+    <span class="type">int</span> n = arr.length;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n - <span class="num">1</span>; i++) {
+        <span class="type">boolean</span> swapped = <span class="kw">false</span>;
+        <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j < n - <span class="num">1</span> - i; j++) {
+            <span class="kw">if</span> (arr[j] > arr[j+<span class="num">1</span>]) {
+                <span class="type">int</span> tmp = arr[j]; arr[j] = arr[j+<span class="num">1</span>]; arr[j+<span class="num">1</span>] = tmp;
+                swapped = <span class="kw">true</span>;
+            }
+        }
+        <span class="kw">if</span> (!swapped) <span class="kw">break</span>;  <span class="com">// 优化：这轮没交换说明已经有序了</span>
+    }
+}
+
+<span class="com">// 口诀：外层 n-1 轮，内层每轮少一个</span></div>
+
+            <h3>2. 选择排序</h3>
+            <div class="code-block"><span class="com">// 思想：每轮选最小的放到前面</span>
+<span class="kw">void</span> <span class="fn">selectionSort</span>(<span class="type">int</span>[] arr) {
+    <span class="type">int</span> n = arr.length;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n - <span class="num">1</span>; i++) {
+        <span class="type">int</span> minIdx = i;
+        <span class="kw">for</span> (<span class="type">int</span> j = i + <span class="num">1</span>; j < n; j++) {
+            <span class="kw">if</span> (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        <span class="com">// 把最小的和第i位交换</span>
+        <span class="type">int</span> tmp = arr[i]; arr[i] = arr[minIdx]; arr[minIdx] = tmp;
+    }
+}</div>
+
+            <h3>3. 插入排序</h3>
+            <div class="code-block"><span class="com">// 思想：像打牌一样，把新牌插入到前面已经排好的牌里</span>
+<span class="kw">void</span> <span class="fn">insertionSort</span>(<span class="type">int</span>[] arr) {
+    <span class="type">int</span> n = arr.length;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i < n; i++) {
+        <span class="type">int</span> key = arr[i];
+        <span class="type">int</span> j = i - <span class="num">1</span>;
+        <span class="com">// 前面比key大的都往后移</span>
+        <span class="kw">while</span> (j >= <span class="num">0</span> && arr[j] > key) {
+            arr[j+<span class="num">1</span>] = arr[j];
+            j--;
+        }
+        arr[j+<span class="num">1</span>] = key;  <span class="com">// 插入到正确位置</span>
+    }
+}
+
+<span class="com">// 对几乎有序的数组特别快，接近 O(n)</span></div>
+
+            <h3>4. 快速排序（重点！）</h3>
+            <div class="code-block"><span class="com">// 思想：选一个基准(pivot)，小的放左边，大的放右边，递归排序左右</span>
+<span class="kw">void</span> <span class="fn">quickSort</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> right) {
+    <span class="kw">if</span> (left >= right) <span class="kw">return</span>;
+    <span class="type">int</span> pivotIdx = <span class="fn">partition</span>(arr, left, right);
+    <span class="fn">quickSort</span>(arr, left, pivotIdx - <span class="num">1</span>);
+    <span class="fn">quickSort</span>(arr, pivotIdx + <span class="num">1</span>, right);
+}
+
+<span class="type">int</span> <span class="fn">partition</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> right) {
+    <span class="type">int</span> pivot = arr[right];  <span class="com">// 选最右边做基准</span>
+    <span class="type">int</span> i = left - <span class="num">1</span>;       <span class="com">// 小于基准的区域的边界</span>
+    <span class="kw">for</span> (<span class="type">int</span> j = left; j < right; j++) {
+        <span class="kw">if</span> (arr[j] <= pivot) {
+            i++;
+            <span class="type">int</span> tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+        }
+    }
+    <span class="com">// 把基准放到中间</span>
+    <span class="type">int</span> tmp = arr[i+<span class="num">1</span>]; arr[i+<span class="num">1</span>] = arr[right]; arr[right] = tmp;
+    <span class="kw">return</span> i + <span class="num">1</span>;
+}
+
+<span class="com">// 平均 O(n log n)，最坏 O(n²)（已排序的数组）</span>
+<span class="com">// 优化：随机选基准、三数取中</span></div>
+
+            <h3>5. 归并排序</h3>
+            <div class="code-block"><span class="com">// 思想：分治。拆成两半，分别排序，再合并</span>
+<span class="kw">void</span> <span class="fn">mergeSort</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> right) {
+    <span class="kw">if</span> (left >= right) <span class="kw">return</span>;
+    <span class="type">int</span> mid = left + (right - left) / <span class="num">2</span>;
+    <span class="fn">mergeSort</span>(arr, left, mid);       <span class="com">// 排左半边</span>
+    <span class="fn">mergeSort</span>(arr, mid + <span class="num">1</span>, right);  <span class="com">// 排右半边</span>
+    <span class="fn">merge</span>(arr, left, mid, right);      <span class="com">// 合并两个有序数组</span>
+}
+
+<span class="kw">void</span> <span class="fn">merge</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> mid, <span class="type">int</span> right) {
+    <span class="type">int</span>[] tmp = <span class="kw">new int</span>[right - left + <span class="num">1</span>];
+    <span class="type">int</span> i = left, j = mid + <span class="num">1</span>, k = <span class="num">0</span>;
+    <span class="kw">while</span> (i <= mid && j <= right) {
+        tmp[k++] = arr[i] <= arr[j] ? arr[i++] : arr[j++];
+    }
+    <span class="kw">while</span> (i <= mid) tmp[k++] = arr[i++];
+    <span class="kw">while</span> (j <= right) tmp[k++] = arr[j++];
+    <span class="com">// 复制回去</span>
+    <span class="kw">for</span> (i = <span class="num">0</span>; i < k; i++) arr[left + i] = tmp[i];
+}
+
+<span class="com">// 时间：O(n log n)  空间：O(n)  稳定排序</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">排序怎么选？</div>
+                <strong>数据量小</strong>：插入排序（n<50 时很快）<br>
+                <strong>数据量大</strong>：快速排序（平均最快）<br>
+                <strong>要稳定</strong>：归并排序<br>
+                <strong>内存紧张</strong>：堆排序（O(1) 额外空间）<br>
+                <strong>实际开发</strong>：直接用语言自带的 sort（Java 用双轴快排 + 归并 + 插入的混合排序）
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 搜索算法 ===================== -->
+    <div class="section" id="search">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(219,97,162,0.15);color:#db61a2;">&#128269;</div>
+            <h2>搜索算法</h2>
+            <span class="badge">重点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>1. 二分查找</h3>
+            <p>在<strong>有序数组</strong>中查找某值，每次砍一半，O(log n)。</p>
+
+            <div class="code-block"><span class="com">// 基础版：找一个数</span>
+<span class="type">int</span> <span class="fn">binarySearch</span>(<span class="type">int</span>[] arr, <span class="type">int</span> target) {
+    <span class="type">int</span> left = <span class="num">0</span>, right = arr.length - <span class="num">1</span>;
+    <span class="kw">while</span> (left <= right) {
+        <span class="type">int</span> mid = left + (right - left) / <span class="num">2</span>;  <span class="com">// 防止溢出，不要写 (left+right)/2</span>
+        <span class="kw">if</span> (arr[mid] == target) {
+            <span class="kw">return</span> mid;
+        } <span class="kw">else if</span> (arr[mid] < target) {
+            left = mid + <span class="num">1</span>;    <span class="com">// 目标在右边</span>
+        } <span class="kw">else</span> {
+            right = mid - <span class="num">1</span>;   <span class="com">// 目标在左边</span>
+        }
+    }
+    <span class="kw">return</span> -<span class="num">1</span>;  <span class="com">// 没找到</span>
+}
+
+<span class="com">// 进阶：找左边界（第一个等于target的位置）</span>
+<span class="type">int</span> <span class="fn">leftBound</span>(<span class="type">int</span>[] arr, <span class="type">int</span> target) {
+    <span class="type">int</span> left = <span class="num">0</span>, right = arr.length;
+    <span class="kw">while</span> (left < right) {
+        <span class="type">int</span> mid = left + (right - left) / <span class="num">2</span>;
+        <span class="kw">if</span> (arr[mid] < target) {
+            left = mid + <span class="num">1</span>;
+        } <span class="kw">else</span> {
+            right = mid;
+        }
+    }
+    <span class="kw">return</span> left;  <span class="com">// 找不到时返回应该插入的位置</span>
+}</div>
+
+            <div class="callout tip">
+                <div class="callout-title">二分查找的核心</div>
+                二分的本质不是"有序"，而是<strong>"可以通过中间元素判断答案在哪一边"</strong>。<br>
+                很多问题都可以用二分，比如：找满足条件的最小值/最大值、平方根、吃香蕉问题等。
+            </div>
+
+            <h3>2. DFS（深度优先搜索）</h3>
+            <p>一条路走到底，走不通就退回来换一条路。用<strong>递归</strong>或<strong>栈</strong>实现。</p>
+
+            <div class="code-block"><span class="com">// 例子：二叉树的前序遍历（DFS）</span>
+<span class="kw">void</span> <span class="fn">dfs</span>(TreeNode root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span>;    <span class="com">// 终止条件</span>
+    System.out.<span class="fn">println</span>(root.val);  <span class="com">// 处理当前节点</span>
+    <span class="fn">dfs</span>(root.left);               <span class="com">// 走左边</span>
+    <span class="fn">dfs</span>(root.right);              <span class="com">// 走右边</span>
+}
+
+<span class="com">// DFS 模板：</span>
+<span class="com">// 1. 终止条件：越界/不满足/找到了</span>
+<span class="com">// 2. 标记访问过（防止重复走）</span>
+<span class="com">// 3. 尝试所有可能的方向</span>
+<span class="com">// 4. 回溯（撤销标记）</span></div>
+
+            <h3>3. BFS（广度优先搜索）</h3>
+            <p>一层一层往外扩散，像水波一样。用<strong>队列</strong>实现。最适合找<strong>最短路径</strong>。</p>
+
+            <div class="code-block"><span class="com">// 例子：二叉树的层序遍历（BFS）</span>
+<span class="kw">void</span> <span class="fn">bfs</span>(TreeNode root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span>;
+    Queue<TreeNode> q = <span class="kw">new</span> <span class="cls">LinkedList</span><>();
+    q.<span class="fn">offer</span>(root);
+
+    <span class="kw">while</span> (!q.<span class="fn">isEmpty</span>()) {
+        <span class="type">int</span> size = q.<span class="fn">size</span>();      <span class="com">// 当前层的节点数</span>
+        <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < size; i++) {
+            TreeNode node = q.<span class="fn">poll</span>();
+            System.out.<span class="fn">println</span>(node.val);  <span class="com">// 处理</span>
+            <span class="kw">if</span> (node.left != <span class="kw">null</span>) q.<span class="fn">offer</span>(node.left);
+            <span class="kw">if</span> (node.right != <span class="kw">null</span>) q.<span class="fn">offer</span>(node.right);
+        }
+    }
+}
+
+<span class="com">// BFS 适合：最短路径、层序遍历、最少操作次数</span></div>
+
+            <div class="callout tip">
+                <div class="callout-title">DFS vs BFS 怎么选？</div>
+                <strong>选 DFS：</strong>找所有路径、空间要求低、路径长度不重要<br>
+                <strong>选 BFS：</strong>找最短路径、层序遍历、最少步数<br>
+                <strong>图搜索要注意：</strong>必须记录 visited，否则会重复访问死循环
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 动态规划 ===================== -->
+    <div class="section" id="dp">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(188,140,255,0.15);color:#bc8cff;">&#128200;</div>
+            <h2>动态规划（DP）</h2>
+            <span class="badge">重难点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>什么是动态规划？</h3>
+            <p>把大问题拆成小问题，<strong>记住小问题的答案</strong>，避免重复计算。核心是 <strong>状态转移方程</strong>。</p>
+
+            <div class="flow-box">
+                大问题 <span class="flow-arrow">→</span> 拆成子问题 <span class="flow-arrow">→</span> 求子问题解 <span class="flow-arrow">→</span> 存起来（DP数组）<span class="flow-arrow">→</span> 组合出大问题的解
+            </div>
+
+            <h3>DP 解题五步法</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">1. 确定 dp 数组含义</div>
+                    <div class="card-desc">dp[i] 或 dp[i][j] 表示什么？想清楚</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. 推导状态转移方程</div>
+                    <div class="card-desc">dp[i] 怎么从前面的 dp 推出来？这是核心</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. 初始化 dp 数组</div>
+                    <div class="card-desc">base case 是什么？dp[0]、dp[1] 等于多少？</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. 确定遍历顺序</div>
+                    <div class="card-desc">从前往后还是从后往前？外层什么内层什么？</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. 手动推导验证</div>
+                    <div class="card-desc">用小例子手动算一遍，看看对不对</div>
+                </div>
+            </div>
+
+            <h3>经典入门题：斐波那契数列</h3>
+            <div class="code-block"><span class="com">// 暴力递归：O(2^n)，慢得离谱！</span>
+<span class="type">int</span> <span class="fn">fib</span>(<span class="type">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="num">1</span>) <span class="kw">return</span> n;
+    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="num">1</span>) + <span class="fn">fib</span>(n-<span class="num">2</span>);
+}
+
+<span class="com">// DP 解法：O(n) 时间，O(n) 空间</span>
+<span class="type">int</span> <span class="fn">fibDP</span>(<span class="type">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="num">1</span>) <span class="kw">return</span> n;
+    <span class="type">int</span>[] dp = <span class="kw">new int</span>[n+<span class="num">1</span>];
+    dp[<span class="num">0</span>] = <span class="num">0</span>;
+    dp[<span class="num">1</span>] = <span class="num">1</span>;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">2</span>; i <= n; i++) {
+        dp[i] = dp[i-<span class="num">1</span>] + dp[i-<span class="num">2</span>];  <span class="com">// 状态转移方程</span>
+    }
+    <span class="kw">return</span> dp[n];
+}
+
+<span class="com">// 优化空间：O(1)（只需要前两个状态）</span>
+<span class="type">int</span> <span class="fn">fibBest</span>(<span class="type">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="num">1</span>) <span class="kw">return</span> n;
+    <span class="type">int</span> a = <span class="num">0</span>, b = <span class="num">1</span>, c;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">2</span>; i <= n; i++) {
+        c = a + b;
+        a = b;
+        b = c;
+    }
+    <span class="kw">return</span> b;
+}</div>
+
+            <h3>经典入门题：爬楼梯</h3>
+            <div class="code-block"><span class="com">// 题目：一次可以爬1阶或2阶，爬n阶有多少种方法？</span>
+<span class="type">int</span> <span class="fn">climbStairs</span>(<span class="type">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="num">2</span>) <span class="kw">return</span> n;
+    <span class="type">int</span>[] dp = <span class="kw">new int</span>[n+<span class="num">1</span>];
+    dp[<span class="num">1</span>] = <span class="num">1</span>;   <span class="com">// 1阶只有1种方法</span>
+    dp[<span class="num">2</span>] = <span class="num">2</span>;   <span class="com">// 2阶有2种（1+1 或 2）</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">3</span>; i <= n; i++) {
+        <span class="com">// 爬到第i阶 = 从i-1爬1步上来 + 从i-2爬2步上来</span>
+        dp[i] = dp[i-<span class="num">1</span>] + dp[i-<span class="num">2</span>];
+    }
+    <span class="kw">return</span> dp[n];
+}</div>
+
+            <h3>经典题：01 背包</h3>
+            <div class="code-block"><span class="com">// 题目：有n个物品，每个物品重量w[i]，价值v[i]，背包容量c，最多装多少价值？</span>
+<span class="type">int</span> <span class="fn">knapsack</span>(<span class="type">int</span>[] w, <span class="type">int</span>[] v, <span class="type">int</span> c) {
+    <span class="type">int</span> n = w.length;
+    <span class="type">int</span>[][] dp = <span class="kw">new int</span>[n+<span class="num">1</span>][c+<span class="num">1</span>];
+    <span class="com">// dp[i][j] = 前i个物品，容量j，最大价值</span>
+
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i <= n; i++) {
+        <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">1</span>; j <= c; j++) {
+            <span class="kw">if</span> (j < w[i-<span class="num">1</span>]) {
+                dp[i][j] = dp[i-<span class="num">1</span>][j];  <span class="com">// 装不下，不选</span>
+            } <span class="kw">else</span> {
+                <span class="com">// 选或不选，取最大的</span>
+                dp[i][j] = Math.<span class="fn">max</span>(dp[i-<span class="num">1</span>][j], dp[i-<span class="num">1</span>][j-w[i-<span class="num">1</span>]] + v[i-<span class="num">1</span>]);
+            }
+        }
+    }
+    <span class="kw">return</span> dp[n][c];
+}
+
+<span class="com">// 空间优化：一维DP（倒序遍历！）</span>
+<span class="type">int</span> <span class="fn">knapsackOpt</span>(<span class="type">int</span>[] w, <span class="type">int</span>[] v, <span class="type">int</span> c) {
+    <span class="type">int</span>[] dp = <span class="kw">new int</span>[c+<span class="num">1</span>];
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < w.length; i++) {
+        <span class="kw">for</span> (<span class="type">int</span> j = c; j >= w[i]; j--) {  <span class="com">// 倒序！</span>
+            dp[j] = Math.<span class="fn">max</span>(dp[j], dp[j-w[i]] + v[i]);
+        }
+    }
+    <span class="kw">return</span> dp[c];
+}</div>
+
+            <h3>常见 DP 题型</h3>
+            <table>
+                <tr><th>题型</th><th>代表题</th><th>状态定义</th></tr>
+                <tr><td>线性 DP</td><td>斐波那契、爬楼梯、最大子序和</td><td>dp[i] 表示前 i 个的最优解</td></tr>
+                <tr><td>背包 DP</td><td>01背包、完全背包、多重背包</td><td>dp[i][j] 前i个物品容量j的最大价值</td></tr>
+                <tr><td>序列 DP</td><td>最长递增子序列(LIS)、最长公共子序列(LCS)</td><td>dp[i][j] 表示 s[0..i] 和 t[0..j] 的解</td></tr>
+                <tr><td>区间 DP</td><td>回文子串、石子游戏</td><td>dp[i][j] 表示区间 [i,j] 的解</td></tr>
+                <tr><td>打家劫舍</td><td>打家劫舍I/II/III</td><td>dp[i] 前i间房能偷的最大金额</td></tr>
+                <tr><td>股票问题</td><td>买卖股票最佳时机系列</td><td>dp[i][k][0/1] 第i天k次交易是否持有</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== 贪心算法 ===================== -->
+    <div class="section" id="greedy">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127775;</div>
+            <h2>贪心算法</h2>
+            <span class="badge">重点</span>
+        </div>
+        <div class="section-body">
+
+            <h3>什么是贪心？</h3>
+            <p>每一步都选<strong>当前最优</strong>的选择，希望最终得到全局最优。</p>
+
+            <div class="callout warn">
+                <div class="callout-title">贪心的前提</div>
+                不是所有问题都能用贪心！必须满足<strong>贪心选择性质</strong>（局部最优能导致全局最优）。<br>
+                怎么判断？一般用反证法 + 数学归纳法证明。或者你想不到反例，那就试试贪心。
+            </div>
+
+            <h3>经典题：买卖股票最佳时机 II</h3>
+            <div class="code-block"><span class="com">// 题目：可以多次买卖股票，问最大利润</span>
+<span class="com">// 贪心：只要今天比昨天贵，就赚差价</span>
+<span class="type">int</span> <span class="fn">maxProfit</span>(<span class="type">int</span>[] prices) {
+    <span class="type">int</span> profit = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i < prices.length; i++) {
+        <span class="kw">if</span> (prices[i] > prices[i-<span class="num">1</span>]) {
+            profit += prices[i] - prices[i-<span class="num">1</span>];
+        }
+    }
+    <span class="kw">return</span> profit;
+}</div>
+
+            <h3>经典题：跳跃游戏</h3>
+            <div class="code-block"><span class="com">// 题目：数组每个元素代表在该位置可以跳的最大长度，问能不能跳到最后</span>
+<span class="type">boolean</span> <span class="fn">canJump</span>(<span class="type">int</span>[] nums) {
+    <span class="type">int</span> farthest = <span class="num">0</span>;  <span class="com">// 当前能跳到的最远位置</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < nums.length; i++) {
+        <span class="kw">if</span> (i > farthest) <span class="kw">return false</span>;  <span class="com">// 连这都到不了，更别说后面了</span>
+        farthest = Math.<span class="fn">max</span>(farthest, i + nums[i]);  <span class="com">// 更新最远位置</span>
+        <span class="kw">if</span> (farthest >= nums.length - <span class="num">1</span>) <span class="kw">return true</span>;
+    }
+    <span class="kw">return true</span>;
+}</div>
+
+            <h3>经典题：分发饼干</h3>
+            <div class="code-block"><span class="com">// 题目：每个孩子有胃口值g，每块饼干大小s，s[i] >= g[i] 才能满足，最多满足几个孩子？</span>
+<span class="type">int</span> <span class="fn">findContentChildren</span>(<span class="type">int</span>[] g, <span class="type">int</span>[] s) {
+    Arrays.<span class="fn">sort</span>(g);
+    Arrays.<span class="fn">sort</span>(s);
+    <span class="type">int</span> i = <span class="num">0</span>, j = <span class="num">0</span>, count = <span class="num">0</span>;
+    <span class="kw">while</span> (i < g.length && j < s.length) {
+        <span class="kw">if</span> (s[j] >= g[i]) {  <span class="com">// 这块饼干能满足这个孩子</span>
+            count++;
+            i++;
+            j++;
+        } <span class="kw">else</span> {
+            j++;  <span class="com">// 饼干太小，换下一块</span>
+        }
+    }
+    <span class="kw">return</span> count;
+}
+
+<span class="com">// 贪心策略：最小的饼干给胃口最小的孩子（先排序）</span></div>
+
+            <h3>贪心 vs DP 怎么选？</h3>
+            <table>
+                <tr><th>对比</th><th>贪心</th><th>动态规划</th></tr>
+                <tr><td>思路</td><td>每步选当前最优</td><td>考虑所有可能，选全局最优</td></tr>
+                <tr><td>效率</td><td>高，一般 O(n) 或 O(n log n)</td><td>较低，一般 O(n²) 或更高</td></tr>
+                <tr><td>正确性</td><td>需要证明，容易错</td><td>一般都是对的</td></tr>
+                <tr><td>适用</td><td>满足贪心选择性质的问题</td><td>有重叠子问题和最优子结构</td></tr>
+                <tr><td>怎么判断</td><td>举反例，举不出就试试</td><td>能拆成子问题，子问题能推出大问题</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== 数据结构 ===================== -->
+    <div class="section" id="datastruct">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(88,166,255,0.15);color:#58a6ff;">&#128208;</div>
+            <h2>常用数据结构</h2>
+            <span class="badge">基础</span>
+        </div>
+        <div class="section-body">
+
+            <h3>各数据结构操作时间对比</h3>
+            <table>
+                <tr><th>数据结构</th><th>查找</th><th>插入</th><th>删除</th><th>适用场景</th></tr>
+                <tr><td>数组</td><td>O(1) 随机访问 / O(n) 查找</td><td>O(n)</td><td>O(n)</td><td>已知下标，快速访问</td></tr>
+                <tr><td>链表</td><td>O(n)</td><td>O(1) 已知位置</td><td>O(1) 已知位置</td><td>频繁增删</td></tr>
+                <tr><td>栈</td><td>O(n)</td><td>O(1)</td><td>O(1)（栈顶）</td><td>后进先出</td></tr>
+                <tr><td>队列</td><td>O(n)</td><td>O(1)</td><td>O(1)（队头）</td><td>先进先出</td></tr>
+                <tr><td>哈希表</td><td>O(1) 平均</td><td>O(1) 平均</td><td>O(1) 平均</td><td>快速查找</td></tr>
+                <tr><td>二叉搜索树</td><td>O(log n) 平均</td><td>O(log n) 平均</td><td>O(log n) 平均</td><td>有序查找</td></tr>
+                <tr><td>红黑树</td><td>O(log n)</td><td>O(log n)</td><td>O(log n)</td><td>自平衡BST</td></tr>
+                <tr><td>堆</td><td>O(1) 最值</td><td>O(log n)</td><td>O(log n)</td><td>找第K大/小元素</td></tr>
+            </table>
+
+            <h3>栈（Stack）</h3>
+            <div class="code-block"><span class="com">// 后进先出（LIFO）</span>
+Stack<Integer> stack = <span class="kw">new</span> <span class="cls">Stack</span><>();
+stack.<span class="fn">push</span>(<span class="num">1</span>);      <span class="com">// 压入</span>
+stack.<span class="fn">pop</span>();       <span class="com">// 弹出栈顶</span>
+stack.<span class="fn">peek</span>();      <span class="com">// 查看栈顶（不弹出）</span>
+stack.<span class="fn">isEmpty</span>();   <span class="com">// 是否为空</span>
+
+<span class="com">// 经典应用：</span>
+<span class="com">// - 括号匹配</span>
+<span class="com">// - 函数调用栈</span>
+<span class="com">// - 逆波兰表达式</span>
+<span class="com">// - 单调栈（找下一个更大元素）</span></div>
+
+            <h3>队列（Queue）</h3>
+            <div class="code-block"><span class="com">// 先进先出（FIFO）</span>
+Queue<Integer> q = <span class="kw">new</span> <span class="cls">LinkedList</span><>();
+q.<span class="fn">offer</span>(<span class="num">1</span>);      <span class="com">// 入队</span>
+q.<span class="fn">poll</span>();       <span class="com">// 出队</span>
+q.<span class="fn">peek</span>();       <span class="com">// 查看队头</span>
+q.<span class="fn">isEmpty</span>();    <span class="com">// 是否为空</span>
+
+<span class="com">// 双端队列 Deque：两头都能进出</span>
+Deque<Integer> dq = <span class="kw">new</span> <span class="cls">ArrayDeque</span><>();
+dq.<span class="fn">offerFirst</span>(<span class="num">1</span>);
+dq.<span class="fn">offerLast</span>(<span class="num">2</span>);
+dq.<span class="fn">pollFirst</span>();
+dq.<span class="fn">pollLast</span>();
+
+<span class="com">// 优先级队列 PriorityQueue：堆实现，默认小顶堆</span>
+PriorityQueue<Integer> pq = <span class="kw">new</span> <span class="cls">PriorityQueue</span><>();
+<span class="com">// 大顶堆：new PriorityQueue<>((a,b) -> b - a)</span></div>
+
+            <h3>哈希表</h3>
+            <div class="code-block"><span class="com">// HashMap：key-value 对，平均 O(1) 查找</span>
+<span class="com">// 底层：数组 + 链表 + 红黑树</span>
+
+<span class="com">// 哈希碰撞解决方法：</span>
+<span class="com">// 1. 链地址法（Java 用这个）</span>
+<span class="com">// 2. 开放地址法（线性探测、二次探测）</span>
+<span class="com">// 3. 再哈希法</span>
+
+<span class="com">// 负载因子 = 元素个数 / 数组长度</span>
+<span class="com">// 默认 0.75，超过就扩容（2倍）</span></div>
+
+            <h3>二叉树</h3>
+            <div class="code-block"><span class="kw">class</span> <span class="cls">TreeNode</span> {
+    <span class="type">int</span> val;
+    TreeNode left;
+    TreeNode right;
+}
+
+<span class="com">// 遍历方式：</span>
+<span class="com">// 前序：根 → 左 → 右</span>
+<span class="com">// 中序：左 → 根 → 右    （二叉搜索树的中序是有序的！）</span>
+<span class="com">// 后序：左 → 右 → 根</span>
+<span class="com">// 层序：BFS 一层层</span>
+
+<span class="com">// 二叉搜索树（BST）：</span>
+<span class="com">// 左子树所有节点 < 根 < 右子树所有节点</span>
+<span class="com">// 中序遍历结果是升序的</span>
+
+<span class="com">// 平衡二叉树（AVL）：</span>
+<span class="com">// 左右子树高度差不超过1</span>
+<span class="com">// 通过旋转维持平衡</span>
+
+<span class="com">// 红黑树：</span>
+<span class="com">// 近似平衡，插入删除更快（旋转次数少）</span>
+<span class="com">// Java 的 TreeMap/TreeSet 用的就是红黑树</span></div>
+        </div>
+    </div>
+
+    <!-- ===================== 代码优化 ===================== -->
+    <div class="section" id="optimize">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(248,81,73,0.15);color:#f85149;">&#9889;</div>
+            <h2>代码优化思路</h2>
+            <span class="badge">进阶</span>
+        </div>
+        <div class="section-body">
+
+            <h3>优化的核心思路</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">1. 先跑对再优化</div>
+                    <div class="card-desc">先写正确的暴力解法，再一步步优化。不要上来就追求最优</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. 找瓶颈</div>
+                    <div class="card-desc">用 profiler 测，不要猜。80% 的时间花在 20% 的代码上</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. 空间换时间</div>
+                    <div class="card-desc">缓存、哈希表、DP数组——用内存换速度</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. 减少重复计算</div>
+                    <div class="card-desc">凡是算过的就存起来，下次直接用（记忆化、DP）</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. 降维打击</div>
+                    <div class="card-desc">O(n²) → O(n log n) → O(n) → O(log n)，每降一级都是质的飞跃</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">6. 过早优化是万恶之源</div>
+                    <div class="card-desc">除非真的有性能问题，否则不要为了优化而优化，可读性更重要</div>
+                </div>
+            </div>
+
+            <h3>常见优化手段</h3>
+            <table>
+                <tr><th>场景</th><th>优化前</th><th>优化后</th><th>说明</th></tr>
+                <tr><td>查找慢</td><td>顺序查找 O(n)</td><td>二分查找 O(log n) 或 哈希 O(1)</td><td>先排序再二分，或用 HashMap</td></tr>
+                <tr><td>重复子问题</td><td>暴力递归 O(2ⁿ)</td><td>记忆化 / DP O(n)</td><td>把算过的存起来</td></tr>
+                <tr><td>字符串拼接</td><td>+ 号拼接 O(n²)</td><td>StringBuilder O(n)</td><td>+号每次都新建字符串</td></tr>
+                <tr><td>频繁增删</td><td>ArrayList O(n)</td><td>LinkedList O(1)</td><td>已知位置时链表更快</td></tr>
+                <tr><td>IO 慢</td><td>单字节读写</td><td>缓冲流 BufferedReader</td><td>加缓冲区减少 IO 次数</td></tr>
+                <tr><td>排序</td><td>冒泡 O(n²)</td><td>快排 O(n log n)</td><td>直接用库函数</td></tr>
+                <tr><td>递归爆栈</td><td>递归</td><td>迭代 / 尾递归</td><td>手动模拟栈</td></tr>
+            </table>
+
+            <h3>刷题建议</h3>
+            <div class="callout tip">
+                <div class="callout-title">刷题路线</div>
+                <strong>第一阶段（入门）：</strong>数组、字符串、链表、排序、二分 → 先把简单题做会<br>
+                <strong>第二阶段（进阶）：</strong>DFS/BFS、哈希表、栈/队列、双指针 → 中等题<br>
+                <strong>第三阶段（高级）：</strong>动态规划、贪心、图论、滑动窗口、前缀和 → 中难题<br>
+                <strong>第四阶段（冲刺）：</strong>按题型刷高频题 + 周赛 → 困难题<br><br>
+                <strong>推荐平台：</strong>LeetCode（面试主流）、牛客网（国内校招）、Codeforces（竞赛）<br>
+                <strong>题量参考：</strong>200 道入门，300 道可以面试，500 道以上比较稳
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 面试速答 ===================== -->
+    <div class="section" id="interview">
+        <div class="section-header">
+            <div class="icon" style="background:rgba(210,153,34,0.15);color:#d29922;">&#127891;</div>
+            <h2>面试高频问题速答</h2>
+            <span class="badge">面试专用</span>
+        </div>
+        <div class="section-body">
+            <table>
+                <tr><th>问题</th><th>参考回答</th></tr>
+                <tr>
+                    <td>时间复杂度和空间复杂度是什么？</td>
+                    <td>时间复杂度描述算法运行时间随数据量增长的趋势，空间复杂度描述额外占用内存的增长趋势。用大O表示法，只看最高阶项。常见的有 O(1), O(log n), O(n), O(n log n), O(n²) 等</td>
+                </tr>
+                <tr>
+                    <td>常见排序算法及复杂度？</td>
+                    <td>冒泡、选择、插入 O(n²)；快排、归并、堆排序 O(n log n)。<br>
+                        稳定的：冒泡、插入、归并<br>
+                        快排最坏 O(n²)，平均 O(n log n)，实际最快</td>
+                </tr>
+                <tr>
+                    <td>快速排序的原理？</td>
+                    <td>选一个基准(pivot)，把小于基准的放左边，大于的放右边（partition过程），然后递归排序左右两边。平均 O(n log n)，最坏 O(n²)（已排序数组），可以通过随机选基准优化</td>
+                </tr>
+                <tr>
+                    <td>归并排序的原理？</td>
+                    <td>分治思想。把数组从中间分成两半，分别排序，然后合并两个有序数组。时间稳定 O(n log n)，空间 O(n)，稳定排序</td>
+                </tr>
+                <tr>
+                    <td>堆排序的原理？</td>
+                    <td>先建堆（大顶堆/小顶堆），然后每次把堆顶和最后一个元素交换，调整堆，重复直到有序。时间 O(n log n)，空间 O(1)，不稳定</td>
+                </tr>
+                <tr>
+                    <td>二分查找的时间复杂度？为什么？</td>
+                    <td>O(log n)。因为每次查找都排除一半的元素，n 经过多少次除以 2 变成 1？就是 log2(n) 次</td>
+                </tr>
+                <tr>
+                    <td>DFS 和 BFS 的区别？</td>
+                    <td>DFS 是深度优先，一条路走到黑再回溯，用递归或栈实现，适合找所有路径、空间要求低。<br>
+                        BFS 是广度优先，一层一层扩散，用队列实现，适合找最短路径、最少步数。</td>
+                </tr>
+                <tr>
+                    <td>什么是动态规划？</td>
+                    <td>把大问题拆成重叠的子问题，记住子问题的解（DP数组），避免重复计算。核心是找到状态转移方程。关键特征：重叠子问题 + 最优子结构</td>
+                </tr>
+                <tr>
+                    <td>贪心和动态规划的区别？</td>
+                    <td>贪心每一步选当前最优，不能回退，需要满足贪心选择性质才能用，效率高但不一定对。<br>
+                        动态规划考虑所有可能的选择，通过子问题的最优解推出全局最优解，一定对但效率低一些。</td>
+                </tr>
+                <tr>
+                    <td>什么是哈希表？怎么解决冲突？</td>
+                    <td>通过哈希函数把 key 映射到数组下标，实现 O(1) 平均查找。<br>
+                        冲突解决：1.链地址法（Java HashMap用）2.开放地址法（线性探测）3.再哈希法<br>
+                        负载因子超过阈值时会扩容（rehash）</td>
+                </tr>
+                <tr>
+                    <td>什么是红黑树？</td>
+                    <td>一种自平衡的二叉搜索树，通过颜色约束和旋转维持近似平衡（最长路径不超过最短路径的2倍）。查找、插入、删除都是 O(log n)。相比 AVL 树，插入删除更快（旋转少），Java 的 TreeMap/TreeSet 用的就是红黑树</td>
+                </tr>
+                <tr>
+                    <td>堆是什么？应用场景？</td>
+                    <td>堆是完全二叉树，分大顶堆和小顶堆。堆顶是最值。插入删除 O(log n)，取最值 O(1)。<br>
+                        应用：优先级队列、Top K 问题、堆排序</td>
+                </tr>
+                <tr>
+                    <td>什么是分治法？</td>
+                    <td>把大问题分成若干个相同的小问题，递归解决小问题，再把结果合并。<br>
+                        三步走：分解 → 解决 → 合并<br>
+                        例子：归并排序、快速排序、二分查找</td>
+                </tr>
+                <tr>
+                    <td>什么是回溯算法？</td>
+                    <td>一种暴力搜索方法，一条路走到底，走不通就退回去换一条路。本质是 DFS + 剪枝。<br>
+                        模板：做出选择 → 递归 → 撤销选择<br>
+                        应用：全排列、组合、子集、N皇后、解数独</td>
+                </tr>
+                <tr>
+                    <td>怎么分析递归算法的复杂度？</td>
+                    <td>时间复杂度 = 递归的节点数 × 每个节点的处理时间<br>
+                        空间复杂度 = 递归深度 + 额外空间<br>
+                        可以用主定理（Master Theorem）快速判断分治算法的复杂度</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>GEIST 算法与优化学习笔记 &nbsp;|&nbsp; 2026-09-29</p>
+    <p>复杂度分析 → 排序 → 搜索 → DP → 贪心 → 数据结构 → 优化思路 → 面试速答</p>
+</div>
+
+</body>
+</html>
