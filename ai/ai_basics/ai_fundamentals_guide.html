@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 基础知识完全指南 · 从机器学习到 Agent 生态</title>
+<style>
+:root{
+  --bg:#0f1117;--card:#171a23;--card2:#1d212d;--border:#2a2f3e;
+  --text:#e6e8ee;--muted:#9aa1b2;--brand:#6c7bff;--brand2:#9b8cff;
+  --green:#3ecf8e;--orange:#ffb454;--red:#ff6b6b;--cyan:#4dd0e1;
+  --code-bg:#0d0f15;--mono:'JetBrains Mono',Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.75;font-size:15px}
+.layout{display:flex;max-width:1280px;margin:0 auto}
+nav{width:240px;position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;border-right:1px solid var(--border);flex-shrink:0}
+nav h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px}
+nav a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 10px;border-radius:6px;margin:2px 0}
+nav a:hover{background:var(--card2);color:var(--text)}
+main{flex:1;padding:40px 48px;min-width:0;max-width:900px}
+.hero{background:linear-gradient(135deg,#1a1f35,#23204d);border:1px solid var(--border);border-radius:16px;padding:40px;margin-bottom:32px}
+.hero h1{font-size:30px;background:linear-gradient(90deg,#6c7bff,#9b8cff,#4dd0e1);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:12px}
+.hero p{color:var(--muted);font-size:15px}
+.tag{display:inline-block;background:rgba(108,123,255,.15);color:var(--brand);border:1px solid rgba(108,123,255,.3);border-radius:20px;padding:2px 12px;font-size:12px;margin-right:8px;margin-top:12px}
+h2{font-size:23px;margin:48px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--brand);scroll-margin-top:20px}
+h3{font-size:17px;margin:28px 0 10px;color:var(--brand2)}
+p{margin:10px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:16px 0}
+.key{background:linear-gradient(135deg,rgba(62,207,142,.08),rgba(77,208,225,.06));border-left:4px solid var(--green)}
+.warn{background:rgba(255,107,107,.07);border-left:4px solid var(--red)}
+.tip{background:rgba(255,180,84,.07);border-left:4px solid var(--orange)}
+.card b{color:var(--text)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 14px;margin-top:8px}
+.kv dt{color:var(--brand2);font-weight:600;font-size:13px}
+.kv dd{font-size:14px}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+th{background:var(--card2);color:var(--brand2);text-align:left;padding:9px 12px;border:1px solid var(--border);font-weight:600}
+td{padding:8px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;margin:12px 0;font-size:13px;line-height:1.6}
+code{font-family:var(--mono);font-size:13px}
+p code,li code,td code,dd code{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--cyan)}
+.diagram{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0;text-align:center}
+.diagram .box{display:inline-block;background:var(--card);border:1.5px solid var(--brand);border-radius:10px;padding:8px 18px;margin:6px;font-size:13.5px;font-weight:600}
+.diagram .box.sub{border-color:var(--cyan);color:var(--cyan)}
+.diagram .arrow{color:var(--muted);margin:0 4px}
+.glossary td:first-child{font-family:var(--mono);color:var(--cyan);white-space:nowrap}
+.qa{border-left:3px solid var(--brand);padding:12px 16px;margin:12px 0;background:var(--card)}
+.qa .q{font-weight:700;color:var(--brand2);margin-bottom:6px}
+.qa .a{font-size:13.5px;color:var(--text)}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin:60px 0 30px}
+@media(max-width:900px){nav{display:none}main{padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+<h3>目录</h3>
+<a href="#c0">0 · 全景地图</a>
+<a href="#c1">1 · 机器学习基础</a>
+<a href="#c2">2 · 深度学习基础</a>
+<a href="#c3">3 · LLM 是怎么炼成的</a>
+<a href="#c4">4 · LLM API 与调用</a>
+<a href="#c5">5 · Prompt 与 Context 工程</a>
+<a href="#c6">6 · Agent 全解</a>
+<a href="#c7">7 · Harness / Skill / Rule / MCP</a>
+<a href="#c8">8 · RAG 检索增强</a>
+<a href="#c9">9 · 幻觉、评估与安全</a>
+<a href="#c10">10 · 工程化与部署</a>
+<a href="#c11">11 · 生态地图</a>
+<a href="#ga">附录A · 术语速查</a>
+<a href="#iv">附录B · 面试速答 20 问</a>
+</nav>
+<main>
+
+<div class="hero">
+<h1>AI 基础知识完全指南</h1>
+<p>从机器学习底层原理，到 LLM、Agent、Harness、Skill、Rule、MCP 等应用生态——一份建立全局认知的地图。</p>
+<div>
+<span class="tag">AI Engineer S0 前置</span><span class="tag">2026-10</span><span class="tag">应用向</span>
+</div>
+</div>
+
+<!-- ============ 第0章 ============ -->
+<h2 id="c0">0 · 全景地图：一张图看懂 AI</h2>
+<p>先把最容易混淆的嵌套关系理清楚——这些词不是并列的，是<strong>一层套一层</strong>：</p>
+<div class="diagram">
+<span class="box">人工智能 AI</span><span class="arrow">⊃</span>
+<span class="box">机器学习 ML</span><span class="arrow">⊃</span>
+<span class="box">深度学习 DL</span><span class="arrow">⊃</span>
+<span class="box">大语言模型 LLM</span>
+</div>
+<div class="card key">
+<b>一句话区分：</b>
+<dl class="kv">
+<dt>AI</dt><dd>让机器表现出智能的所有尝试的总称（含规则系统、搜索、专家系统）</dd>
+<dt>ML</dt><dd>不写死规则，让机器<b>从数据中学出规律</b>（"从例子学习"）</dd>
+<dt>DL</dt><dd>用<b>多层神经网络</b>做的机器学习，能自动学特征，数据越多越强</dd>
+<dt>LLM</dt><dd>用海量文本训练的超大 Transformer 网络，学的是"下一个词预测"，涌现出对话/推理/写代码能力</dd>
+<dt>GenAI / AIGC</dt><dd>能<b>生成内容</b>（文本/图/音视频）的 AI，LLM 是其中文本方向的代表</dd>
+</dl>
+</div>
+<h3>AI 发展三个流派（面试偶尔问）</h3>
+<table>
+<tr><th>流派</th><th>核心思想</th><th>代表</th><th>现状</th></tr>
+<tr><td>符号主义</td><td>智能 = 逻辑推理，人写规则</td><td>专家系统、知识图谱</td><td>融入现代系统（如规则引擎、检索）</td></tr>
+<tr><td>连接主义</td><td>智能 = 神经元连接，从数据学</td><td>神经网络 → 深度学习 → GPT</td><td><b>当前主流</b></td></tr>
+<tr><td>行为主义</td><td>智能 = 与环境交互中习得</td><td>强化学习、机器人</td><td>用于对齐（RLHF）与 Agent 决策</td></tr>
+</table>
+<div class="card tip"><b>本指南地图：</b>第 1-3 章讲"模型怎么来的"（训练视角），第 4-9 章讲"模型怎么用起来"（应用视角，也是 AI Engineer 的主战场），第 10-11 章讲"怎么上线、生态里有什么"。你的串行计划 S1-S3 对应前三章，S4-S6 对应后六章。</div>
+
+<!-- ============ 第1章 ============ -->
+<h2 id="c1">1 · 机器学习基础</h2>
+<h3>1.1 三种学习范式</h3>
+<table>
+<tr><th>范式</th><th>数据形态</th><th>典型任务</th><th>例子</th></tr>
+<tr><td><b>监督学习</b></td><td>有标注（x → y）</td><td>回归（连续值）、分类（离散类别）</td><td>房价预测、垃圾邮件识别</td></tr>
+<tr><td><b>无监督学习</b></td><td>无标注</td><td>聚类、降维、异常检测</td><td>用户分群、PCA 降维</td></tr>
+<tr><td><b>强化学习</b></td><td>环境 + 奖励信号</td><td>序列决策</td><td>AlphaGo、RLHF 对齐、Agent 策略</td></tr>
+</table>
+<h3>1.2 训练的核心循环（一切模型通用）</h3>
+<pre><code>for 每一批数据:
+    预测  ŷ = model(x)          # 前向传播
+    损失  loss = L(ŷ, y)         # 衡量"错得有多离谱"
+    梯度  g = ∂loss/∂参数        # 反向传播：每个参数该往哪调
+    更新  参数 -= 学习率 × g      # 沿负梯度走一小步</code></pre>
+<div class="card key"><b>必懂概念：</b>
+<dl class="kv">
+<dt>损失函数</dt><dd>量化"预测有多错"的函数。回归用 MSE，分类用交叉熵</dd>
+<dt>梯度下降</dt><dd>沿损失下降最快的方向更新参数。学习率太大震荡发散，太小收敛慢</dd>
+<dt>过拟合</dt><dd>训练分高考试分低 = 背题了。解法：更多数据、正则化、早停、Dropout</dd>
+<dt>欠拟合</dt><dd>训练考试都不行 = 模型太简单。解法：加参数、加特征、训更久</dd>
+<dt>数据三分</dt><dd>训练集（学）/ 验证集（调参、早停）/ 测试集（最终考试，绝不参与训练）</dd>
+</dl>
+</div>
+<h3>1.3 评估指标</h3>
+<table>
+<tr><th>指标</th><th>含义</th><th>口诀</th></tr>
+<tr><td>Accuracy</td><td>全对的比例</td><td>类别不均衡时会骗人（99% 负样本时全猜负也有 99%）</td></tr>
+<tr><td>Precision 精确率</td><td>预测为正的里面，真对多少</td><td>"报出来的准不准"——宁可漏报不可误报时看它</td></tr>
+<tr><td>Recall 召回率</td><td>真为正的里面，找出了多少</td><td>"该找的漏没漏"——宁可误报不可漏报时看它（如癌症筛查）</td></tr>
+<tr><td>F1</td><td>P 和 R 的调和平均</td><td>两者要兼顾时的单一数字</td></tr>
+<tr><td>混淆矩阵</td><td>TP/FP/FN/TN 四格</td><td>一切分类指标的源头</td></tr>
+</table>
+<div class="card tip"><b>动手锚点（对应你的 S1）：</b>用 NumPy 从零实现线性回归 + 逻辑回归 + kNN，手推 MSE 和交叉熵的梯度——这是本章节的全部实战载体。</div>
+
+<!-- ============ 第2章 ============ -->
+<h2 id="c2">2 · 深度学习基础</h2>
+<h3>2.1 神经元与多层感知机（MLP）</h3>
+<p>一个神经元 = <code>y = σ(Wx + b)</code>：线性变换加非线性激活。<strong>激活函数是灵魂</strong>——没有它，多层网络叠加仍是线性变换，等于白叠。</p>
+<table>
+<tr><th>激活函数</th><th>公式/特点</th><th>用途</th></tr>
+<tr><td>ReLU</td><td>max(0, x)，简单高效不易梯度消失</td><td>CNN/MLP 默认首选</td></tr>
+<tr><td>Sigmoid</td><td>压到 (0,1)，输出概率</td><td>二分类输出层</td></tr>
+<tr><td>Softmax</td><td>压成和为 1 的概率分布</td><td>多分类输出层、注意力权重</td></tr>
+<tr><td>GELU</td><td>ReLU 的平滑版</td><td>Transformer 内部（GPT/BERT）</td></tr>
+</table>
+<h3>2.2 主干网络架构演进</h3>
+<table>
+<tr><th>架构</th><th>擅长</th><th>核心机制</th><th>代表</th></tr>
+<tr><td>CNN</td><td>图像（局部特征 + 平移不变）</td><td>卷积核滑动共享权重、池化降维</td><td>ResNet、YOLO</td></tr>
+<tr><td>RNN/LSTM</td><td>序列（旧方案）</td><td>按时间步循环、隐状态传递</td><td>已被 Transformer 大面积取代</td></tr>
+<tr><td><b>Transformer</b></td><td>文本、多模态、一切</td><td><b>自注意力</b>：任意两位置直接交互，可完全并行</td><td>GPT、BERT、ViT、多模态大模型</td></tr>
+</table>
+<div class="card key"><b>自注意力一页话：</b>每个 token 生成 Q（我在找什么）、K（我是什么）、V（我的内容）。用 Q 和所有 K 做点积算"相关度"，softmax 成权重，加权求和所有 V——每个词都能"看到"全句并按相关性吸收信息。<code>Attention(Q,K,V) = softmax(QKᵀ/√d)·V</code>，除以 √d 防止点积过大导致 softmax 饱和。</div>
+<h3>2.3 训练工程必备件</h3>
+<table>
+<tr><th>组件</th><th>作用</th></tr>
+<tr><td>BatchNorm / LayerNorm</td><td>稳定各层输入分布，加速收敛（Transformer 用 LayerNorm）</td></tr>
+<tr><td>Dropout</td><td>训练时随机丢弃神经元 → 防过拟合</td></tr>
+<tr><td>学习率调度</td><td>预热（warmup）+ 余弦衰减；微调用小学习率（1e-5 ~ 5e-5）</td></tr>
+<tr><td>早停 Early Stopping</td><td>验证集损失不再下降就停 → 防过拟合</td></tr>
+<tr><td>反向传播</td><td>链式法则从输出层往回逐层算梯度（autograd 框架自动完成）</td></tr>
+</table>
+<div class="card tip"><b>动手锚点（对应 S2/S3）：</b>PyTorch 手写训练循环 + CIFAR10 CNN；再手写一遍 attention 公式并与 <code>nn.MultiheadAttention</code> 对数值。</div>
+
+<!-- ============ 第3章 ============ -->
+<h2 id="c3">3 · LLM 是怎么炼成的</h2>
+<h3>3.1 从文本到数字：Tokenization 与 Embedding</h3>
+<dl class="kv" style="margin:12px 0">
+<dt>Tokenizer</dt><dd>把文本切成 token（子词单元）。英文约 1 token ≈ 0.75 词，中文约 1 字 ≈ 1~2 token。所有模型按 <b>token 计费、限上下文长度</b></dd>
+<dt>Embedding</dt><dd>把 token 映射成高维向量（如 1536 维）。<b>语义相近 → 向量距离近</b>，这是语义检索/RAG 的数学基础</dd>
+<dt>位置编码</dt><dd>注意力本身无序，需要注入位置信息（正弦编码 / RoPE 旋转位置编码）</dd>
+</dl>
+<h3>3.2 训练三阶段</h3>
+<table>
+<tr><th>阶段</th><th>做什么</th><th>数据</th><th>产出</th></tr>
+<tr><td><b>预训练</b></td><td>下一个词预测（自监督）</td><td>数万亿 token 网络文本</td><td>基座模型（Base）：会"续写"，不会"对话"</td></tr>
+<tr><td><b>监督微调 SFT</b></td><td>学会以助手身份对话</td><td>人工写的高质量问答对</td><td>会聊天的 Instruct 模型</td></tr>
+<tr><td><b>RLHF / 对齐</b></td><td>人类偏好强化：有用、诚实、无害</td><td>人类对回答的排序打分</td><td>最终发布的对话模型</td></tr>
+</table>
+<div class="card key"><b>关键推论（理解很多现象的钥匙）：</b>LLM 本质是<b>条件概率生成器</b>——逐 token 预测下一个词。所以它：① 没有真正的"查数据库"能力 → 需要 RAG；② 知识截止在训练数据 → 需要联网/工具；③ 会一本正经编造 → 幻觉的根源；④ 温度参数控制采样的随机性。</div>
+<h3>3.3 两大流派与缩放定律</h3>
+<table>
+<tr><th>流派</th><th>训练目标</th><th>擅长</th><th>代表</th></tr>
+<tr><td>GPT 类（Decoder-only）</td><td>预测下一个词</td><td>生成、对话、代码 —— 当前主流</td><td>GPT、Claude、Llama、Qwen、DeepSeek</td></tr>
+<tr><td>BERT 类（Encoder-only）</td><td>完形填空（双向）</td><td>理解类任务：分类、检索、embedding</td><td>BERT、各类 embedding 模型</td></tr>
+</table>
+<p><b>缩放定律（Scaling Law）：</b>模型效果随「参数量 × 数据量 × 算力」按幂律提升——这是"大力出奇迹"的理论依据，也解释了为什么各家疯狂堆卡。<b>涌现能力：</b>规模跨过某个阈值后突然出现的能力（如推理、指令跟随）。</p>
+
+<!-- ============ 第4章 ============ -->
+<h2 id="c4">4 · LLM API 与调用（应用第一课）</h2>
+<h3>4.1 一切应用的基础：Chat API 的形状</h3>
+<p>各家 API（OpenAI / Anthropic / 国产）形态高度趋同，核心是 <strong>messages 数组 + 三种角色</strong>：</p>
+<pre><code>response = client.chat.completions.create(
+    model="qwen-plus",
+    messages=[
+        {"role": "system",    "content": "你是一个严谨的编程助教"},   # 设定身份与规则
+        {"role": "user",      "content": "解释什么是过拟合"},          # 用户输入
+        {"role": "assistant", "content": "过拟合是指……"},             # 历史回复（多轮对话=把历史全部带上）
+        {"role": "user",      "content": "怎么解决？"}                 # 新一轮输入
+    ],
+    temperature=0.7,      # 随机性：0=确定性（提取/分类），1=发散（创意写作）
+    max_tokens=1024,      # 输出上限，也是成本上限
+    stream=True           # 流式输出，逐 token 返回，体感更快
+)</code></pre>
+<div class="card key"><b>必须建立的成本意识：</b>
+<dl class="kv">
+<dt>计费</dt><dd>按 token 计费，<b>输入 + 输出分开计价</b>；输入通常更便宜，输出更贵</dd>
+<dt>上下文窗口</dt><dd>输入+输出共享窗口（如 128K）。对话越长越贵、越慢，且"中间信息容易被忽略"（lost in the middle）</dd>
+<dt>多轮对话本质</dt><dd>API 是<b>无状态</b>的——"记忆"靠你把历史 messages 每次全量重发。这是理解 Agent 上下文管理的起点</dd>
+<dt>系统提示词</dt><dd>system 的优先级高于 user，适合放身份、规则、输出格式约束</dd>
+</dl>
+</div>
+<h3>4.2 Function Calling：让模型"动手"</h3>
+<p>LLM 只会生成文本，要让它查数据库、调接口、执行代码，就通过<strong>工具调用</strong>：你声明工具的名称、功能描述、参数 JSON Schema → 模型在需要时返回"我要调用某工具+参数" → <strong>你的代码执行它</strong> → 把结果喂回去 → 模型继续。</p>
+<pre><code>tools = [{
+  "type": "function",
+  "function": {
+    "name": "get_weather",
+    "description": "查询指定城市的实时天气",   # 描述写得好坏直接决定模型会不会用对
+    "parameters": {
+      "type": "object",
+      "properties": {"city": {"type": "string"}},
+      "required": ["city"]
+    }
+  }
+}]
+# 返回里若出现 tool_calls → 你执行 get_weather("成都") → 把结果作为
+# {"role":"tool", "content":"晴 26℃"} 追加进 messages → 再次请求</code></pre>
+<div class="card warn"><b>关键认知：</b>模型<strong>从不真正执行</strong>任何东西——它只输出"调用意图"。执行永远发生在<strong>你的运行环境</strong>里。这条认知是理解下一章 Agent 的地基。</div>
+
+<!-- ============ 第5章 ============ -->
+<h2 id="c5">5 · Prompt 与 Context Engineering</h2>
+<h3>5.1 Prompt Engineering 核心技法</h3>
+<table>
+<tr><th>技法</th><th>怎么做</th><th>适用</th></tr>
+<tr><td>Zero-shot</td><td>直接下指令</td><td>简单任务、强模型</td></tr>
+<tr><td><b>Few-shot</b></td><td>给 2~5 个输入输出示例</td><td>格式对齐、风格模仿，性价比最高的稳定器</td></tr>
+<tr><td><b>CoT 思维链</b></td><td>"请一步步思考"</td><td>数学、逻辑、多步推理</td></tr>
+<tr><td>角色设定</td><td>system 里给身份与约束</td><td>所有正式应用的基础</td></tr>
+<tr><td>结构化输出</td><td>要求 JSON / 明确 schema + 示例</td><td>程序要解析模型输出时必须</td></tr>
+<tr><td>分隔符隔离</td><td>用 ```或XML标签包裹用户内容</td><td>防注入、防混淆指令与数据</td></tr>
+</table>
+<h3>5.2 Context Engineering：Prompt 的升级版</h3>
+<p>单次提示怎么写只是术；<strong>Context Engineering 管的是"模型在每一步到底能看到什么"</strong>——在有限的上下文窗口里，动态组装出最优的信息组合：</p>
+<div class="diagram">
+<span class="box sub">System 规则</span> + <span class="box sub">检索到的知识(RAG)</span> + <span class="box sub">工具结果</span> + <span class="box sub">对话历史</span> + <span class="box sub">记忆</span> → <span class="box">上下文窗口</span>
+</div>
+<table>
+<tr><th>策略</th><th>说明</th></tr>
+<tr><td>历史裁剪 / 滑动窗口</td><td>只保留最近 N 轮，久远信息压缩成摘要</td></tr>
+<tr><td>上下文压缩</td><td>长文档 → 摘要；多轮工具结果 → 只留结论</td></tr>
+<tr><td>按需注入</td><td>信息不预塞，Agent 需要时再通过工具/检索拉取（Skill 与 MCP 的动机）</td></tr>
+<tr><td>位置放置</td><td>关键约束放开头和结尾（中间最容易被忽略）</td></tr>
+</table>
+<div class="card tip"><b>一句话区分：</b>Prompt Engineering = 写好这一条消息；Context Engineering = 设计模型整个"视野"。Agent 系统的核心工程量就在后者。</div>
+
+<!-- ============ 第6章 ============ -->
+<h2 id="c6">6 · Agent 全解（应用层的核心主角）</h2>
+<h3>6.1 定义</h3>
+<div class="card key"><b>Agent = LLM（大脑）+ 工具（手脚）+ 循环（生命）+ 记忆（经验）。</b><br>
+普通 LLM 调用是"一问一答"；Agent 是让模型在循环中<b>自主规划 → 调用工具 → 观察结果 → 决定下一步</b>，直到完成目标。区别的本质：<b>从"回答问题"升级为"完成任务"</b>。</div>
+<h3>6.2 Agent 主循环（ReAct 范式）</h3>
+<pre><code># 所有 Agent 框架的内核都是这个循环，手写一遍胜过看十个框架
+messages = [system(目标+可用工具说明), user(任务)]
+while True:
+    resp = llm(messages)                    # 思考 Reason
+    if resp.tool_calls:                     # 决定行动 Act
+        results = [execute(t) for t in resp.tool_calls]   # 环境执行
+        messages += [resp, tool_results]    # 观察结果 Observe
+    else:
+        return resp.content                 # 无需工具 → 给出最终答案</code></pre>
+<h3>6.3 Agent 四大件</h3>
+<table>
+<tr><th>组件</th><th>职责</th><th>常见实现</th></tr>
+<tr><td><b>规划 Planning</b></td><td>把大任务拆成子步骤，决定调用顺序</td><td>CoT、任务清单、ReAct、Plan-and-Execute</td></tr>
+<tr><td><b>工具 Tools</b></td><td>突破"只会生成文本"的限制：搜索、代码执行、API、文件系统</td><td>Function Calling、MCP</td></tr>
+<tr><td><b>记忆 Memory</b></td><td>短期 = 上下文窗口内的历史；长期 = 外部存储，跨会话保留</td><td>向量库、数据库、摘要文件（如 CLAUDE.md）</td></tr>
+<tr><td><b>反思 Reflection</b></td><td>检查自己的输出、发现错误、重试改进</td><td>自评 prompt、测试反馈回路、多轮自我修正</td></tr>
+</table>
+<h3>6.4 多 Agent 协作</h3>
+<p>单个上下文装不下复杂任务时，拆成多个角色（规划者 / 执行者 / 评审者），各自维护自己的上下文，通过消息传递协作——本质是<b>用分工换上下文空间</b>，代价是通信开销与误差传递。你的计划里 S6 只需做到：能用 Function Calling 完成多步任务。</p>
+<div class="card warn"><b>Agent 的真实短板（面试加分点）：</b>错误会累积（一步错步步错）、成本随循环次数膨胀、可能陷入死循环（必须设最大步数）、工具描述不清时选错工具。所以生产级 Agent 必须有：<b>步数上限、成本预算、人工介入点（human-in-the-loop）、全程日志</b>。</div>
+
+<!-- ============ 第7章 ============ -->
+<h2 id="c7">7 · Harness / Skill / Rule / Memory / MCP —— Agent 生态五件套</h2>
+<p>这一章是你点名要的概念。它们都是围绕"把裸 LLM 变成可靠 Agent"出现的工程概念。</p>
+<h3>7.1 Harness（智能体运行框架 / 脚手架）</h3>
+<div class="card key">
+<dl class="kv">
+<dt>是什么</dt><dd>包裹模型的<b>整个执行环境</b>：主循环、工具的注册与执行、上下文组装、权限控制、日志——模型之外的一切代码</dd>
+<dt>类比</dt><dd>模型是发动机，Harness 是整辆车：底盘、油路、方向盘、仪表盘。发动机再强，没底盘开不动</dd>
+<dt>例子</dt><dd>Claude Code、OpenAI Codex CLI、开源的 agent loop 框架，本质都是 harness</dd>
+<dt>为什么重要</dt><dd>同一个大模型，套上不同的 harness 表现天差地别——<b>上下文怎么组装、工具怎么给、错误怎么反馈</b>决定了 Agent 的上限。这就是"模型能力 ≠ 产品能力"的原因</dd>
+</dl>
+</div>
+<h3>7.2 Skill（技能包）</h3>
+<div class="card key">
+<dl class="kv">
+<dt>是什么</dt><dd>把某个领域的<b>知识、流程、脚本打包成的可复用模块</b>（通常是一个带说明文档的文件夹：SKILL.md + 资源文件）。Agent 平时只看到技能清单（名字+描述），<b>需要时才把完整内容加载进上下文</b></dd>
+<dt>解决什么</dt><dd>上下文有限——不可能把所有专业知识常驻上下文。Skill = "按需加载的专家手册"</dd>
+<dt>类比</dt><dd>员工入职时只看岗位目录，接到具体任务才翻对应岗位的详细 SOP 手册</dd>
+<dt>与工具的区别</dt><dd>Tool 是"能做某动作"（调 API）；Skill 是"懂某领域怎么做好"（知识+流程+可含脚本）。Skill 内部可以调用工具</dd>
+</dl>
+</div>
+<h3>7.3 Rule / Rules（规则）</h3>
+<div class="card key">
+<dl class="kv">
+<dt>是什么</dt><dd><b>常驻的、全局性的行为约束与项目约定</b>，每次请求都注入 system 上下文（如 Claude Code 的 CLAUDE.md、Cursor 的 .cursorrules、通用的 AGENTS.md）</dd>
+<dt>典型内容</dt><dd>"本仓库用 TypeScript 严格模式""commit 用中文""改代码前先读对应文件""永远不要 push 到 main"</dd>
+<dt>与 Skill 区别</dt><dd>Rule = 每次都在场的"公司规章"；Skill = 按需取用的"专业手册"</dd>
+</dl>
+</div>
+<h3>7.4 Memory（记忆）</h3>
+<table>
+<tr><th>类型</th><th>载体</th><th>生命周期</th></tr>
+<tr><td>短期记忆</td><td>当前上下文窗口内的 messages</td><td>本次会话</td></tr>
+<tr><td>长期记忆</td><td>外部存储：向量库 / 文件 / 数据库，需要时检索注入</td><td>跨会话持久</td></tr>
+<tr><td>项目记忆</td><td>仓库内的记忆文件（如 CLAUDE.md 中"用户偏好"段落）</td><td>跟随项目</td></tr>
+</table>
+<h3>7.5 MCP（Model Context Protocol）</h3>
+<div class="card key">
+<dl class="kv">
+<dt>是什么</dt><dd>Anthropic 提出并成为事实标准的<b>开放协议</b>：统一"模型 ↔ 外部工具/数据源"的接入方式。MCP Server 暴露 tools（可调用动作）/ resources（可读数据）/ prompts（预设模板），任何支持 MCP 的客户端都能即插即用</dd>
+<dt>类比</dt><dd>工具界的 USB-C：以前每个 Agent × 每个工具都要写一次私有对接，现在都插同一个协议口</dd>
+<dt>价值</dt><dd>生态复用——社区写好的 MCP Server（GitHub、数据库、浏览器…）所有客户端共享；企业内部系统只需写一次 Server 就能接入所有 AI 工具</dd>
+</dl>
+</div>
+<h3>7.6 五件套关系图</h3>
+<div class="diagram">
+<span class="box">Harness</span><span class="arrow">包裹运行 →</span><span class="box">LLM</span><br>
+<span class="box sub">Rule 常驻约束</span> <span class="box sub">Skill 按需加载</span> <span class="box sub">Memory 跨会话存取</span> <span class="box sub">MCP 标准接工具</span><br>
+<span style="color:var(--muted);font-size:13px">↑ 全部由 Harness 负责在正确的时机组装进上下文</span>
+</div>
+
+<!-- ============ 第8章 ============ -->
+<h2 id="c8">8 · RAG 检索增强生成</h2>
+<h3>8.1 解决什么问题</h3>
+<p>模型知识有截止日期、不含私有数据、长上下文贵且慢。RAG = <strong>先从你的资料里"检索"相关片段，塞进上下文，再让模型"生成"有依据的回答</strong>——给外挂知识库，顺便用引用压制幻觉。</p>
+<h3>8.2 全链路（你的 S4+S5 主项目）</h3>
+<pre><code>【索引阶段·离线】文档解析 → 分块 chunking（固定长度+overlap+句子边界）
+        → embedding 模型向量化 → 存入向量库（FAISS/Chroma/pgvector）
+【查询阶段·在线】用户问题 → 向量化 → 相似度检索 Top-K
+        → （可选）重排 rerank → 拼进 prompt（带来源）→ LLM 生成 → 附引用</code></pre>
+<table>
+<tr><th>环节</th><th>关键决策点</th></tr>
+<tr><td>分块</td><td>chunk 太小丢上下文、太大稀释相关性；中文 300~500 字 + 10~20% overlap 是常用起点</td></tr>
+<tr><td>Embedding 选型</td><td>中文场景选中文优化的 embedding 模型；维度越高信息越丰但存储越贵</td></tr>
+<tr><td>检索</td><td>余弦相似度 Top-K；混合检索（关键词 BM25 + 语义向量）通常更稳</td></tr>
+<tr><td>重排 Rerank</td><td>用交叉编码器对 Top-20 精排出 Top-5，显著提升精度，代价是延迟</td></tr>
+<tr><td><b>评估</b></td><td>检索侧 recall@k / MRR；生成侧 faithfulness（答案是否忠于检索内容）、answer relevance。没有评估的 RAG = 玄学调参</td></tr>
+</table>
+<div class="card tip"><b>RAG vs 微调 vs 长上下文：</b>知识频繁更新/私有 → RAG（便宜灵活）；改变行为风格/领域格式 → 微调；文档就几十页 → 直接塞长上下文。三者可组合，RAG 是 AI Engineer 岗位第一高频技能。</div>
+
+<!-- ============ 第9章 ============ -->
+<h2 id="c9">9 · 幻觉、评估与安全</h2>
+<h3>9.1 幻觉（Hallucination）</h3>
+<div class="card warn">
+<dl class="kv">
+<dt>成因</dt><dd>模型的本质是"预测统计上合理的下一个词"——<b>它优化的是"像"，不是"真"</b>。训练数据错误、知识缺失、采样随机性都会产生流利但错误的输出</dd>
+<dt>缓解</dt><dd>① RAG 让答案有据可查；② 要求输出引用来源；③ 温度调低；④ 让模型先说"不知道"再回答；⑤ 关键场景接规则校验/人工审核；⑥ 高风险领域换用带推理验证的模型</dd>
+</dl>
+</div>
+<h3>9.2 评估（Evals）—— AI 工程的分水岭</h3>
+<table>
+<tr><th>方法</th><th>做法</th><th>成本</th></tr>
+<tr><td>金标数据集</td><td>人工标注 问题-标准答案 对，跑批算指标</td><td>标注贵，结果最可靠</td></tr>
+<tr><td>LLM-as-Judge</td><td>让强模型按 rubric 给输出打分</td><td>便宜可扩展，注意评委偏差</td></tr>
+<tr><td>规则/单元测试</td><td>格式校验、关键词必须出现、代码能否运行</td><td>最便宜，覆盖面窄</td></tr>
+<tr><td>在线指标</td><td>用户点赞率、重试率、人工接管率</td><td>真实但滞后</td></tr>
+</table>
+<div class="card key"><b>铁律：</b>改 prompt / 换模型 / 调参数，<b>必须在评估集上对比前后</b>，不靠"我感觉变好了"。"会建评估"是区分玩具项目与工程项目的分水岭。</div>
+<h3>9.3 安全三件事</h3>
+<dl class="kv" style="margin:12px 0">
+<dt>Prompt 注入</dt><dd>恶意指令藏进"数据"里（网页/文档/用户输入）劫持模型——防御：分隔符隔离、权限最小化、工具白名单、输出过滤</dd>
+<dt>越狱 Jailbreak</dt><dd>角色扮演、编码伪装等绕过安全对齐——厂商层防御为主，应用层做输入输出双向审核</dd>
+<dt>数据安全</dt><dd>API Key 走环境变量绝不硬编码；私有数据发第三方 API 前想清楚合规；敏感场景考虑本地部署开源模型</dd>
+</dl>
+
+<!-- ============ 第10章 ============ -->
+<h2 id="c10">10 · 工程化与部署</h2>
+<table>
+<tr><th>主题</th><th>要点</th></tr>
+<tr><td>API 服务化</td><td>FastAPI 封装：异步接口（LLM 调用是 I/O 密集）、流式 SSE、Pydantic 校验、错误重试与超时、密钥走 .env</td></tr>
+<tr><td>容器化</td><td>Dockerfile + compose 编排应用与向量库；新机器一条命令起服务</td></tr>
+<tr><td>可观测</td><td>记录每次调用的：token 用量（成本）、延迟、输入输出样本、错误率——排查与优化的依据</td></tr>
+<tr><td>成本优化</td><td>小模型分流简单请求（模型路由）、缓存重复查询、精简上下文、批处理接口</td></tr>
+<tr><td>推理优化（进阶）</td><td>量化（FP16→INT8/4）、vLLM 高吞吐推理、ONNX Runtime（你有 C++ 底子，这是差异化方向）</td></tr>
+<tr><td>CI/CD</td><td>GitHub Actions：push 自动跑 pytest + lint，评估集回归</td></tr>
+</table>
+
+<!-- ============ 第11章 ============ -->
+<h2 id="c11">11 · 生态地图（2026）</h2>
+<table>
+<tr><th>类别</th><th>代表</th><th>认知要点</th></tr>
+<tr><td>闭源模型</td><td>GPT 系列、Claude 系列、Gemini</td><td>能力最强、按 token 付费、数据出域</td></tr>
+<tr><td>开源/开放权重</td><td>Llama、Qwen、DeepSeek、Mistral</td><td>可私有部署可微调；中文任务 Qwen/DeepSeek 强</td></tr>
+<tr><td>训练框架</td><td><b>PyTorch</b>（主流）、JAX</td><td>你的 S2 主线</td></tr>
+<tr><td>模型生态</td><td><b>HuggingFace</b>（模型/数据集/Transformers 库）</td><td>你的 S3 主线</td></tr>
+<tr><td>Agent 框架</td><td>LangChain / LlamaIndex / 各家 Agent SDK</td><td>先手写裸循环再学框架（S6 对比实验）</td></tr>
+<tr><td>向量库</td><td>FAISS（库）、Chroma（轻量）、Milvus/pgvector（生产）</td><td>S4 主线</td></tr>
+<tr><td>AI 编码工具</td><td>Claude Code、Cursor、Copilot</td><td>你正在用——理解它的 Harness/Skill/Rule 机制</td></tr>
+<tr><td>本地推理</td><td>Ollama、vLLM、llama.cpp</td><td>笔记本可跑量化小模型，做实验零成本</td></tr>
+</table>
+
+<!-- ============ 附录A ============ -->
+<h2 id="ga">附录A · 术语速查表</h2>
+<table class="glossary">
+<tr><th>术语</th><th>一句话解释</th></tr>
+<tr><td>Token</td><td>模型处理文本的最小单位，计费与上下文长度都以它计</td></tr>
+<tr><td>Embedding</td><td>文本 → 高维向量，语义近则距离近，检索的数学基础</td></tr>
+<tr><td>Context Window</td><td>模型单次能"看到"的最大 token 数，输入输出共享</td></tr>
+<tr><td>Temperature</td><td>采样随机性：0 稳定可复现，1 发散有创意</td></tr>
+<tr><td>System Prompt</td><td>设定身份/规则/格式的高优先级指令</td></tr>
+<tr><td>Few-shot</td><td>在提示里给几个示例引导模型照做</td></tr>
+<tr><td>CoT</td><td>思维链：让模型显式分步推理再给答案</td></tr>
+<tr><td>Function Calling</td><td>模型输出结构化"调用意图"，由外部代码执行</td></tr>
+<tr><td>Tool / Tool Use</td><td>赋予模型动作能力的外部函数（搜索/执行/查询）</td></tr>
+<tr><td>Agent</td><td>LLM+工具+循环+记忆，从"回答"升级为"完成任务"</td></tr>
+<tr><td>ReAct</td><td>Agent 经典范式：推理(Reason)→行动(Act)→观察(Observe) 循环</td></tr>
+<tr><td>Harness</td><td>包裹模型的执行框架：循环/工具执行/上下文组装/权限</td></tr>
+<tr><td>Skill</td><td>按需加载的领域知识+流程打包模块，省上下文</td></tr>
+<tr><td>Rule</td><td>常驻注入的全局行为约束（CLAUDE.md / .cursorrules）</td></tr>
+<tr><td>Memory</td><td>短期=上下文内历史；长期=外部存储跨会话检索</td></tr>
+<tr><td>MCP</td><td>模型连接工具/数据源的开放标准协议，"工具界 USB-C"</td></tr>
+<tr><td>RAG</td><td>检索增强生成：先查资料再回答，附引用抗幻觉</td></tr>
+<tr><td>Chunking</td><td>文档切块以便检索，大小与重叠策略影响召回</td></tr>
+<tr><td>Rerank</td><td>用精排模型对初检结果重排序，提升相关性</td></tr>
+<tr><td>向量数据库</td><td>存 embedding 并支持相似度检索的库（FAISS/Chroma…）</td></tr>
+<tr><td>Hybrid Search</td><td>关键词(BM25)+语义(向量)混合检索，互补短板</td></tr>
+<tr><td>Hallucination</td><td>一本正经编造错误信息，源于"优化像而非真"</td></tr>
+<tr><td>SFT</td><td>监督微调：用高质量问答对教会模型对话格式</td></tr>
+<tr><td>RLHF</td><td>基于人类偏好反馈的强化学习，对齐模型行为</td></tr>
+<tr><td>LoRA / PEFT</td><td>低秩适配微调：只训小矩阵，单卡可微调大模型</td></tr>
+<tr><td>Quantization</td><td>量化：降数值精度换体积与速度，如 FP16→INT4</td></tr>
+<tr><td>Distillation</td><td>蒸馏：小模型模仿大模型输出，压缩成本</td></tr>
+<tr><td>Multimodal</td><td>多模态：同时处理文本/图像/音频/视频</td></tr>
+<tr><td>Evals</td><td>系统化评估模型/应用效果的方法体系</td></tr>
+<tr><td>Guardrail</td><td>护栏：输入输出双向过滤与约束，保障安全合规</td></tr>
+</table>
+
+<!-- ============ 附录B ============ -->
+<h2 id="iv">附录B · 面试速答 20 问</h2>
+<div class="qa"><div class="q">1. LLM 是怎么工作的？</div><div class="a">本质是基于 Transformer 的下一个 token 概率预测器：预训练学语言规律 → SFT 学对话 → RLHF 对齐人类偏好。生成时逐 token 采样。</div></div>
+<div class="qa"><div class="q">2. Transformer 为什么取代 RNN？</div><div class="a">自注意力让任意两个位置直接交互且可完全并行训练，解决了 RNN 的长程依赖与串行慢两大问题。</div></div>
+<div class="qa"><div class="q">3. Attention 公式及 √d 的作用？</div><div class="a">softmax(QKᵀ/√d)·V；除以 √d 防止维度大时点积过大、softmax 进入饱和区导致梯度消失。</div></div>
+<div class="qa"><div class="q">4. GPT 和 BERT 的区别？</div><div class="a">GPT 是 Decoder-only 自回归生成，擅长生成；BERT 是 Encoder-only 双向理解，擅长分类/检索/embedding。</div></div>
+<div class="qa"><div class="q">5. 为什么会幻觉？怎么缓解？</div><div class="a">模型优化"统计上像"而非"事实上真"。缓解：RAG+引用、低温、允许说不知道、规则校验、人工审核。</div></div>
+<div class="qa"><div class="q">6. RAG 的完整流程？</div><div class="a">索引：解析→分块→embedding→入库；查询：问题向量化→Top-K 检索→重排→拼 prompt→生成附引用。检索质量决定上限。</div></div>
+<div class="qa"><div class="q">7. RAG vs 微调怎么选？</div><div class="a">知识问题（要新、要私有）用 RAG；行为/风格/格式问题用微调；两者可组合。RAG 便宜灵活可解释，微调改变模型本身。</div></div>
+<div class="qa"><div class="q">8. Agent 和普通 LLM 调用的区别？</div><div class="a">Agent 有循环：规划→调工具→观察→再决策直到完成目标，从"回答问题"升级为"完成任务"。</div></div>
+<div class="qa"><div class="q">9. 描述 ReAct 循环。</div><div class="a">Reason（模型思考该做什么）→ Act（发起工具调用）→ Observe（把执行结果喂回上下文）→ 循环直到无需工具输出答案。</div></div>
+<div class="qa"><div class="q">10. Function Calling 的执行者是谁？</div><div class="a">模型只输出"调用什么+参数"的结构化意图，<b>真正的执行永远发生在调用方的运行环境</b>，结果再喂回模型。</div></div>
+<div class="qa"><div class="q">11. 什么是 Harness？</div><div class="a">包裹模型的执行框架：主循环、工具注册执行、上下文组装、权限与日志。模型是发动机，Harness 是整车——同模型不同 Harness 表现差异巨大。</div></div>
+<div class="qa"><div class="q">12. Skill 和 Tool 的区别？</div><div class="a">Tool 是一个可执行动作（调 API）；Skill 是按需加载的领域知识+流程包（可内含脚本与工具用法），解决专业知识占上下文的问题。</div></div>
+<div class="qa"><div class="q">13. Rule（如 CLAUDE.md）起什么作用？</div><div class="a">常驻注入的全局约束：代码规范、工作流约定、禁区。与 Skill 的"按需加载"相对，Rule 是"每次都在"。</div></div>
+<div class="qa"><div class="q">14. MCP 是什么，解决什么问题？</div><div class="a">模型连接外部工具/数据的开放协议，M×N 对接问题变 M+N——一次实现处处可用，工具界 USB-C。</div></div>
+<div class="qa"><div class="q">15. 多轮对话的"记忆"是怎么实现的？</div><div class="a">API 无状态，靠每次全量重发历史 messages；长了就裁剪/压缩/摘要，跨会话记忆存外部库按需检索注入。</div></div>
+<div class="qa"><div class="q">16. Temperature 设 0 会完全确定吗？为什么分类任务要设 0？</div><div class="a">趋近确定性（硬件与实现仍有微小随机）。分类/提取要稳定结构所以设 0；创意生成调高。</div></div>
+<div class="qa"><div class="q">17. 什么是 Prompt 注入？怎么防？</div><div class="a">恶意指令藏进被处理的数据中劫持模型。防御：分隔符隔离数据与指令、最小权限、工具白名单、输出校验。</div></div>
+<div class="qa"><div class="q">18. 怎么评估一个 LLM 应用的好坏？</div><div class="a">金标数据集算指标 + LLM-as-Judge 按评分规则打分 + 规则测试 + 在线指标；任何改动必须在评估集上对比，拒绝体感。</div></div>
+<div class="qa"><div class="q">19. 上下文越长越好吗？</div><div class="a">不。成本与延迟随 token 线性涨，且存在 lost-in-the-middle；工程上讲究"每一步只注入必要信息"（Context Engineering）。</div></div>
+<div class="qa"><div class="q">20. 生产级 Agent 必须有哪些保护？</div><div class="a">最大步数限制、成本预算、超时与重试、人工介入点、全程日志与评估——防止死循环烧钱与错误累积。</div></div>
+
+<div class="card tip" style="margin-top:40px"><b>怎么用这份文档（对应你的串行计划）：</b>现在通读一遍建立地图（重点第 4-7 章）；S2 时回看第 2-3 章；S4-S6 每开一站，先重读对应章节再动手。附录 B 在面试季直接当背诵卡用。</div>
+<div class="foot">AI Fundamentals Guide · 为 GEISTD 的 AI Engineer 之路而写 · 2026-10 · 配合《AIEngineer方向一体化计划_v3_深耕串行版.xlsx》使用</div>
+</main>
+</div>
+</body>
+</html>
