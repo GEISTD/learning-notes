@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL 速通指南 · AI Engineer 最小必要集</title>
+<style>
+:root{--bg:#0f1117;--card:#171a23;--card2:#1d212d;--border:#2a2f3e;--text:#e6e8ee;--muted:#9aa1b2;--brand:#6c7bff;--brand2:#9b8cff;--green:#3ecf8e;--orange:#ffb454;--red:#ff6b6b;--cyan:#4dd0e1;--code-bg:#0d0f15;--mono:'JetBrains Mono',Consolas,monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.75;font-size:15px}
+.layout{display:flex;max-width:1100px;margin:0 auto}
+nav{width:220px;position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;border-right:1px solid var(--border);flex-shrink:0}
+nav h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px}
+nav a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:5px 10px;border-radius:6px;margin:2px 0}
+nav a:hover{background:var(--card2);color:var(--text)}
+main{flex:1;padding:40px 48px;min-width:0;max-width:800px}
+.hero{background:linear-gradient(135deg,#1a1f35,#23204d);border:1px solid var(--border);border-radius:16px;padding:36px;margin-bottom:32px}
+.hero h1{font-size:28px;background:linear-gradient(90deg,#6c7bff,#4dd0e1);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+.hero p{color:var(--muted);font-size:14px}
+.tag{display:inline-block;background:rgba(108,123,255,.15);color:var(--brand);border:1px solid rgba(108,123,255,.3);border-radius:20px;padding:2px 10px;font-size:11px;margin-right:6px;margin-top:10px}
+h2{font-size:21px;margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--brand);scroll-margin-top:20px}
+h3{font-size:16px;margin:24px 0 8px;color:var(--brand2)}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:14px 0}
+.key{background:linear-gradient(135deg,rgba(62,207,142,.08),rgba(77,208,225,.06));border-left:4px solid var(--green)}
+.warn{background:rgba(255,107,107,.07);border-left:4px solid var(--red)}
+.tip{background:rgba(255,180,84,.07);border-left:4px solid var(--orange)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th{background:var(--card2);color:var(--brand2);text-align:left;padding:8px 10px;border:1px solid var(--border);font-weight:600}
+td{padding:7px 10px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:10px 0;font-size:12.5px;line-height:1.6}
+code{font-family:var(--mono);font-size:12.5px}
+p code,li code,td code{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--cyan)}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;margin-top:8px}
+.kv dt{color:var(--brand2);font-weight:600;font-size:13px}
+.kv dd{font-size:14px}
+.qa{border-left:3px solid var(--brand);padding:10px 14px;margin:10px 0;background:var(--card)}
+.qa .q{font-weight:700;color:var(--brand2);margin-bottom:4px}
+.qa .a{font-size:13px;color:var(--text)}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin:50px 0 30px}
+@media(max-width:800px){nav{display:none}main{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+<h3>目录</h3>
+<a href="#why">为什么 AI 岗要 SQL</a>
+<a href="#day1">Day 1 · 核心查询</a>
+<a href="#day2">Day 2 · 聚合与多表</a>
+<a href="#day3">Day 3 · 实战场景</a>
+<a href="#practice">20 题实战清单</a>
+<a href="#vs">SQL vs Pandas 对照</a>
+</nav>
+<main>
+
+<div class="hero">
+<h1>SQL 速通指南</h1>
+<p>AI Engineer 的最小必要集：3 天掌握面试+工作够用的 SQL，不学数据库管理，不学调优，只学"查数据"。</p>
+<div>
+<span class="tag">S1 并行补漏</span><span class="tag">3 天速通</span><span class="tag">面试导向</span>
+</div>
+</div>
+
+<h2 id="why">为什么 AI 岗要 SQL（但不需要学太深）</h2>
+<div class="card key">
+<dl class="kv">
+<dt>面试高频</dt><dd>LeetCode Database 题库是技术面试标配，通常考 JOIN + GROUP BY + 子查询</dd>
+<dt>数据分析</dt><dd>从业务库拉训练数据、分析 bad case、查用户行为日志，都是 SQL 场景</dd>
+<dt>RAG 工程</dt><dd>pgvector 做向量库时，元数据过滤（WHERE 时间/类别/来源）必须 SQL</dd>
+<dt>不需要深学</dt><dd>索引调优、事务隔离、存储过程——AI 岗几乎用不到，跳过</dd>
+</dl>
+</div>
+
+<h2 id="day1">Day 1 · 核心查询（SELECT 单表）</h2>
+<h3>1.1 基础语法骨架</h3>
+<pre><code>SELECT 列名1, 列名2, 计算列          -- 查什么
+FROM 表名                            -- 从哪查
+WHERE 行过滤条件                     -- 筛哪些行（分组前过滤）
+ORDER BY 列名 DESC                   -- 怎么排
+LIMIT 10;                            -- 取前几条</code></pre>
+
+<h3>1.2 必会 8 个单表操作</h3>
+<table>
+<tr><th>场景</th><th>SQL 模式</th><th>记忆点</th></tr>
+<tr><td>去重</td><td><code>SELECT DISTINCT col</code></td><td>DISTINCT 对整行去重，不是单列</td></tr>
+<tr><td>条件筛选</td><td><code>WHERE age > 18 AND city = '北京'</code></td><td>AND 优先级高于 OR，用括号明确</td></tr>
+<tr><td>模糊匹配</td><td><code>WHERE name LIKE '张%'</code></td><td>% 通配任意字符，_ 通配单个</td></tr>
+<tr><td>范围/集合</td><td><code>WHERE id IN (1,2,3)</code> / <code>BETWEEN 10 AND 20</code></td><td>IN 相当于多个 OR</td></tr>
+<tr><td>空值判断</td><td><code>WHERE col IS NULL</code> / <code>IS NOT NULL</code></td><td><b>不能用 = NULL</b>，这是高频考点</td></tr>
+<tr><td>排序</td><td><code>ORDER BY col1 DESC, col2 ASC</code></td><td>多列排序按优先级从左到右</td></tr>
+<tr><td>限制条数</td><td><code>LIMIT 10 OFFSET 20</code></td><td>分页基础，OFFSET 跳过前 N 条</td></tr>
+<tr><td>别名</td><td><code>SELECT col AS new_name</code></td><td>AS 可省略，但建议写上可读性好</td></tr>
+</table>
+
+<div class="card tip"><b>练习平台：</b>LeetCode Database 题库（免费），或 SQLBolt（交互式教程）。今天先刷 175（Combine Two Tables）、176（Second Highest Salary）、177（Nth Highest Salary）——这三题覆盖 80% 的单表考点。</div>
+
+<h2 id="day2">Day 2 · 聚合与多表（GROUP BY + JOIN）</h2>
+<h3>2.1 聚合函数（配合 GROUP BY）</h3>
+<pre><code>SELECT 
+    department,                    -- 分组键
+    COUNT(*) as emp_count,         -- 每组行数
+    AVG(salary) as avg_salary,     -- 平均
+    MAX(salary) as max_salary,     -- 最大
+    MIN(salary) as min_salary,     -- 最小
+    SUM(salary) as total_salary    -- 求和
+FROM employees
+WHERE hire_date > '2020-01-01'     -- ① 先过滤行（WHERE）
+GROUP BY department                -- ② 再分组
+HAVING AVG(salary) > 10000         -- ③ 再过滤组（HAVING）
+ORDER BY avg_salary DESC           -- ④ 最后排序
+LIMIT 5;</code></pre>
+
+<div class="card warn"><b>WHERE vs HAVING 的区别（面试必考）：</b>WHERE 在分组前过滤<b>行</b>，HAVING 在分组后过滤<b>组</b>。WHERE 里不能用聚合函数（如 <code>WHERE AVG(x) > 10</code> 会报错），必须用 HAVING。</div>
+
+<h3>2.2 多表连接（JOIN）</h3>
+<table>
+<tr><th>类型</th><th>结果</th><th>使用场景</th></tr>
+<tr><td><b>INNER JOIN</b></td><td>只保留两表匹配的行</td><td>默认，查"有对应关系"的数据</td></tr>
+<tr><td><b>LEFT JOIN</b></td><td>左表全保留，右表无匹配则为 NULL</td><td>查"左表全部 + 右表可能有"（如：所有用户及其订单，没订单的显示 NULL）</td></tr>
+<tr><td>RIGHT JOIN</td><td>右表全保留</td><td>少用，可用 LEFT JOIN 交换表顺序替代</td></tr>
+<tr><td>FULL OUTER JOIN</td><td>两表全保留</td><td>MySQL 不支持，PostgreSQL 支持</td></tr>
+</table>
+
+<pre><code>-- 典型面试题：查询每个部门工资最高的员工
+SELECT d.name as dept_name, e.name as emp_name, e.salary
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.id
+WHERE (e.dept_id, e.salary) IN (
+    SELECT dept_id, MAX(salary)
+    FROM employees
+    GROUP BY dept_id
+);</code></pre>
+
+<h3>2.3 子查询三种位置</h3>
+<table>
+<tr><th>位置</th><th>示例</th><th>说明</th></tr>
+<tr><td>WHERE 中</td><td><code>WHERE salary > (SELECT AVG(salary) FROM emp)</code></td><td>标量子查询，返回单个值</td></tr>
+<tr><td>FROM 中</td><td><code>FROM (SELECT dept, AVG(salary) as avg_s FROM emp GROUP BY dept) t</code></td><td>派生表，必须起别名</td></tr>
+<tr><td>SELECT 中</td><td><code>SELECT name, (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) as order_cnt FROM users u</code></td><td>相关子查询，效率较低但直观</td></tr>
+</table>
+
+<div class="card tip"><b>今日练习：</b>LeetCode 181（Employees Earning More Than Their Managers）、182（Duplicate Emails）、183（Customers Who Never Order）、184（Department Highest Salary）、185（Department Top Three Salaries）。这 5 题覆盖 JOIN + GROUP BY + 子查询。</div>
+
+<h2 id="day3">Day 3 · 实战场景（AI 工作流）</h2>
+<h3>3.1 场景一：RAG 元数据过滤（pgvector）</h3>
+<p>假设你用 PostgreSQL + pgvector 存文档块，需要按条件过滤：</p>
+<pre><code>-- 建表（了解即可，一般用 ORM 或迁移工具）
+CREATE TABLE documents (
+    id SERIAL PRIMARY KEY,
+    content TEXT,
+    embedding VECTOR(1536),        -- pgvector 扩展
+    source VARCHAR(100),           -- 来源
+    created_at TIMESTAMP,
+    category VARCHAR(50)
+);
+
+-- 语义检索 + 元数据过滤（RAG 核心查询）
+SELECT content, source, 
+       embedding <=> '[0.1, 0.2, ...]' as distance  -- 余弦距离
+FROM documents
+WHERE category = '技术文档'          -- 元数据过滤
+  AND created_at > '2024-01-01'     -- 时间过滤
+  AND source != '内部机密'           -- 安全过滤
+ORDER BY embedding <=> '[0.1, 0.2, ...]'  -- 按向量相似度排序
+LIMIT 5;                            -- Top-5 相关文档</code></pre>
+
+<h3>3.2 场景二：数据分析（用户行为日志）</h3>
+<pre><code>-- 统计每日活跃用户及平均使用时长（面试高频）
+SELECT 
+    DATE(login_time) as login_date,
+    COUNT(DISTINCT user_id) as dau,
+    AVG(session_duration) as avg_duration,
+    COUNT(*) as total_sessions
+FROM user_logs
+WHERE login_time >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY DATE(login_time)
+HAVING COUNT(DISTINCT user_id) > 100
+ORDER BY login_date DESC;</code></pre>
+
+<h3>3.3 场景三：数据清洗（去重与窗口函数）</h3>
+<pre><code>-- 保留每个用户最新的一条记录（ROW_NUMBER 窗口函数）
+WITH ranked AS (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY updated_at DESC) as rn
+    FROM user_profiles
+)
+SELECT * FROM ranked WHERE rn = 1;
+
+-- 计算每个用户与平均值的差距（窗口函数面试考点）
+SELECT 
+    user_id,
+    score,
+    AVG(score) OVER () as global_avg,           -- 全局平均
+    AVG(score) OVER (PARTITION BY dept) as dept_avg,  -- 部门平均
+    score - AVG(score) OVER (PARTITION BY dept) as diff_from_dept
+FROM employee_scores;</code></pre>
+
+<div class="card key"><b>窗口函数三件套（面试加分项）：</b>
+<ul style="margin:8px 0 0 20px">
+<li><code>ROW_NUMBER()</code>：去重取最新/最旧</li>
+<li><code>RANK() / DENSE_RANK()</code>：排名（允许并列）</li>
+<li><code>LAG() / LEAD()</code>：取前一行/后一行（计算环比）</li>
+</ul>
+</div>
+
+<h2 id="practice">20 题实战清单（按优先级排序）</h2>
+<p>在 LeetCode Database 标签下刷这些题，按顺序来：</p>
+
+<table>
+<tr><th>阶段</th><th>题号</th><th>题目</th><th>考察点</th></tr>
+<tr><td rowspan="5"><b>基础（Day 1）</b></td><td>175</td><td>Combine Two Tables</td><td>LEFT JOIN 基础</td></tr>
+<tr><td>176</td><td>Second Highest Salary</td><td>LIMIT/OFFSET 或子查询</td></tr>
+<tr><td>177</td><td>Nth Highest Salary</td><td>函数 + LIMIT</td></tr>
+<tr><td>178</td><td>Rank Scores</td><td>窗口函数 DENSE_RANK</td></tr>
+<tr><td>180</td><td>Consecutive Numbers</td><td>自连接或 LAG/LEAD</td></tr>
+<tr><td rowspan="5"><b>进阶（Day 2）</b></td><td>181</td><td>Employees Earning More Than Managers</td><td>自连接</td></tr>
+<tr><td>182</td><td>Duplicate Emails</td><td>GROUP BY + HAVING</td></tr>
+<tr><td>183</td><td>Customers Who Never Order</td><td>LEFT JOIN + IS NULL / NOT IN</td></tr>
+<tr><td>184</td><td>Department Highest Salary</td><td>JOIN + 子查询 / 窗口函数</td></tr>
+<tr><td>185</td><td>Department Top Three Salaries</td><td>窗口函数 DENSE_RANK + 筛选</td></tr>
+<tr><td rowspan="5"><b>实战（Day 3）</b></td><td>196</td><td>Delete Duplicate Emails</td><td>DELETE + 自连接（了解）</td></tr>
+<tr><td>197</td><td>Rising Temperature</td><td>自连接 + DATEDIFF</td></tr>
+<tr><td>262</td><td>Trips and Users</td><td>复杂 JOIN + 条件聚合（难，选做）</td></tr>
+<tr><td>570</td><td>Managers with at Least 5 Direct Reports</td><td>GROUP BY + HAVING</td></tr>
+<tr><td>577</td><td>Employee Bonus</td><td>LEFT JOIN + 空值处理</td></tr>
+<tr><td rowspan="5"><b>补充（面试前）</b></td><td>586</td><td>Customer Placing Largest Number of Orders</td><td>GROUP BY + LIMIT</td></tr>
+<tr><td>595</td><td>Big Countries</td><td>OR 条件</td></tr>
+<tr><td>596</td><td>Classes More Than 5 Students</td><td>GROUP BY + HAVING</td></tr>
+<tr><td>608</td><td>Tree Node</td><td>CASE WHEN 条件分支</td></tr>
+<tr><td>627</td><td>Swap Salary</td><td>UPDATE + CASE（了解）</td></tr>
+</table>
+
+<div class="card tip"><b>刷题策略：</b>前 10 题（基础+进阶）必须手写通过，后 10 题看题解理解思路即可。遇到窗口函数（ROW_NUMBER/RANK）的卡壳直接看题解，这属于"知道有这功能就行"的范畴。</div>
+
+<h2 id="vs">SQL vs Pandas 对照表（AI 工程师视角）</h2>
+<table>
+<tr><th>操作</th><th>SQL</th><th>Pandas (Python)</th><th>何时用 SQL</th></tr>
+<tr><td>筛选行</td><td><code>WHERE age > 18</code></td><td><code>df[df['age'] > 18]</code></td><td>数据在数据库里，且只需要部分数据</td></tr>
+<tr><td>选列</td><td><code>SELECT name, age</code></td><td><code>df[['name', 'age']]</code></td><td>同上</td></tr>
+<tr><td>分组聚合</td><td><code>GROUP BY dept</code></td><td><code>df.groupby('dept')</code></td><td>数据量大（千万级），数据库引擎更快</td></tr>
+<tr><td>表连接</td><td><code>JOIN</code></td><td><code>pd.merge()</code></td><td>两表都在数据库，避免先导出再合并</td></tr>
+<tr><td>排序</td><td><code>ORDER BY</code></td><td><code>df.sort_values()</code></td><td>数据库索引排序通常更快</td></tr>
+<tr><td>去重</td><td><code>DISTINCT</code></td><td><code>df.drop_duplicates()</code></td><td>数据库层去重减少传输量</td></tr>
+<tr><td>复杂转换</td><td>难写</td><td>灵活（apply, map）</td><td>简单转换用 SQL，复杂逻辑用 Python</td></tr>
+</table>
+
+<div class="card key"><b>决策原则：</b>数据在数据库 → 先 SQL 过滤/聚合 → 导出小结果集 → Pandas 做复杂分析。不要全表导出再用 Python 筛（内存爆炸）。</div>
+
+<div class="foot">SQL Crash Guide · 配合 S1 并行学习 · 每天 30-45 分钟 · 3 天速通</div>
+</main>
+</div>
+</body>
+</html>

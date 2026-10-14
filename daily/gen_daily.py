@@ -2,19 +2,24 @@
 """
 每日学习计划 + 手写练习骨架生成器（AI Engineer 深耕串行版）
 - 读取内置的技能站时间表与 LeetCode 题库
-- 生成：桌面《今日学习计划.md》+ plans/ 存档 + practice/ 练习 .py 骨架
-- state.json 维护幂等：同一天重复运行不重复出题、不断签
+- 生成：桌面《学习计划_日期.md》+ dailyPlan 仓库 plans/ + practice/ 练习 .py 骨架
+- state.json 维护幂等：同一天重复运行不重复出题；题号只在确认后推进
+- 确认模式：python gen_daily.py --confirm → 归档全部未确认计划、推进题号、结算连续打卡
+- 自定义计划：--new-goal "目标" 调用 LLM 生成逐日计划；--import-plan 导入现成 JSON；--builtin 切回内置
 纯标准库，无第三方依赖。
 """
 import json, os, random, sys
 from datetime import date, datetime, timedelta
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-PLANS_DIR = os.path.join(BASE, "plans")
-PRAC_DIR = os.path.join(BASE, "practice")
 LOGS_DIR = os.path.join(BASE, "logs")
 STATE_FILE = os.path.join(BASE, "state.json")
-for d in (PLANS_DIR, PRAC_DIR, LOGS_DIR):
+# dailyPlan 归档仓库：plans/=进行中 done/=已确认 practice/=手写练习（可用环境变量覆盖）
+DAILY_REPO = os.environ.get("DAILY_PLAN_REPO") or os.path.join(os.path.dirname(os.path.dirname(BASE)), "dailyPlan")
+REPO_PLANS = os.path.join(DAILY_REPO, "plans")
+REPO_DONE = os.path.join(DAILY_REPO, "done")
+PRAC_DIR = os.path.join(DAILY_REPO, "practice")
+for d in (LOGS_DIR, REPO_PLANS, REPO_DONE, PRAC_DIR):
     os.makedirs(d, exist_ok=True)
 
 # ---------- 桌面路径（兼容 OneDrive 重定向） ----------
@@ -204,17 +209,269 @@ Q = [
   "回溯+可重复选（start 不递增）；先排序便于剩余值为负时剪枝",None),
 ]
 
-# SQL 速通（仅 10-12~10-14）
-SQL_DAYS = {
- "2026-10-12": "SQL Day1：单表查询（WHERE/ORDER/LIKE/IN/IS NULL）→ 刷 LeetCode 175、176、177",
- "2026-10-13": "SQL Day2：GROUP BY/HAVING/JOIN/子查询 → 刷 181、182、183",
- "2026-10-14": "SQL Day3：窗口函数 ROW_NUMBER/RANK + RAG 元数据过滤场景 → 刷 184、185、197",
+# SQL 暂缓（用户要求后置；恢复时按 LeetCode Database 题号顺序 175→181→… 接续安排）
+SQL_DAYS = {}
+
+# ---------- LC 闯关模式：主任务 = LeetCode 主题闯关（AI 主任务/SQL 暂缓） ----------
+# 每天 1 道主练（在 Q 中有骨架/提示/用例）+ 2 道举一反三（同主题，网页直接做）
+LC_FOCUS = True
+# (主题, 主练题号, [(题号, 题名, slug, 难度), (题号, 题名, slug, 难度)])
+LC_PLAN = [
+ ("双指针", 283, [(344,"反转字符串","reverse-string","Easy"),(125,"验证回文串","valid-palindrome","Easy")]),
+ ("双指针", 26, [(88,"合并两个有序数组","merge-sorted-array","Easy"),(392,"判断子序列","is-subsequence","Easy")]),
+ ("双指针", 27, [(455,"分发饼干","assign-cookies","Easy"),(905,"按奇偶排序数组","sort-array-by-parity","Easy")]),
+ ("双指针", 977, [(345,"反转字符串中的元音字母","reverse-vowels-of-a-string","Easy"),(941,"有效的山脉数组","valid-mountain-array","Easy")]),
+ ("双指针", 167, [(121,"买卖股票的最佳时机","best-time-to-buy-and-sell-stock","Easy"),(122,"买卖股票的最佳时机 II","best-time-to-buy-and-sell-stock-ii","Medium")]),
+ ("双指针", 11, [(16,"最接近的三数之和","3sum-closest","Medium"),(18,"四数之和","4sum","Medium")]),
+ ("双指针", 15, [(454,"四数相加 II","4sum-ii","Medium"),(532,"数组中的 k-diff 数对","k-diff-pairs-in-an-array","Medium")]),
+ ("滑动窗口", 209, [(643,"子数组最大平均数 I","maximum-average-subarray-i","Easy"),(438,"找到字符串中所有字母异位词","find-all-anagrams-in-a-string","Medium")]),
+ ("滑动窗口", 3, [(567,"字符串的排列","permutation-in-string","Medium"),(219,"存在重复元素 II","contains-duplicate-ii","Easy")]),
+ ("哈希表", 1, [(217,"存在重复元素","contains-duplicate","Easy"),(242,"有效的字母异位词","valid-anagram","Easy")]),
+ ("哈希表", 49, [(383,"赎金信","ransom-note","Easy"),(136,"只出现一次的数字","single-number","Easy")]),
+ ("哈希表", 349, [(268,"丢失的数字","missing-number","Easy"),(448,"找到所有数组中消失的数字","find-all-numbers-disappeared-in-an-array","Easy")]),
+ ("哈希表", 350, [(387,"字符串中的第一个唯一字符","first-unique-character-in-a-string","Easy"),(205,"同构字符串","isomorphic-strings","Easy")]),
+ ("哈希表", 202, [(290,"单词规律","word-pattern","Easy"),(409,"最长回文串","longest-palindrome","Easy")]),
+ ("哈希表", 128, [(380,"O(1)时间插入删除获取随机元素","insert-delete-getrandom-o1","Medium"),(299,"猜数字游戏","bulls-and-cows","Medium")]),
+ ("二分查找", 704, [(278,"第一个错误的版本","first-bad-version","Easy"),(374,"猜数字大小","guess-number-higher-or-lower","Easy")]),
+ ("二分查找", 35, [(367,"有效的完全平方数","valid-perfect-square","Easy"),(50,"Pow(x, n)","powx-n","Medium")]),
+ ("二分查找", 69, [(153,"寻找旋转排序数组中的最小值","find-minimum-in-rotated-sorted-array","Medium"),(162,"寻找峰值","find-peak-element","Medium")]),
+ ("二分查找", 34, [(74,"搜索二维矩阵","search-a-2d-matrix","Medium"),(81,"搜索旋转排序数组 II","search-in-rotated-sorted-array-ii","Medium")]),
+ ("二分查找", 33, [(875,"爱吃香蕉的珂珂","koko-eating-bananas","Medium"),(1011,"在 D 天内送达包裹的能力","capacity-to-ship-packages-within-d-days","Medium")]),
+ ("链表", 206, [(203,"移除链表元素","remove-linked-list-elements","Easy"),(83,"删除排序链表中的重复元素","remove-duplicates-from-sorted-list","Easy")]),
+ ("链表", 21, [(234,"回文链表","palindrome-linked-list","Easy"),(160,"相交链表","intersection-of-two-linked-lists","Easy")]),
+ ("链表", 141, [(142,"环形链表 II","linked-list-cycle-ii","Medium"),(287,"寻找重复数","find-the-duplicate-number","Medium")]),
+ ("链表", 876, [(19,"删除链表的倒数第 N 个结点","remove-nth-node-from-end-of-list","Medium"),(148,"排序链表","sort-list","Medium")]),
+ ("栈与队列", 20, [(682,"棒球比赛","baseball-game","Easy"),(844,"比较含退格的字符串","backspace-string-compare","Easy")]),
+ ("栈与队列", 155, [(496,"下一个更大元素 I","next-greater-element-i","Easy"),(503,"下一个更大元素 II","next-greater-element-ii","Medium")]),
+ ("栈与队列", 232, [(150,"逆波兰表达式求值","evaluate-reverse-polish-notation","Medium"),(71,"简化路径","simplify-path","Medium")]),
+ ("栈与队列", 225, [(622,"设计循环队列","design-circular-queue","Medium"),(641,"设计循环双端队列","design-circular-deque","Medium")]),
+ ("栈与队列", 739, [(901,"股票价格跨度","online-stock-span","Medium"),(856,"括号的分数","score-of-parentheses","Medium")]),
+ ("栈与队列", 42, [(84,"柱状图中最大的矩形","largest-rectangle-in-histogram","Hard"),(85,"最大矩形","maximal-rectangle","Hard")]),
+ ("二叉树DFS", 144, [(100,"相同的树","same-tree","Easy"),(572,"另一棵树的子树","subtree-of-another-tree","Easy")]),
+ ("二叉树DFS", 94, [(257,"二叉树的所有路径","binary-tree-paths","Easy"),(111,"二叉树的最小深度","minimum-depth-of-binary-tree","Easy")]),
+ ("二叉树DFS", 104, [(108,"将有序数组转换为二叉搜索树","convert-sorted-array-to-binary-search-tree","Easy"),(559,"N 叉树的最大深度","maximum-depth-of-n-ary-tree","Easy")]),
+ ("二叉树DFS", 226, [(617,"合并二叉树","merge-two-binary-trees","Easy"),(404,"左叶子之和","sum-of-left-leaves","Easy")]),
+ ("二叉树DFS", 101, [(222,"完全二叉树的节点个数","count-complete-tree-nodes","Medium"),(671,"二叉树中第二小的节点","second-minimum-node-in-a-binary-tree","Easy")]),
+ ("二叉树DFS", 110, [(563,"二叉树的坡度","binary-tree-tilt","Easy"),(687,"最长同值路径","longest-univalue-path","Medium")]),
+ ("二叉树DFS", 543, [(437,"路径总和 III","path-sum-iii","Medium"),(98,"验证二叉搜索树","validate-binary-search-tree","Medium")]),
+ ("二叉树DFS", 112, [(113,"路径总和 II","path-sum-ii","Medium"),(129,"求根节点到叶节点数字之和","sum-root-to-leaf-numbers","Medium")]),
+ ("二叉树DFS", 236, [(235,"二叉搜索树的最近公共祖先","lowest-common-ancestor-of-a-binary-search-tree","Easy"),(701,"二叉搜索树中的插入操作","insert-into-a-binary-search-tree","Medium")]),
+ ("二叉树DFS", 124, [(297,"二叉树的序列化与反序列化","serialize-and-deserialize-binary-tree","Hard"),(968,"监控二叉树","binary-tree-cameras","Hard")]),
+ ("二叉树BFS", 102, [(637,"二叉树的层平均值","average-of-levels-in-binary-tree","Easy"),(107,"二叉树的层序遍历 II","binary-tree-level-order-traversal-ii","Medium")]),
+ ("图与BFS", 200, [(733,"图像渲染","flood-fill","Easy"),(463,"岛屿的周长","island-perimeter","Easy")]),
+ ("图与BFS", 695, [(130,"被围绕的区域","surrounded-regions","Medium"),(1254,"统计封闭岛屿的数目","number-of-closed-islands","Medium")]),
+ ("图与BFS", 994, [(1162,"地图分析","as-far-from-land-as-possible","Medium"),(542,"01 矩阵","01-matrix","Medium")]),
+ ("图与BFS", 207, [(210,"课程表 II","course-schedule-ii","Medium"),(997,"找到小镇的法官","find-the-town-judge","Easy")]),
+ ("回溯", 78, [(77,"组合","combinations","Medium"),(90,"子集 II","subsets-ii","Medium")]),
+ ("回溯", 46, [(47,"全排列 II","permutations-ii","Medium"),(17,"电话号码的字母组合","letter-combinations-of-a-phone-number","Medium")]),
+ ("回溯", 39, [(22,"括号生成","generate-parentheses","Medium"),(40,"组合总和 II","combination-sum-ii","Medium")]),
+ ("动态规划", 70, [(746,"使用最小花费爬楼梯","min-cost-climbing-stairs","Easy"),(118,"杨辉三角","pascals-triangle","Easy")]),
+ ("动态规划", 53, [(152,"乘积最大子数组","maximum-product-subarray","Medium"),(918,"环形子数组的最大和","maximum-sum-circular-subarray","Medium")]),
+ ("动态规划", 198, [(213,"打家劫舍 II","house-robber-ii","Medium"),(337,"打家劫舍 III","house-robber-iii","Medium")]),
+ ("动态规划", 62, [(63,"不同路径 II","unique-paths-ii","Medium"),(64,"最小路径和","minimum-path-sum","Medium")]),
+ ("动态规划", 1143, [(300,"最长递增子序列","longest-increasing-subsequence","Medium"),(583,"两个字符串的删除操作","delete-operation-for-two-strings","Medium")]),
+ ("动态规划", 322, [(91,"解码方法","decode-ways","Medium"),(279,"完全平方数","perfect-squares","Medium")]),
+]
+QN2I = {q[0]: i for i, q in enumerate(Q)}
+
+# 选做加练池：按主题分组、每关独立一对（顺序与 LC_PLAN 中该主题各关的出现顺序一一对应），
+# 保证每天选做题也不同。状态好就做满 5 题（≈50-60min），做完 3 题即达标
+BONUS = {
+ "双指针": [
+  [(922,"按奇偶排序数组 II","sort-array-by-parity-ii","Easy"),(917,"仅仅反转字母","reverse-only-letters","Easy")],
+  [(925,"长按键入","long-pressed-name","Easy"),(680,"验证回文串 II","valid-palindrome-ii","Easy")],
+  [(849,"到最近的人的最大距离","maximize-distance-to-closest-person","Medium"),(986,"区间列表的交集","interval-list-intersections","Medium")],
+  [(881,"救生艇","boats-to-save-people","Medium"),(611,"有效三角形的个数","valid-triangle-number","Medium")],
+  [(75,"颜色分类","sort-colors","Medium"),(633,"平方数之和","sum-of-square-numbers","Medium")],
+  [(713,"乘积小于 K 的子数组","subarray-product-less-than-k","Medium"),(1099,"小于 K 的两数之和","two-sum-less-than-k","Easy")],
+  [(1498,"满足条件的子序列数目","number-of-subsequences-that-satisfy-the-given-sum-condition","Medium"),(825,"适龄的朋友","friends-of-appropriate-ages","Medium")],
+ ],
+ "滑动窗口": [
+  [(1456,"定长子串中元音的最大数目","maximum-number-of-vowels-in-a-substring-of-given-length","Medium"),(187,"重复的DNA序列","repeated-dna-sequences","Medium")],
+  [(904,"水果成篮","fruit-into-baskets","Medium"),(1004,"最大连续1的个数 III","max-consecutive-ones-iii","Medium")],
+ ],
+ "哈希表": [
+  [(771,"宝石与石头","jewels-and-stones","Easy"),(389,"找不同","find-the-difference","Easy")],
+  [(451,"根据字符出现频率排序","sort-characters-by-frequency","Medium"),(500,"键盘行","keyboard-row","Easy")],
+  [(575,"分糖果","distribute-candies","Easy"),(1207,"独一无二的出现次数","unique-number-of-occurrences","Easy")],
+  [(599,"两个列表的最小索引总和","minimum-index-sum-of-two-lists","Easy"),(748,"最短补全词","shortest-completing-word","Easy")],
+  [(645,"错误的集合","set-mismatch","Easy"),(720,"词典中最长的单词","longest-word-in-dictionary","Medium")],
+  [(692,"前K个高频单词","top-k-frequent-words","Medium"),(525,"连续数组","contiguous-array","Medium")],
+ ],
+ "二分查找": [
+  [(441,"排列硬币","arranging-coins","Easy"),(852,"山脉数组的峰顶索引","peak-index-in-a-mountain-array","Medium")],
+  [(1351,"统计有序矩阵中的负数","count-negative-numbers-in-a-sorted-matrix","Easy"),(2089,"找出数组排序后的目标下标","find-target-indices-after-sorting-array","Easy")],
+  [(154,"寻找旋转排序数组中的最小值 II","find-minimum-in-rotated-sorted-array-ii","Medium"),(540,"有序数组中的单一元素","single-element-in-a-sorted-array","Medium")],
+  [(436,"寻找右区间","find-right-interval","Medium"),(981,"基于时间的键值存储","time-based-key-value-store","Medium")],
+  [(1283,"使结果不超过阈值的最小除数","find-the-smallest-divisor-given-a-threshold","Medium"),(410,"分割数组的最大值","split-array-largest-sum","Hard")],
+ ],
+ "链表": [
+  [(92,"反转链表 II","reverse-linked-list-ii","Medium"),(445,"两数相加 II","add-two-numbers-ii","Medium")],
+  [(2,"两数相加","add-two-numbers","Medium"),(24,"两两交换链表中的节点","swap-nodes-in-pairs","Medium")],
+  [(143,"重排链表","reorder-list","Medium"),(147,"对链表进行插入排序","insertion-sort-list","Medium")],
+  [(61,"旋转链表","rotate-list","Medium"),(86,"分隔链表","partition-list","Medium")],
+ ],
+ "栈与队列": [
+  [(1047,"删除字符串中的所有相邻重复项","remove-all-adjacent-duplicates-in-string","Easy"),(394,"字符串解码","decode-string","Medium")],
+  [(1472,"设计浏览器历史记录","design-browser-history","Medium"),(1381,"设计一个支持增量操作的栈","design-a-stack-with-increment-operation","Medium")],
+  [(341,"扁平化嵌套列表迭代器","flatten-nested-list-iterator","Medium"),(735,"小行星碰撞","asteroid-collision","Medium")],
+  [(1670,"设计前中后队列","design-front-middle-back-queue","Medium"),(933,"最近的请求次数","number-of-recent-calls","Easy")],
+  [(402,"移掉 K 位数字","remove-k-digits","Medium"),(636,"函数的独占时间","exclusive-time-of-functions","Medium")],
+  [(907,"子数组的最小值之和","sum-of-subarray-minimums","Medium"),(1019,"链表中的下一个更大节点","next-greater-node-in-linked-list","Medium")],
+ ],
+ "二叉树DFS": [
+  [(669,"修剪二叉搜索树","trim-a-binary-search-tree","Medium"),(1038,"从二叉搜索树到更大和树","convert-bst-to-greater-tree","Medium")],
+  [(897,"递增顺序搜索树","increasing-order-search-tree","Easy"),(700,"二叉搜索树中的搜索","search-in-a-binary-search-tree","Easy")],
+  [(965,"单值二叉树","univalued-binary-tree","Easy"),(606,"根据二叉树创建字符串","construct-string-from-binary-tree","Medium")],
+  [(938,"二叉搜索树的范围和","range-sum-of-bst","Easy"),(530,"二叉搜索树的最小绝对差","minimum-absolute-difference-in-bst","Easy")],
+  [(958,"二叉树的完全性检验","check-completeness-of-a-binary-tree","Medium"),(513,"找树左下角的值","find-bottom-left-tree-value","Medium")],
+  [(508,"出现次数最多的子树元素和","most-frequent-subtree-sum","Medium"),(623,"在二叉树中增加一行","add-one-row-to-tree","Medium")],
+  [(814,"二叉树剪枝","binary-tree-pruning","Medium"),(979,"在二叉树中分配硬币","distribute-coins-in-binary-tree","Medium")],
+  [(988,"从叶结点开始的最小字符串","smallest-string-starting-from-leaf","Medium"),(1022,"从根到叶的二进制数之和","sum-of-root-to-leaf-binary-numbers","Easy")],
+  [(450,"删除二叉搜索树中的节点","delete-node-in-a-bst","Medium"),(1305,"两棵二叉搜索树中的所有元素","all-elements-in-two-binary-search-trees","Medium")],
+  [(1372,"二叉树中的最长交错路径","longest-zigzag-path-in-a-binary-tree","Medium"),(1373,"二叉搜索子树的最大键值和","maximum-sum-bst-in-binary-tree","Hard")],
+ ],
+ "二叉树BFS": [
+  [(515,"在每个树行中找最大值","find-largest-value-in-each-tree-row","Medium"),(199,"二叉树的右视图","binary-tree-right-side-view","Medium")],
+ ],
+ "图与BFS": [
+  [(841,"钥匙和房间","keys-and-rooms","Medium"),(133,"克隆图","clone-graph","Medium")],
+  [(1091,"二进制矩阵中的最短路径","shortest-path-in-binary-matrix","Medium"),(934,"最短的桥","shortest-bridge","Medium")],
+  [(785,"判断二分图","is-graph-bipartite","Medium"),(1926,"迷宫中离入口最近的出口","nearest-exit-from-entrance-in-maze","Medium")],
+  [(802,"找到最终的安全状态","find-eventual-safe-states","Medium"),(684,"冗余连接","redundant-connection","Medium")],
+ ],
+ "回溯": [
+  [(784,"字母大小写全排列","letter-case-permutation","Medium"),(131,"分割回文串","palindrome-partitioning","Medium")],
+  [(967,"连续差相同的数字","numbers-with-same-consecutive-differences","Medium"),(491,"非递减子序列","non-decreasing-subsequences","Medium")],
+  [(216,"组合总和 III","combination-sum-iii","Medium"),(79,"单词搜索","word-search","Medium")],
+ ],
+ "动态规划": [
+  [(509,"斐波那契数","fibonacci-number","Easy"),(1137,"第 N 个泰波那契数","n-th-tribonacci-number","Easy")],
+  [(1014,"最佳观光组合","best-sightseeing-pair","Medium"),(1186,"删除一次得到子数组最大和","maximum-subarray-sum-with-one-deletion","Medium")],
+  [(740,"删除并获得点数","delete-and-earn","Medium"),(790,"多米诺和托米诺平铺","domino-and-tromino-tiling","Medium")],
+  [(931,"下降路径最小和","minimum-falling-path-sum","Medium"),(576,"出界的路径数","out-of-boundary-paths","Medium")],
+  [(516,"最长回文子序列","longest-palindromic-subsequence","Medium"),(712,"两个字符串的最小ASCII删除和","minimum-ascii-delete-sum-for-two-strings","Medium")],
+  [(377,"组合总和 Ⅳ","combination-sum-iv","Medium"),(96,"不同的二叉搜索树","unique-binary-search-trees","Medium")],
+ ],
 }
+
+def qmeta_of(qi):
+    """由闯关序号取主练题元数据。"""
+    return Q[QN2I[LC_PLAN[qi % len(LC_PLAN)][1]]]
+
+def lc_entry(qi):
+    return LC_PLAN[qi % len(LC_PLAN)]
+
+# ---------- 自定义计划（LLM 生成 / 手动导入，配置存 plan_config.json） ----------
+CONFIG_FILE = os.path.join(BASE, "plan_config.json")
+DEFAULT_BG = "大二计算机专业学生，有 C/C++ 基础，正在系统学习 AI 方向（Python/NumPy/PyTorch/机器学习）"
+
+def load_plan_cfg():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+    return {"mode": "builtin"}
+
+def save_plan_cfg(cfg):
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+
+def llm_cfg(cfg):
+    llm = dict(cfg.get("llm") or {})
+    llm.setdefault("base_url", "https://api.deepseek.com")
+    llm.setdefault("model", "deepseek-chat")
+    if not llm.get("api_key"):
+        llm["api_key"] = os.environ.get("LLM_API_KEY", "")
+    return llm
+
+def llm_chat(cfg, messages, timeout=180):
+    """OpenAI 兼容 /chat/completions 调用（纯标准库）。"""
+    import urllib.request
+    llm = llm_cfg(cfg)
+    if not llm["api_key"]:
+        raise RuntimeError(
+            "未配置 LLM API Key。方式1：在 plan_config.json 的 llm.api_key 填写；"
+            "方式2：设置环境变量 LLM_API_KEY；"
+            "方式3：用 --import-plan 导入任何聊天机器人生成的计划 JSON（无需 API）")
+    body = json.dumps({"model": llm["model"], "messages": messages,
+                       "temperature": 0.4, "stream": False}).encode("utf-8")
+    req = urllib.request.Request(
+        llm["base_url"].rstrip("/") + "/chat/completions", data=body,
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + llm["api_key"]})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        data = json.loads(r.read().decode("utf-8"))
+    return data["choices"][0]["message"]["content"]
+
+def extract_json(text):
+    try:
+        return json.loads(text)
+    except Exception:
+        i, j = text.find("{"), text.rfind("}")
+        if i >= 0 and j > i:
+            return json.loads(text[i:j + 1])
+        raise ValueError("LLM 输出不是有效 JSON")
+
+PLAN_PROMPT = """把下面的学习目标拆解成逐日学习计划。
+
+【学习目标】{goal}
+【周期】{start} 至 {end}（共 {ndays} 天，每天约 {minutes} 分钟）
+【学习者背景】{bg}
+
+要求：
+1. 划分为 3-8 个阶段，由浅入深，每个阶段有可检验的毕业标准（grad）。
+2. 逐日安排：每天任务具体可执行、一句话说清；理论与实践交替；每周至少 1 天复习/重写日；周末任务适当减轻；最后一天为综合实战日。
+3. 每天字段：stage(阶段名)、main(主任务)、hand(必须亲手完成的部分)、ai(可交给 AI 辅助的部分)、extra(20-40 分钟附加小任务，可为空字符串)。
+4. 只输出 JSON（不要 markdown 代码块、不要任何解释），结构：
+{{"milestones":[{{"stage":"阶段名","end":"YYYY-MM-DD","grad":"毕业标准"}}],"days":[{{"stage":"...","main":"...","hand":"...","ai":"...","extra":"..."}}]}}
+days 数组长度必须等于 {ndays}，顺序即日期顺序（第一天是 {start}）。"""
+
+def normalize_plan(data, start, end):
+    """把 LLM 输出规整为固定结构：日期按顺序强制对齐，缺失字段给默认值。"""
+    ndays = (end - start).days + 1
+    raw = data.get("days") or []
+    if len(raw) < max(1, int(ndays * 0.8)):
+        raise ValueError(f"天数不足：{len(raw)}/{ndays}")
+    days = []
+    for i in range(ndays):
+        s = raw[i] if i < len(raw) and isinstance(raw[i], dict) else {}
+        days.append({
+            "date": (start + timedelta(days=i)).isoformat(),
+            "stage": str(s.get("stage") or "综合推进"),
+            "main":  str(s.get("main") or s.get("task") or "（按本阶段主题继续推进）"),
+            "hand":  str(s.get("hand") or "核心部分亲手实现"),
+            "ai":    str(s.get("ai") or "调试、资料查询、代码 review"),
+            "extra": str(s.get("extra") or ""),
+        })
+    milestones = []
+    for m in data.get("milestones") or []:
+        if isinstance(m, dict) and m.get("stage"):
+            milestones.append({"stage": str(m["stage"]),
+                               "end": str(m.get("end") or ""),
+                               "grad": str(m.get("grad") or "完成本阶段全部任务")})
+    return {"milestones": milestones, "days": days}
+
+def gen_custom_plan(goal, start, end, minutes, background, cfg):
+    """调用 LLM 生成逐日计划；解析失败自动重试一次。"""
+    ndays = (end - start).days + 1
+    msgs = [{"role": "system", "content": "你是专业的学习计划制定师，只输出 JSON。"},
+            {"role": "user", "content": PLAN_PROMPT.format(
+                goal=goal, start=start.isoformat(), end=end.isoformat(),
+                ndays=ndays, minutes=minutes, bg=background)}]
+    last = None
+    for _ in range(2):
+        try:
+            return normalize_plan(extract_json(llm_chat(cfg, msgs)), start, end)
+        except Exception as e:
+            last = e
+            msgs.append({"role": "user", "content":
+                         f"上次输出无法使用（{e}）。请严格按要求的 JSON 结构重新输出，days 长度 {ndays}。"})
+    raise RuntimeError(f"LLM 生成计划失败：{last}")
 
 # ---------- 状态 ----------
 def load_state():
     if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
+        with open(STATE_FILE, "r", encoding="utf-8-sig") as f:
             return json.load(f)
     return {"last_date": None, "q_index": 0, "round": 1, "history": {}, "streak": 0}
 
@@ -229,6 +486,33 @@ def stage_of(d):
         if a <= iso <= b:
             return rest
     return ("计划外", "按 v3 计划复盘/休整（或提前开始下一阶段准备）", "复习本周手写代码", "—", "—")
+
+def plan_of(d):
+    """今日任务来源：自定义计划（plan_config.json mode=custom）或内置 STAGES。"""
+    iso = d.isoformat()
+    cfg = load_plan_cfg()
+    if cfg.get("mode") == "custom" and cfg.get("days"):
+        days = cfg["days"]
+        goal = cfg.get("goal", "")
+        for idx, x in enumerate(days):
+            if x["date"] == iso:
+                grad = ""
+                for m in cfg.get("milestones") or []:
+                    if m.get("stage") == x["stage"] and m.get("grad"):
+                        grad = m["grad"]
+                return {"station": x["stage"], "main": x["main"], "hand": x["hand"],
+                        "ai": x["ai"], "grad": grad or f"完成「{x['stage']}」阶段全部任务",
+                        "extra": x.get("extra", ""), "goal": goal,
+                        "day_no": idx + 1, "day_total": len(days)}
+        if iso < days[0]["date"]:
+            main = f"自定义计划将于 {days[0]['date']} 开始：{goal}（今天自由准备）"
+        else:
+            main = "本计划已到期。用 --new-goal 制定新计划，或 --builtin 切回内置计划"
+        return {"station": "自定义计划", "main": main, "hand": "—", "ai": "—", "grad": "—",
+                "extra": "", "goal": goal, "day_no": 0, "day_total": len(days)}
+    station, main, hand, ai, grad = stage_of(d)
+    return {"station": station, "main": main, "hand": hand, "ai": ai, "grad": grad,
+            "extra": SQL_DAYS.get(iso, ""), "goal": "", "day_no": 0, "day_total": 0}
 
 HELPER_LL = '''
 # ---- 链表工具（本地测试用，提交 LeetCode 时删掉这部分）----
@@ -381,7 +665,7 @@ def build_practice(qi, qmeta, d, review=False):
     return path, fname
 
 def pick_question(d, state):
-    """返回 (qmeta, review_bool, qi)。周日做本周复习；一轮刷完进入二刷。"""
+    """返回 (qmeta, review_bool, qi)。按 LC_PLAN 闯关顺序；周日复习；一轮刷完进入二刷。"""
     is_sunday = d.weekday() == 6
     if is_sunday and state["history"]:
         week_ago = (d - timedelta(days=6)).isoformat()
@@ -389,59 +673,85 @@ def pick_question(d, state):
                 if iso >= week_ago and not h.get("review")]
         if done:
             iso, qi = random.choice(done)
-            return Q[qi % len(Q)], True, qi
+            return qmeta_of(qi), True, qi
     qi = state["q_index"]
-    if qi >= len(Q):
-        qi = qi % len(Q)  # 二刷
+    if qi >= len(LC_PLAN):
+        qi = qi % len(LC_PLAN)  # 二刷
         review = True
     else:
         review = False
-    return Q[qi], review, qi
+    return qmeta_of(qi), review, qi
 
-def build_md(d, stage, qmeta, qi, review, qfname, state):
-    station, main_task, hand, ai_help, grad = stage
+def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None):
     iso = d.isoformat()
     wd = WEEKDAYS[d.weekday()]
     num, qname, slug, diff, tags, sig, hint, cases = qmeta
-    round_no = state["q_index"] // len(Q) + 1
-    qtag = "复习重做" if review else f"第 {qi+1}/{len(Q)} 题（第 {round_no} 轮）"
+    round_no = state["q_index"] // len(LC_PLAN) + 1
+    qtag = "复习重做" if review else f"第 {qi+1}/{len(LC_PLAN)} 关（第 {round_no} 轮）"
     is_sunday = d.weekday() == 6
-    sql_line = SQL_DAYS.get(iso)
+    sql_line = plan.get("extra") or None
+    station, main_task = plan["station"], plan["main"]
+    hand, ai_help, grad = plan["hand"], plan["ai"], plan["grad"]
+    lc_on = bool(LC_FOCUS and lc)
+    sec = 3 if lc_on else 2
     L = []
     L.append(f"# 今日学习计划 · {iso} {wd}")
     L.append("")
     L.append(f"**当前技能站：{station}** ｜ 连续打卡：**{state['streak']} 天** ｜ 算法：{qtag}")
+    if plan.get("goal"):
+        L.append(f" ｜ 🎯 **{plan['goal']}**（Day {plan['day_no']}/{plan['day_total']}）")
     L.append("")
+    if carry:
+        L.append("> ⚠️ 有未确认的遗留计划：" + "、".join(carry) +
+                 "。完成后双击桌面「✅完成今日计划」一并归档；未确认前不推进新题。")
+        L.append("")
     L.append("## 1. 主任务（45-90 分钟，当天必须有 commit）")
     L.append(f"- {main_task}")
     L.append(f"- ✍️ **必须手写**：{hand}")
     L.append(f"- 🤖 **可交给 AI**：{ai_help}")
     L.append(f"- 🎯 本站毕业标准：{grad}")
     L.append("")
-    L.append("## 2. 碎片任务")
-    L.append(f"- [ ] **算法手写 20min**：LeetCode {num}. {qname} [{diff}]（{qtag}）")
-    L.append(f"      练习文件已生成：`daily/practice/{qfname}` —— 在 VS Code 打开手写，本地跑通看到 AC! 后 commit（禁止纸上默写）")
-    L.append(f"      题目链接：https://leetcode.cn/problems/{slug}/")
+    if lc_on:
+        topic, _, extras = lc
+        L.append("## 2. 算法闯关（30-40 分钟）")
+        L.append(f"**今日主题：{topic}** ｜ {qtag}")
+        L.append(f"- [ ] **主练（手写跑通 AC）**：LeetCode {num}. {qname} [{diff}]")
+        L.append(f"      练习文件已生成：`D:\\GEIST\\dailyPlan\\practice\\{qfname}` —— 在 VS Code 打开手写，本地跑通看到 AC!（禁止纸上默写）")
+        L.append(f"      题目链接：https://leetcode.cn/problems/{slug}/")
+        ex = "　｜　".join(f"[LC {n}. {t} [{df}]](https://leetcode.cn/problems/{s}/)" for n, t, s, df in extras)
+        L.append(f"- [ ] **举一反三（网页直接做，卡 10 分钟看题解再默写）**：{ex}")
+        pairs = BONUS.get(topic) or []
+        k = sum(1 for e in LC_PLAN[: qi % len(LC_PLAN)] if e[0] == topic)
+        bonus = pairs[k % len(pairs)] if pairs else []
+        if bonus:
+            bx = "　｜　".join(f"[LC {n}. {t} [{df}]](https://leetcode.cn/problems/{s}/)" for n, t, s, df in bonus)
+            L.append(f"- [ ]（选做）**加练**：{bx}")
+        L.append("")
+    L.append(f"## {sec}. 碎片任务")
+    if not lc_on:
+        L.append(f"- [ ] **算法手写 20min**：LeetCode {num}. {qname} [{diff}]（{qtag}）")
+        L.append(f"      练习文件已生成：`D:\\GEIST\\dailyPlan\\practice\\{qfname}` —— 在 VS Code 打开手写，本地跑通看到 AC!（禁止纸上默写）")
+        L.append(f"      题目链接：https://leetcode.cn/problems/{slug}/")
     if sql_line:
         L.append(f"- [ ] **{sql_line}**")
     L.append("- [ ] **英语 30min**：GRE 单词 + 英文技术阅读")
     L.append("")
     if is_sunday:
-        L.append("## 3. 周日特殊任务")
+        L.append(f"## {sec+1}. 周日特殊任务")
         L.append("- [ ] **重写日 30min**：把本周 AI 帮写最多的一段核心代码删掉，凭理解重写一遍")
         L.append("- [ ] **Demo Day 30min**：做一个可展示产出（截图/录屏/GIF），写进 learning-notes/progress.md 产出墙")
         L.append("- [ ] **概念卡 10min**：复习本周+上周的概念卡")
         L.append("")
-        L.append("## 4. 手写 vs AI 红线")
+        L.append(f"## {sec+2}. 手写 vs AI 红线")
     else:
-        L.append("## 3. 手写 vs AI 红线")
+        L.append(f"## {sec+1}. 手写 vs AI 红线")
     L.append("- 顺序永远是 **先自己写 → 跑通 → 再让 AI review**，不要反过来")
     L.append("- 不粘贴没读懂的长代码；核心代码（损失/训练循环/检索/评估/路由）必须自己写")
     L.append("")
-    L.append(f"## {5 if is_sunday else 4}. 完成后")
-    L.append("1. 练习文件跑通看到 `AC!`")
-    L.append("2. `git add -A && git commit -m \"daily: {0} 计划+练习\"`（23:00 也会自动提交一次）".format(iso))
-    L.append("3. 状态太差的最小方案：打开文件写 1 行并 commit，**宁可持续 10 行/天，不断线**")
+    L.append(f"## {sec+3 if is_sunday else sec+2}. 完成后（确认归档）")
+    L.append("1. 练习文件本地跑通看到 `AC!`，主任务当天有 commit")
+    L.append("2. **双击桌面「✅完成今日计划」**：本计划自动归档到 GitHub dailyPlan 仓库并删除本地文件，之后才推进新题")
+    L.append("3. 没完成就不点确认：文件保留，明天继续攻克同一题（最小方案：练习文件写 1 行也是进步）")
     L.append("")
     L.append(f"---\n_由 gen_daily.py 于 {datetime.now().strftime('%Y-%m-%d %H:%M')} 自动生成_")
     return "\n".join(L)
@@ -451,39 +761,45 @@ def main():
     state = load_state()
     iso = today.isoformat()
 
-    # 连续天数 & 幂等
-    if state["last_date"] == iso:
-        pass  # 同一天重复运行：不推进
-    else:
-        if state["last_date"]:
-            prev = date.fromisoformat(state["last_date"])
-            state["streak"] = state["streak"] + 1 if (today - prev).days == 1 else 1
-        else:
-            state["streak"] = 1
-        state["last_date"] = iso
+    # 幂等：同一天重复运行不推进（连续打卡与题号由 --confirm 确认时结算）
+    state["last_date"] = iso
 
+    def pending_dates(today_iso):
+        return sorted(d for d, h in state["history"].items()
+                      if h.get("status", "pending") == "pending" and d < today_iso)
+
+    carry = []
     if iso in state["history"]:
-        qi = state["history"][iso]["qi"]
-        review = state["history"][iso]["review"]
-        qmeta = Q[qi % len(Q)]
+        h = state["history"][iso]
+        qi, review = h["qi"], h["review"]
+        qmeta = qmeta_of(qi)
+        carry = pending_dates(iso)
     else:
-        qmeta, review, qi = pick_question(today, state)
+        pend = pending_dates(iso)
+        if pend:
+            # 有未确认的遗留计划：不推进新题，继续攻克最早未完成的那题
+            h0 = state["history"][pend[0]]
+            qi, review = h0["qi"], h0["review"]
+            qmeta = qmeta_of(qi)
+            carry = pend
+        else:
+            qmeta, review, qi = pick_question(today, state)
         state["history"][iso] = {"qi": qi, "review": review,
-                                 "station": stage_of(today)[0]}
-        if not review and state["q_index"] < len(Q):
-            state["q_index"] += 1
+                                 "station": stage_of(today)[0], "status": "pending"}
 
     path, qfname = build_practice(qi, qmeta, today, review=review)
-    stage = stage_of(today)
-    md = build_md(today, stage, qmeta, qi, review, qfname, state)
+    plan = plan_of(today)
+    lc = lc_entry(qi)
+    state["history"][iso]["station"] = plan["station"]
+    md = build_md(today, plan, qmeta, qi, review, qfname, state, carry=carry, lc=lc)
 
-    plan_path = os.path.join(PLANS_DIR, f"{iso}.md")
+    plan_path = os.path.join(REPO_PLANS, f"{iso}.md")
     with open(plan_path, "w", encoding="utf-8") as f:
         f.write(md)
 
     desktop_ok = False
     try:
-        dp = os.path.join(desktop_dir(), "今日学习计划.md")
+        dp = os.path.join(desktop_dir(), f"学习计划_{iso}.md")
         with open(dp, "w", encoding="utf-8") as f:
             f.write(md)
         desktop_ok = True
@@ -497,12 +813,176 @@ def main():
     qnum, qname = qmeta[0], qmeta[1]
     with open(summary, "w", encoding="utf-8") as f:
         f.write(f"今日计划已生成 | 连续 {state['streak']} 天\n")
-        f.write(f"{stage[0]}：{qnum}.{qname}（{'复习' if review else '新题'}）已就位\n")
+        f.write(f"{plan['station']}：{qnum}.{qname}（{'复习' if review else '新题'}）已就位\n")
 
     print(f"[OK] {iso} {WEEKDAYS[today.weekday()]} streak={state['streak']}")
     print(f"plan: {plan_path}")
     print(f"practice: {path}")
     print(f"desktop: {desktop_ok}")
 
-if __name__ == "__main__":
+# ---------- 确认归档（done.ps1 调用：--confirm）----------
+def confirm(past_only=False):
+    """past_only=True：仅归档今天之前的未确认计划（生成前的补确认弹窗用），
+    并作废今天已自动生成的"延续计划"，使随后的重新生成按新题号出题。"""
+    today = date.today()
+    tiso = today.isoformat()
+    state = load_state()
+    pend = sorted(d for d, h in state["history"].items()
+                  if h.get("status", "pending") == "pending")
+    arch = [d for d in pend if (d < tiso or not past_only)]
+    if not arch:
+        print("NOTHING_PENDING")
+        return
+    for iso in arch:
+        src = os.path.join(REPO_PLANS, f"{iso}.md")
+        dst_dir = os.path.join(REPO_DONE, iso[:7])
+        os.makedirs(dst_dir, exist_ok=True)
+        if os.path.exists(src):
+            os.replace(src, os.path.join(dst_dir, f"{iso}.md"))
+        state["history"][iso]["status"] = "done"
+        p = os.path.join(desktop_dir(), f"学习计划_{iso}.md")
+        if os.path.exists(p):
+            os.remove(p)
+    # 推进题号：仅按非复习题推进（多个遗留日共用同一题只 +1）
+    new_qi = [state["history"][d]["qi"] for d in arch
+              if not state["history"][d].get("review")]
+    if new_qi:
+        state["q_index"] = max(state["q_index"], max(new_qi) + 1)
+    # 连续打卡按确认日结算
+    last = state.get("last_confirm")
+    if last == tiso:
+        pass
+    elif last == (today - timedelta(days=1)).isoformat():
+        state["streak"] = state.get("streak", 0) + 1
+    else:
+        state["streak"] = 1
+    state["last_confirm"] = tiso
+    # 今天若已被自动生成为"延续计划"，作废该条目 → 随后的重新生成按推进后的题号出新题
+    if past_only and tiso in state["history"] and state["history"][tiso].get("status") == "pending":
+        del state["history"][tiso]
+    save_state(state)
+    print("CONFIRMED:" + ",".join(arch))
+    print(f"STREAK:{state['streak']}")
+
+# ---------- 自定义计划命令 ----------
+def arg_value(args, name, default=None):
+    if name in args:
+        i = args.index(name)
+        if i + 1 < len(args) and not args[i + 1].startswith("--"):
+            return args[i + 1]
+    return default
+
+def print_cfg_summary(cfg):
+    days = cfg.get("days") or []
+    print(f"模式: {cfg.get('mode')}  目标: {cfg.get('goal', '—')}")
+    print(f"周期: {cfg.get('start', '—')} ~ {cfg.get('end', '—')}"
+          f"（{len(days)} 天，每天约 {cfg.get('daily_minutes', '—')} 分钟）")
+    ms = {m["stage"]: m.get("grad", "") for m in cfg.get("milestones") or []}
+    cur, first, prev, cnt = None, "", "", 0
+    for x in days:
+        if x["stage"] != cur:
+            if cur is not None:
+                g = f"｜毕业：{ms[cur]}" if ms.get(cur) else ""
+                print(f"  · {cur}：{first} ~ {prev}（{cnt} 天）{g}")
+            cur, first, cnt = x["stage"], x["date"], 0
+        prev, cnt = x["date"], cnt + 1
+    if cur is not None:
+        g = f"｜毕业：{ms[cur]}" if ms.get(cur) else ""
+        print(f"  · {cur}：{first} ~ {prev}（{cnt} 天）{g}")
+
+def cmd_new_goal(args):
+    goal = arg_value(args, "--new-goal")
+    if not goal:
+        print('用法: python gen_daily.py --new-goal "目标" [--days 30 | --end 2026-11-15] '
+              '[--minutes 120] [--background "背景"]')
+        sys.exit(2)
+    cfg = load_plan_cfg()
+    start = date.today()
+    end_s = arg_value(args, "--end")
+    end = date.fromisoformat(end_s) if end_s else start + timedelta(days=int(arg_value(args, "--days", "30")) - 1)
+    ndays = (end - start).days + 1
+    if ndays < 1 or ndays > 90:
+        print("计划天数需在 1~90 天之间（更长的目标建议分段制定）")
+        sys.exit(2)
+    minutes = int(arg_value(args, "--minutes", str(cfg.get("daily_minutes", 120))))
+    background = arg_value(args, "--background", cfg.get("background") or DEFAULT_BG)
+    print(f"正在调用 LLM 生成 {ndays} 天逐日计划（{llm_cfg(cfg)['model']}）...")
+    try:
+        plan = gen_custom_plan(goal, start, end, minutes, background, cfg)
+    except Exception as e:
+        print(f"[失败] {e}")
+        sys.exit(1)
+    cfg.update({"mode": "custom", "goal": goal, "background": background,
+                "daily_minutes": minutes, "start": start.isoformat(), "end": end.isoformat(),
+                "milestones": plan["milestones"], "days": plan["days"]})
+    save_plan_cfg(cfg)
+    print("[OK] 自定义计划已保存：")
+    print_cfg_summary(cfg)
     main()
+
+def cmd_import_plan(args):
+    path = arg_value(args, "--import-plan")
+    if not path or not os.path.exists(path):
+        print('用法: python gen_daily.py --import-plan plan.json [--goal "目标"]')
+        sys.exit(2)
+    with open(path, "r", encoding="utf-8-sig") as f:
+        data = json.load(f)
+    raw = data.get("days") if isinstance(data, dict) else data
+    if not isinstance(raw, list) or not raw:
+        print("JSON 里需要非空的 days 数组")
+        sys.exit(2)
+    days = []
+    for i, s in enumerate(raw):
+        if not isinstance(s, dict) or not s.get("date"):
+            print(f"days[{i}] 缺少 date 字段")
+            sys.exit(2)
+        days.append({"date": str(s["date"]), "stage": str(s.get("stage") or "自定义"),
+                     "main": str(s.get("main") or s.get("task") or ""),
+                     "hand": str(s.get("hand") or ""), "ai": str(s.get("ai") or ""),
+                     "extra": str(s.get("extra") or "")})
+    days.sort(key=lambda x: x["date"])
+    if len({x["date"] for x in days}) != len(days):
+        print("days 里有重复日期")
+        sys.exit(2)
+    cfg = load_plan_cfg()
+    goal = arg_value(args, "--goal") or (data.get("goal") if isinstance(data, dict) else "") or "自定义计划"
+    cfg.update({"mode": "custom", "goal": goal, "start": days[0]["date"], "end": days[-1]["date"],
+                "milestones": data.get("milestones", []) if isinstance(data, dict) else [],
+                "days": days})
+    save_plan_cfg(cfg)
+    print(f"[OK] 已导入 {len(days)} 天计划：")
+    print_cfg_summary(cfg)
+    main()
+
+def cmd_show_plan():
+    cfg = load_plan_cfg()
+    print_cfg_summary(cfg)
+    llm = llm_cfg(cfg)
+    print(f"LLM: {llm['base_url']} / {llm['model']} / key={'已配置' if llm.get('api_key') else '未配置'}")
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if "--status" in args:
+        # 供 run_daily.ps1 弹窗决策：是否有未确认遗留 / 今天是否已生成过
+        st = load_state()
+        t = date.today().isoformat()
+        pend = sorted(d for d, h in st["history"].items()
+                      if h.get("status", "pending") == "pending" and d < t)
+        print("CARRY:" + (",".join(pend) if pend else "none"))
+        print("TODAY_ENTRY:" + ("yes" if t in st["history"] else "no"))
+    elif "--confirm" in args:
+        confirm(past_only="--past-only" in args)
+    elif "--new-goal" in args:
+        cmd_new_goal(args)
+    elif "--import-plan" in args:
+        cmd_import_plan(args)
+    elif "--builtin" in args:
+        cfg = load_plan_cfg()
+        cfg["mode"] = "builtin"
+        save_plan_cfg(cfg)
+        print("[OK] 已切回内置计划")
+        main()
+    elif "--show-plan" in args:
+        cmd_show_plan()
+    else:
+        main()
