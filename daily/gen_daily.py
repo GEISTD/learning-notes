@@ -14,6 +14,13 @@ from datetime import date, datetime, timedelta
 BASE = os.path.dirname(os.path.abspath(__file__))
 LOGS_DIR = os.path.join(BASE, "logs")
 STATE_FILE = os.path.join(BASE, "state.json")
+# 供 ps1 读取的机器可读结果（Python 直接写 UTF-8，绕过 PS 捕获子进程输出的 GBK 乱码坑）
+LAST_RUN = os.path.join(BASE, "last_run.json")
+
+
+def write_run_result(obj):
+    with open(LAST_RUN, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
 # dailyPlan 归档仓库：plans/=进行中 done/=已确认 practice/=手写练习（可用环境变量覆盖）
 DAILY_REPO = os.environ.get("DAILY_PLAN_REPO") or os.path.join(os.path.dirname(os.path.dirname(BASE)), "dailyPlan")
 REPO_PLANS = os.path.join(DAILY_REPO, "plans")
@@ -764,6 +771,12 @@ def main():
     # 幂等：同一天重复运行不推进（连续打卡与题号由 --confirm 确认时结算）
     state["last_date"] = iso
 
+    # 今天已确认归档：重启 / 重复触发不得再生成（防止"已完成的任务复活"）
+    if state["history"].get(iso, {}).get("status") == "done":
+        print("TODAY_DONE")
+        write_run_result({"result": "today_done", "date": iso})
+        return
+
     def pending_dates(today_iso):
         return sorted(d for d, h in state["history"].items()
                       if h.get("status", "pending") == "pending" and d < today_iso)
@@ -819,6 +832,9 @@ def main():
     print(f"plan: {plan_path}")
     print(f"practice: {path}")
     print(f"desktop: {desktop_ok}")
+    write_run_result({"result": "ok", "date": iso,
+                      "station": plan["station"], "q": f"{qnum}.{qname}",
+                      "review": review, "streak": state["streak"]})
 
 # ---------- 确认归档（done.ps1 调用：--confirm）----------
 def confirm(past_only=False):
@@ -832,6 +848,7 @@ def confirm(past_only=False):
     arch = [d for d in pend if (d < tiso or not past_only)]
     if not arch:
         print("NOTHING_PENDING")
+        write_run_result({"result": "nothing_pending"})
         return
     for iso in arch:
         src = os.path.join(REPO_PLANS, f"{iso}.md")
@@ -863,6 +880,8 @@ def confirm(past_only=False):
     save_state(state)
     print("CONFIRMED:" + ",".join(arch))
     print(f"STREAK:{state['streak']}")
+    write_run_result({"result": "confirmed", "dates": arch,
+                      "streak": state["streak"], "past_only": past_only})
 
 # ---------- 自定义计划命令 ----------
 def arg_value(args, name, default=None):

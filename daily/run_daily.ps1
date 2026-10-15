@@ -1,14 +1,23 @@
-﻿# 每日计划生成（登录时 / 08:30 由任务计划调用）
+# 每日计划生成（登录时 / 08:30 由任务计划调用）
 # 补确认弹窗（有遗留时） → 生成 → Toast → 推送新计划到 GitHub dailyPlan 仓库
 $ErrorActionPreference = "Continue"
+# 子进程（python -X utf8）输出按 UTF-8 解码，否则中文系统默认 GBK 会把捕获结果变成乱码
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 $dir = $PSScriptRoot
 $py = "C:\Users\29681\AppData\Local\Programs\Python\Python313\python.exe"
 if (-not (Test-Path $py)) { $py = "py" }
+
+# 单实例互斥锁：开机时 ONLOGON 与 08:30 两个任务可能并发触发，
+# 第二个实例直接退出，避免重复弹窗、重复生成（拿到锁的实例负责全部流程）
+$mtx = New-Object System.Threading.Mutex($false, "Local\AIPlanDailyRun")
+if (-not $mtx.WaitOne(5000)) { exit }
 
 $stamp = Get-Date -Format "yyyy-MM-dd"
 if (-not (Test-Path (Join-Path $dir "logs"))) { New-Item -ItemType Directory -Path (Join-Path $dir "logs") | Out-Null }
 $log = Join-Path $dir "logs\$stamp.log"
 
+try {
 # 0) 补确认弹窗：有未确认的遗留计划且今天还没生成过 → 先问"完成了没"
 #    [是] 归档遗留并按新题号生成  [否]/超时(10分钟) → 延续同一题
 $statusOut = & $py -X utf8 (Join-Path $dir "gen_daily.py") --status 2>> $log
@@ -29,10 +38,16 @@ if ($carry -and $carry -ne "none" -and $todayEntry -eq "no") {
     }
 }
 
-# 1) 生成计划与练习文件（幂等：同一天重复运行不重复出题）
+# 1) 生成计划与练习文件（幂等：同一天重复运行不重复出题；今天已确认则结果为 today_done）
 & $py -X utf8 (Join-Path $dir "gen_daily.py") *>> $log
+$todayDone = $false
+try {
+    $rr = [IO.File]::ReadAllText((Join-Path $dir "last_run.json"), [Text.Encoding]::UTF8) | ConvertFrom-Json
+    $todayDone = ($rr.result -eq "today_done")
+} catch { Add-Content $log "last_run read failed: $_" }
 
-# 2) Toast 通知（原生 WinRT，无需安装模块；失败则静默跳过）
+# 2) Toast 通知（原生 WinRT，无需安装模块；今天已确认归档则不再打扰）
+if (-not $todayDone) {
 try {
     [void][Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType=WindowsRuntime]
     $tpl = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
@@ -47,6 +62,7 @@ try {
     [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("AI Daily Plan").Show($toast)
 } catch {
     Add-Content $log "toast failed: $_"
+}
 }
 
 # 3) 推送新计划到 GitHub dailyPlan 仓库（失败只记日志，下次自动补推）
@@ -65,4 +81,9 @@ try {
 } catch {
     Add-Content $log "git failed: $_"
     try { Pop-Location } catch {}
+}
+}
+finally {
+    $mtx.ReleaseMutex() | Out-Null
+    $mtx.Dispose()
 }
