@@ -19,19 +19,20 @@ def apply_all(funcs, x):
     """把 x 依次喂给每个函数，返回最终结果。
     apply_all([str.upper, lambda s: s + "!"], "hi") -> "HI!"
     """
-    # TODO
+    for func in funcs:
+        x = func(x)
     return x
 
 
 def make_counter():
-    """返回一个计数器函数：每次调用返回值加 1，从 1 开始。
+    count = 0
 
-        c = make_counter()
-        c() -> 1
-        c() -> 2
-    提示：内层函数里要改外层变量，需要 nonlocal。
-    """
-    # TODO
+    def counter():
+        nonlocal count
+        count += 1
+        return count
+
+    return counter
     def counter():
         return 0
     return counter
@@ -42,8 +43,8 @@ def sum_all(*args):
     sum_all(1, 2, 3) -> 6，sum_all() -> 0
     提示：直接用内置 sum(args)。
     """
-    # TODO
-    return 0
+    num = sum(args)
+    return num
 
 
 DEFAULTS = {"lr": 0.01, "epochs": 10}
@@ -54,17 +55,17 @@ def build_config(**kwargs):
     build_config(epochs=20) -> {"lr": 0.01, "epochs": 20}
     提示：先 dict(DEFAULTS)，再 .update(kwargs)。
     """
-    # TODO
-    return {}
+    dict(DEFAULTS)
+    DEFAULTS.update(kwargs)
+    return DEFAULTS
 
 
 def compose(f, g):
     """返回一个新函数，等价于 f(g(x))。
     compose(str.upper, lambda s: s + "!"), 传入 "hi" -> "HI!"
     """
-    # TODO
     def composed(x):
-        return x
+        return f(g(x))
     return composed
 
 

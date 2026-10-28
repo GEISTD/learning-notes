@@ -24,16 +24,18 @@ class BankAccount:
     """
 
     def __init__(self, owner, balance=0):
-        # TODO: 保存 owner 和 balance 到 self
-        pass
+        self.owner = owner
+        self.balance = balance
 
     def deposit(self, amount):
-        # TODO
-        return 0
+        self.balance += amount
+        return self.balance
 
     def withdraw(self, amount):
-        # TODO
-        return 0
+        if amount > self.balance:
+            raise ValueError
+        self.balance -= amount
+        return self.balance
 
 
 class Vector2:
@@ -46,16 +48,19 @@ class Vector2:
     """
 
     def __init__(self, x, y):
-        # TODO
-        pass
+        self.x = x
+        self.y = y
 
     def __add__(self, other):
-        # TODO
-        return None
+        self.x += other.x
+        self.y += other.y
+        return self.x, self.y
 
     def __repr__(self):
-        # TODO
-        return ""
+        num  = self.x
+        self.x = self.y
+        self.y = num
+        return f"Vector2({self.y}, {self.x})"
 
 
 class Stack:
@@ -71,20 +76,23 @@ class Stack:
         self._data = []
 
     def push(self, x):
-        # TODO
-        pass
+        self._data.append(x)
+
 
     def pop(self):
-        # TODO
-        return None
+        if self.is_empty():
+            raise IndexError("栈为空")
+        return self._data.pop()
 
     def peek(self):
-        # TODO
-        return None
+        if self.is_empty():
+            return None
+        return self._data[-1]
 
     def is_empty(self):
-        # TODO
-        return True
+        if self.is_empty():
+            return True
+        return False
 
 
 class Student:
@@ -100,8 +108,9 @@ class Student:
 
     @classmethod
     def from_string(cls, s, sep=","):
-        # TODO
-        return None
+        cls.sep = sep
+
+        return cls
 
 
 # ============ 自测区（不用改） ============

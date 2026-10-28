@@ -19,8 +19,10 @@ def word_count(text):
     """统计每个单词出现次数，返回 dict。按空格切词。
     "a b a c" -> {"a": 2, "b": 1, "c": 1}
     """
-    # TODO
-    return {}
+    dic = {}
+    for word in text.split():
+        dic[word] = dic.get(word, 0) + 1
+    return dic
 
 
 def top_k_words(text, k):
@@ -29,31 +31,39 @@ def top_k_words(text, k):
 
     提示：先 word_count，再 sorted(..., key=lambda kv: (-kv[1], kv[0]))[:k]
     """
-    # TODO
-    return []
+    word_counts = {}
+    for word in text.split():
+        word_counts[word] = word_counts.get(word, 0) + 1
+        sorted_word_count = sorted(word_counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return sorted_word_count [:k]
 
 
 def invert(d):
     """键值互换。{"a": 1, "b": 2} -> {1: "a", 2: "b"}（假设值不重复）。"""
-    # TODO
-    return {}
+    result = {}
+    for k,v in d.items():
+        result[v] = k
+    return result
 
 
 def common_keys(d1, d2):
     """返回两个字典共同拥有的键，类型必须是 set。
     提示：dict 的 keys() 支持集合运算：d1.keys() & d2.keys()
     """
-    # TODO
-    return set()
+    result = set()
+    for k in d1.keys():
+        if k  in d2.keys():
+            result.add(k)
+    return result
 
 
 def group_by_len(words):
-    """按单词长度分组。["a","bb","cc","d"] -> {1: ["a","d"], 2: ["bb","cc"]}
-
-    提示：用 d.setdefault(length, []).append(w)，或 S08 的 defaultdict。
-    """
-    # TODO
-    return {}
+    """按单词长度分组。"""
+    groups = {}
+    for w in words:
+        length = len(w)
+        groups.setdefault(length, []).append(w)
+    return groups
 
 
 # ============ 自测区（不用改） ============

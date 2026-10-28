@@ -17,13 +17,11 @@
 # ============ 练习区 ============
 
 def second_largest(nums):
-    """返回第二大的「不同」数值。例如 [3,1,4,4,2] -> 3。
-    不同值不足 2 个时返回 None。
-
-    提示：sorted(set(nums)) 会得到一个去重且升序的新列表。
-    """
-    # TODO
-    return None
+    """返回第二大的不同数值；不同值不足 2 个时返回 None。"""
+    unique_nums = sorted(set(nums))
+    if len(unique_nums) < 2:
+        return None
+    return unique_nums[-2]
 
 
 def remove_dups_keep_order(nums):
@@ -32,16 +30,19 @@ def remove_dups_keep_order(nums):
     提示：用 seen = set() 记录见过的值，再用推导式过滤；
           不能直接 set(nums)，那样顺序就乱了。
     """
-    # TODO
-    return []
+    k = sorted(set(nums))
+    return k
 
 
 def squares_of_odds(n):
     """返回 0 到 n-1 中所有奇数的平方，要求用【一行列表推导式】。
     n=6 时 0..5 里的奇数是 1,3,5 -> [1,9,25]
     """
-    # TODO
-    return []
+    numbers = []
+    for i in range(1, n ):
+        if i % 2 == 1:
+            numbers.append(i*i)
+    return numbers
 
 
 def flatten(matrix):
@@ -49,8 +50,11 @@ def flatten(matrix):
 
     提示：双层推导式 [x for row in matrix for x in row]
     """
-    # TODO
-    return []
+    result = []
+    for row in matrix:
+        for x in row:
+            result.append(x)
+    return result
 
 
 def rotate(lst, k):
@@ -59,8 +63,10 @@ def rotate(lst, k):
     提示：先对 len(lst) 取模（k 可能大于长度），再切片拼接。
           一行就能写完：lst[-k:] + lst[:-k]
     """
-    # TODO
-    return []
+    if not lst:
+        return []
+    k %= len(lst)
+    return lst[-k:] + lst[:-k]
 
 
 # ============ 自测区（不用改） ============

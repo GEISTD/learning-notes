@@ -13,66 +13,88 @@
 【练习】改完运行：python s09_bridge.py
 """
 
+
 # ============ 练习区 ============
 
 def two_sum(nums, target):
-    """LC 1. 两数之和：返回和为 target 的两个数的下标 [i, j]（i < j）。
-    nums = [2,7,11,15], target = 9 -> [0, 1]
-    提示：一遍哈希。遍历时用 dict 存「值 -> 下标」，查 target - x 是否已经出现过，
-          这样是 O(n) 而不是双重循环 O(n^2)。
-    """
-    # TODO
-    return []
+    """返回两数之和等于 target 的两个下标。"""
+    seen = {}
 
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
 
 def is_valid(s):
-    """LC 20. 有效的括号：判断括号是否一一配对且顺序正确。
-    "()[]{}" -> True；"(]" -> False；"([)]" -> False
-    提示：栈 + 配对字典 {")": "(", "]": "[", "}": "{"}；遇左括号入栈，
-          遇右括号时栈顶必须是对应的左括号。
-    """
-    # TODO
-    return False
+    """判断括号是否一一配对且顺序正确。"""
+    pairs = {")": "(", "]": "[", "}": "{"}
+    stack = []
 
+    for char in s:
+        if char in "([{":
+            stack.append(char)
+        elif char in pairs:
+            if not stack or stack.pop() != pairs[char]:
+                return False
+
+    return not stack
 
 def merge_sorted(a, b):
-    """LC 88 的简化版：合并两个有序列表，返回新的有序列表（不修改原列表）。
-    [1,2,3] + [2,5,6] -> [1,2,2,3,5,6]
-    提示：双指针，分别指向 a 和 b，每次取较小的那个；最后把剩下的整段接上。
-          也可以直接用 sorted(a + b) —— 但那不算练双指针，先手写一遍。
-    """
-    # TODO
-    return []
+    """合并两个有序列表，返回新的有序列表。"""
+    result = []
+    i = j = 0
+
+    while i < len(a) and j < len(b):
+        if a[i] <= b[j]:
+            result.append(a[i])
+            i += 1
+        else:
+            result.append(b[j])
+            j += 1
+
+    result.extend(a[i:])
+    result.extend(b[j:])
+    return result
 
 
 def max_subarray(nums):
-    """LC 53. 最大子序和：返回和最大的连续子数组之和。
-    [-2,1,-3,4,-1,2,1,-5,4] -> 6（子数组 [4,-1,2,1]）
-    提示：Kadane 算法。cur = max(x, cur + x)，ans = max(ans, cur)。
-          一句话理解：如果「之前累计的和」还不如「从当前重新开始」，就重新开始。
-    """
-    # TODO
-    return 0
+    """返回最大连续子数组的和。"""
+    cur = ans = nums[0]
 
+    for x in nums[1:]:
+        cur = max(x, cur + x)
+        ans = max(ans, cur)
+
+    return ans
 
 def move_zeros(nums):
-    """LC 283. 移动零：把所有 0 移到末尾，非零元素保持相对顺序，返回新列表。
-    [0,1,0,3,12] -> [1,3,12,0,0]
-    提示：双指针（写指针）。遍历数组，遇到非零就写到 write 位置并 write += 1，
-          最后把剩余位置补 0。
-    """
-    # TODO
-    return []
+    """把所有 0 移到末尾，返回新列表。"""
+    result = []
+    for num in nums:
+        if num != 0:
+            result.append(num)
+
+    result.extend([0] * (len(nums) - len(result)))
+    return result
 
 
 def roman_to_int(s):
-    """LC 13. 罗马数字转整数。
-    "MCMXCIV" -> 1994；"III" -> 3；"LVIII" -> 58
-    提示：规则是「小值在大值左边就减，否则加」。
-          用一个 dict 存 7 个符号的值，遍历时和下一个字符比较。
-    """
-    # TODO
-    return 0
+    """把罗马数字转换成整数。"""
+    values = {
+        "I": 1, "V": 5, "X": 10, "L": 50,
+        "C": 100, "D": 500, "M": 1000,
+    }
+
+    total = 0
+    for i, char in enumerate(s):
+        value = values[char]
+        if i + 1 < len(s) and value < values[s[i + 1]]:
+            total -= value
+        else:
+            total += value
+
+    return total
 
 
 # ============ 自测区（不用改） ============

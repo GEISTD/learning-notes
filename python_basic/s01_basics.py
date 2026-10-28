@@ -18,31 +18,30 @@
 
 def greet(name, age):
     """返回 "我叫{name}，今年{age}岁"。用 f-string。"""
-    # TODO
-    return f""
+    return f"我叫{name}，今年{age}岁"
 
 
 def celsius_to_f(c):
     """摄氏度转华氏度：F = C * 9/5 + 32，结果保留 1 位小数（用 round）。"""
-    # TODO
-    return 0
+    f = round(c * 9/5 + 32,1)
+    return f
 
 
 def first_last(full):
     """把 "李 小龙" 拆成 ("李", "小龙")。
-
-    提示：str.split(maxsplit=1) 只切第一刀，剩下的整体保留，
-          正好对应「姓 + 名」这种中文姓名。
-    不足两段时，第二段返回空字符串。
-    """
-    # TODO
-    return ("", "")
+    &#xA;    提示：str.split(maxsplit=1) 只切第一刀，剩下的整体保留，&#xA;
+    正好对应「姓 + 名」这种中文姓名。&#xA;    不足两段时，第二段返回空字符串。&#xA;    """
+    parts = full.split(maxsplit=1)
+    return tuple((parts + [""])[:2])
 
 
 def is_even(n):
     """判断偶数，返回 bool。注意 Python 里 0 也是偶数。"""
-    # TODO
-    return False
+    if n % 2 == 0:
+        return True
+    else :
+        return False
+
 
 
 def digit_sum(n):
@@ -51,7 +50,9 @@ def digit_sum(n):
     提示：可以先 str(n) 再逐字符 int()，
           也可以用 while n > 0: total += n % 10; n //= 10
     """
-    # TODO
+    while n > 0:
+        sum += n % 10
+        n /= 10
     return 0
 
 

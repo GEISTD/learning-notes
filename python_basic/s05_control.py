@@ -15,33 +15,42 @@
 
 【练习】改完运行：python s05_control.py
 """
+from itertools import zip_longest
+from unittest import result
+
 
 # ============ 练习区 ============
-
 def fizzbuzz(n):
-    """返回 1..n 的 FizzBuzz 结果列表（字符串）。
-    3 的倍数 -> "Fizz"，5 的倍数 -> "Buzz"，15 的倍数 -> "FizzBuzz"，其余转字符串。
-    n=5 -> ["1", "2", "Fizz", "4", "Buzz"]
-    注意：15 的判断必须写在 3 和 5 前面，否则永远走不到。
-    """
-    # TODO
-    return []
+    result = []
+    for i in range(1, n + 1):
+        if i % 15 == 0:
+            result.append("FizzBuzz")
+        elif i % 3 == 0:
+            result.append("Fizz")
+        elif i % 5 == 0:
+            result.append("Buzz")
+        else:
+            result.append(str(i))
 
+    return result
 
 def find_first(nums, target):
     """返回 target 首次出现的下标，找不到返回 -1。
     提示：用 enumerate，找到就 return，不要写完整的 for 循环再判断。
     """
-    # TODO
-    return -1
+    if nums is None or len(nums) == 0:
+        return -1
+    enumerated = enumerate(nums)
+    return enumerated
+
 
 
 def zip_pairs(a, b):
-    """把两个序列配成 [(a0,b0), (a1,b1), ...]，长度不齐时按短的截断。
-    zip_pairs([1,2,3], "ab") -> [(1,"a"), (2,"b")]
-    """
-    # TODO
-    return []
+    """把两个序列配对，长度不齐时按较短的截断。"""
+    result = []
+    for x, y in zip(a, b):
+        result.append((x, y))
+    return result
 
 
 def collatz_steps(n):
@@ -49,8 +58,16 @@ def collatz_steps(n):
     6 -> 6,3,10,5,16,8,4,2,1 共 8 步。
     提示：这里是典型的 while（步数未知），记得用整数除法 //。
     """
-    # TODO
-    return 0
+    count = 0
+    while n!=1 :
+        if n % 2 == 0 :
+            n = n // 2
+            count += 1
+        else :
+            n = 3 * n + 1
+            count += 1
+
+    return count
 
 
 def sum_until_negative(nums):
@@ -58,8 +75,13 @@ def sum_until_negative(nums):
     [1, 2, -1, 5] -> 3
     提示：for + break。
     """
-    # TODO
-    return 0
+    sum = 0
+    for num in nums:
+        if num < 0:
+            break
+        else :
+            sum += num
+    return sum
 
 
 # ============ 自测区（不用改） ============

@@ -26,16 +26,18 @@ def top_words_counter(text, k):
     "a b a c a", k=2 -> [("a", 3), ("b", 1)]
     提示：Counter(text.split()).most_common(k) 已经是你要的顺序。
     """
-    # TODO
-    return []
+    return Counter(text.split()).most_common(k)
 
 
 def group_by_first_letter(words):
     """用 defaultdict(list) 按首字母分组。["apple","banana","avocado"]
     -> {"a": ["apple","avocado"], "b": ["banana"]}
     """
-    # TODO
-    return {}
+    groups = defaultdict(list)
+    for w in words:
+            groups[w[0]].append(w)
+
+    return groups
 
 
 def pair_sum(nums, target):
@@ -43,17 +45,18 @@ def pair_sum(nums, target):
     pair_sum([1, 2, 3, 4], 5) -> (0, 3)
     提示：遍历 combinations(range(len(nums)), 2)，找到就 return。
     """
-    # TODO
+    for a, b in combinations(nums, 2):
+        if a + b == target:
+            return (a-1, b-1)
     return None
 
 
 def safe_int(s, default=-1):
-    """把字符串转 int，失败时返回 default（不要抛异常出去）。
-    safe_int("42") -> 42；safe_int("abc") -> -1
-    提示：try / except ValueError。
-    """
-    # TODO
-    return 0
+    """把字符串转成 int；失败时返回 default。"""
+    try:
+        return int(s)
+    except ValueError:
+        return default
 
 
 def days_between(d1, d2):
@@ -61,18 +64,28 @@ def days_between(d1, d2):
     ("2024-01-01", "2024-03-01") -> 60（2024 是闰年，2 月有 29 天）
     提示：datetime.strptime(s, "%Y-%m-%d") 解析，相减得 timedelta，取 .days。
     """
-    # TODO
-    return 0
+    date1 = datetime.strptime(d1, "%Y-%m-%d")
+    date2 = datetime.strptime(d2, "%Y-%m-%d")
+    st = date2 - date1
+    return st.days
 
 
 def bfs_order(graph, start):
-    """用 deque 做 BFS，返回访问顺序（同一层按边给出顺序）。
-    graph = {"A": ["B","C"], "B": ["D"], "C": [], "D": []}
-    bfs_order(graph, "A") -> ["A", "B", "C", "D"]
-    提示：出队 -> 记录 -> 把未访问邻居入队；一定要用集合记录已访问，防止成环死循环。
-    """
-    # TODO
-    return []
+    """用 BFS 返回从 start 开始的访问顺序。"""
+    queue = deque([start])
+    visited = {start}
+    order = []
+
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+
+    return order
 
 
 # ============ 自测区（不用改） ============

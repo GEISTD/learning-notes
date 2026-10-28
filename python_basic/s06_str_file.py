@@ -30,24 +30,22 @@ def normalize_ws(s):
     提示：split() 不带参数时已经帮你做了「按任意空白切且丢掉空串」，
           再用 " ".join(...) 拼回去即可。
     """
-    # TODO
-    return ""
+
+    return " ".join(s.split())
 
 
 def is_palindrome(s):
-    """判断回文，只考虑字母数字，忽略大小写和标点。
-    "A man, a plan, a canal: Panama" -> True
-    "abc" -> False
-    提示：先 [c.lower() for c in s if c.isalnum()]，再和反转比较。
-    """
-    # TODO
-    return False
+    """判断回文，忽略大小写和标点。"""
+    chars = [c.lower() for c in s if c.isalnum()]
+    return chars == chars[::-1]
 
 
 def write_upper(path, lines):
     """把 lines 每一行转成大写写入 path（UTF-8，每行一个 \\n）。"""
-    # TODO
-    pass
+    for line in lines:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(line.upper())
+    pass-
 
 
 def count_nonempty_lines(path):
@@ -61,8 +59,18 @@ def csv_parse(line):
     每段先 strip，能转 int 就转 int，否则能转 float 就转 float，都不行保持字符串。
     提示：用 try/except 依次尝试，或者自己判断 "." in token。
     """
-    # TODO
-    return []
+    result = []
+    for part in line.split(","):
+        token = part.strip()
+        try:
+            value = int(token)
+        except ValueError:
+            try:
+                value = float(token)
+            except ValueError:
+                value = token
+        result.append(value)
+    return result
 
 
 # ============ 自测区（不用改） ============
