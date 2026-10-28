@@ -8,7 +8,7 @@
 - 自定义计划：--new-goal "目标" 调用 LLM 生成逐日计划；--import-plan 导入现成 JSON；--builtin 切回内置
 纯标准库，无第三方依赖。
 """
-import json, os, random, sys
+import importlib.util, json, os, random, sys
 from datetime import date, datetime, timedelta
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -460,6 +460,39 @@ def qmeta_of(qi):
 def lc_entry(qi):
     return LC_PLAN[qi % len(LC_PLAN)]
 
+# ---------- Python 基础营（暂替算法闯关，9 关走完后自动恢复 LeetCode） ----------
+PY_CAMP_DIR = os.environ.get("PY_CAMP_DIR") or r"D:\GEIST\learning-notes\python_basic"
+
+
+def py_camp_status():
+    """读取 python_basic/check.py 的真实进度（不是自报，是真跑测试）。
+
+    返回 None（目录不可用）或 dict：
+      all_done / done / total / index(当前关0基) / name / title / pending / passed / count
+    """
+    check_py = os.path.join(PY_CAMP_DIR, "check.py")
+    if not os.path.exists(check_py):
+        return None
+    try:
+        spec = importlib.util.spec_from_file_location("py_basic_check", check_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        stages = mod.stage_status()
+    except Exception as e:
+        print("py camp status failed:", e, file=sys.stderr)
+        return None
+    if not stages:
+        return None
+
+    total = len(stages)
+    done = sum(1 for s in stages if s["total"] and s["passed"] == s["total"])
+    cur = next((i for i, s in enumerate(stages)
+                if not (s["total"] and s["passed"] == s["total"])), total - 1)
+    s = stages[cur]
+    return {"all_done": done == total, "done": done, "total": total, "index": cur,
+            "name": s["name"], "title": s["title"], "pending": s["pending"],
+            "passed": s["passed"], "count": s["total"], "error": s["error"]}
+
 # ---------- 自定义计划（LLM 生成 / 手动导入，配置存 plan_config.json） ----------
 CONFIG_FILE = os.path.join(BASE, "plan_config.json")
 DEFAULT_BG = "大二计算机专业学生，有 C/C++ 基础，正在系统学习 AI 方向（Python/NumPy/PyTorch/机器学习）"
@@ -780,7 +813,7 @@ def pick_question(d, state):
         review = False
     return qmeta_of(qi), review, qi
 
-def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, weekend=None):
+def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, weekend=None, py_camp=None):
     iso = d.isoformat()
     wd = WEEKDAYS[d.weekday()]
     num, qname, slug, diff, tags, sig, hint, cases = qmeta
@@ -791,12 +824,15 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     sql_line = plan.get("extra") or None
     station, main_task = plan["station"], plan["main"]
     hand, ai_help, grad = plan["hand"], plan["ai"], plan["grad"]
-    lc_on = bool(LC_FOCUS and lc)
-    sec = 3 if lc_on else 2
+    py_on = bool(py_camp and not py_camp["all_done"])
+    lc_on = bool(LC_FOCUS and lc and not py_on)
+    sec = 3 if (lc_on or py_on) else 2
     L = []
     L.append(f"# 今日学习计划 · {iso} {wd}")
     L.append("")
-    L.append(f"**当前技能站：{station}** ｜ 连续打卡：**{state['streak']} 天** ｜ 算法：{qtag}")
+    track = (f"🐍 Python 基础 第 {py_camp['index']+1}/{py_camp['total']} 关"
+             if py_on else qtag)
+    L.append(f"**当前技能站：{station}** ｜ 连续打卡：**{state['streak']} 天** ｜ {track}")
     if plan.get("goal"):
         L.append(f" ｜ 🎯 **{plan['goal']}**（Day {plan['day_no']}/{plan['day_total']}）")
     L.append("")
@@ -810,7 +846,21 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     L.append(f"- 🤖 **可交给 AI**：{ai_help}")
     L.append(f"- 🎯 本站毕业标准：{grad}")
     L.append("")
-    if lc_on:
+    if py_on:
+        idx = py_camp["index"]
+        L.append("## 2. 🐍 Python 基础关（20-30 分钟 · 暂替算法闯关）")
+        L.append(f"**第 {idx+1}/{py_camp['total']} 关：{py_camp['title']}** ｜ 已完成 {py_camp['done']} 关 ｜ 本关 {py_camp['passed']}/{py_camp['count']} 过")
+        L.append(f"- [ ] **打开文件**：`{PY_CAMP_DIR}\\{py_camp['name']}.py`（VS Code，只改中间的函数体）")
+        if py_camp.get("error"):
+            L.append("- ⚠️ 本关文件当前有语法错误（或改动还没保存），先修好能正常运行再自检")
+        elif py_camp["pending"]:
+            L.append(f"- [ ] **今天要过的函数**：{'、'.join(py_camp['pending'])}")
+        else:
+            L.append("- [ ] **今天重写一遍本关**：把已通过的实现删掉，凭记忆重写（防遗忘）")
+        L.append(f"- [ ] **自检**：终端 `python {py_camp['name']}.py`，全部 [通过] 才算过关")
+        L.append(f"- 进度说明：9 关走完自动恢复 LeetCode 闯关（当前 {py_camp['done']}/{py_camp['total']}）")
+        L.append("")
+    elif lc_on:
         topic, _, extras = lc
         L.append("## 2. 算法闯关（30-40 分钟）")
         L.append(f"**今日主题：{topic}** ｜ {qtag}")
@@ -827,7 +877,7 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
             L.append(f"- [ ]（选做）**加练**：{bx}")
         L.append("")
     L.append(f"## {sec}. 碎片任务")
-    if not lc_on:
+    if not lc_on and not py_on:
         L.append(f"- [ ] **算法手写 20min**：LeetCode {num}. {qname} [{diff}]（{qtag}）")
         L.append(f"      练习文件已生成：`D:\\GEIST\\dailyPlan\\practice\\{qfname}` —— 在 VS Code 打开手写，本地跑通看到 AC!（禁止纸上默写）")
         L.append(f"      题目链接：https://leetcode.cn/problems/{slug}/")
@@ -858,7 +908,10 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     L.append("")
     next_no += 1
     L.append(f"## {next_no}. 完成后（确认归档）")
-    L.append("1. 练习文件本地跑通看到 `AC!`，主任务当天有 commit")
+    if py_on:
+        L.append(f"1. 第 {py_camp['index']+1} 关全部 `[通过]`，主任务当天有 commit")
+    else:
+        L.append("1. 练习文件本地跑通看到 `AC!`，主任务当天有 commit")
     L.append("2. **双击桌面「✅完成今日计划」**：本计划自动归档到 GitHub dailyPlan 仓库并删除本地文件，之后才推进新题")
     L.append("3. 没完成就不点确认：文件保留，明天继续攻克同一题（最小方案：练习文件写 1 行也是进步）")
     L.append("")
@@ -902,12 +955,19 @@ def main():
         state["history"][iso] = {"qi": qi, "review": review,
                                  "station": stage_of(today)[0], "status": "pending"}
 
-    path, qfname = build_practice(qi, qmeta, today, review=review)
+    py_camp = py_camp_status()
+    py_on = bool(py_camp and not py_camp["all_done"])
+    # 标记该日走的是 Python 基础关：确认归档时不推进 LeetCode 题号（否则会空跳题）
+    state["history"][iso]["py_stage"] = py_camp["name"] if py_on else ""
+    if py_on:
+        path, qfname = None, ""
+    else:
+        path, qfname = build_practice(qi, qmeta, today, review=review)
     plan = plan_of(today)
     lc = lc_entry(qi)
     weekend = weekend_project(today, plan["station"]) if today.weekday() >= 5 else None
     state["history"][iso]["station"] = plan["station"]
-    md = build_md(today, plan, qmeta, qi, review, qfname, state, carry=carry, lc=lc, weekend=weekend)
+    md = build_md(today, plan, qmeta, qi, review, qfname, state, carry=carry, lc=lc, weekend=weekend, py_camp=py_camp)
 
     plan_path = os.path.join(REPO_PLANS, f"{iso}.md")
     with open(plan_path, "w", encoding="utf-8") as f:
@@ -929,7 +989,11 @@ def main():
     qnum, qname = qmeta[0], qmeta[1]
     with open(summary, "w", encoding="utf-8") as f:
         f.write(f"今日计划已生成 | 连续 {state['streak']} 天\n")
-        f.write(f"{plan['station']}：{qnum}.{qname}（{'复习' if review else '新题'}）已就位\n")
+        if py_on:
+            f.write(f"{plan['station']}：Python 基础第 {py_camp['index']+1}/{py_camp['total']} 关"
+                    f"（{py_camp['title']}）\n")
+        else:
+            f.write(f"{plan['station']}：{qnum}.{qname}（{'复习' if review else '新题'}）已就位\n")
 
     print(f"[OK] {iso} {WEEKDAYS[today.weekday()]} streak={state['streak']}")
     print(f"plan: {plan_path}")
@@ -937,7 +1001,8 @@ def main():
     print(f"desktop: {desktop_ok}")
     write_run_result({"result": "ok", "date": iso,
                       "station": plan["station"], "q": f"{qnum}.{qname}",
-                      "review": review, "streak": state["streak"]})
+                      "review": review, "streak": state["streak"],
+                      "py_stage": py_camp["name"] if py_on else ""})
 
 # ---------- 确认归档（done.ps1 调用：--confirm）----------
 def confirm(past_only=False):
@@ -963,9 +1028,11 @@ def confirm(past_only=False):
         p = os.path.join(desktop_dir(), f"学习计划_{iso}.md")
         if os.path.exists(p):
             os.remove(p)
-    # 推进题号：仅按非复习题推进（多个遗留日共用同一题只 +1）
+    # 推进题号：仅按非复习、且当天真的做了 LeetCode 的日子推进
+    # （Python 基础关暂替期间不推进，避免把没做的题白白跳过）
     new_qi = [state["history"][d]["qi"] for d in arch
-              if not state["history"][d].get("review")]
+              if not state["history"][d].get("review")
+              and not state["history"][d].get("py_stage")]
     if new_qi:
         state["q_index"] = max(state["q_index"], max(new_qi) + 1)
     # 连续打卡按确认日结算
