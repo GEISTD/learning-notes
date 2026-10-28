@@ -491,7 +491,8 @@ def py_camp_status():
     s = stages[cur]
     return {"all_done": done == total, "done": done, "total": total, "index": cur,
             "name": s["name"], "title": s["title"], "pending": s["pending"],
-            "passed": s["passed"], "count": s["total"], "error": s["error"]}
+            "passed": s["passed"], "count": s["total"], "error": s["error"],
+            "stages": stages}
 
 # ---------- 自定义计划（LLM 生成 / 手动导入，配置存 plan_config.json） ----------
 CONFIG_FILE = os.path.join(BASE, "plan_config.json")
@@ -813,7 +814,7 @@ def pick_question(d, state):
         review = False
     return qmeta_of(qi), review, qi
 
-def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, weekend=None, py_camp=None):
+def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, weekend=None, py_camp=None, py_all=False):
     iso = d.isoformat()
     wd = WEEKDAYS[d.weekday()]
     num, qname, slug, diff, tags, sig, hint, cases = qmeta
@@ -830,8 +831,12 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     L = []
     L.append(f"# 今日学习计划 · {iso} {wd}")
     L.append("")
-    track = (f"🐍 Python 基础 第 {py_camp['index']+1}/{py_camp['total']} 关"
-             if py_on else qtag)
+    if py_all:
+        track = f"🐍 Python 基础冲刺（9 关今天全通）"
+    elif py_on:
+        track = f"🐍 Python 基础 第 {py_camp['index']+1}/{py_camp['total']} 关"
+    else:
+        track = qtag
     L.append(f"**当前技能站：{station}** ｜ 连续打卡：**{state['streak']} 天** ｜ {track}")
     if plan.get("goal"):
         L.append(f" ｜ 🎯 **{plan['goal']}**（Day {plan['day_no']}/{plan['day_total']}）")
@@ -848,18 +853,36 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     L.append("")
     if py_on:
         idx = py_camp["index"]
-        L.append("## 2. 🐍 Python 基础关（20-30 分钟 · 暂替算法闯关）")
-        L.append(f"**第 {idx+1}/{py_camp['total']} 关：{py_camp['title']}** ｜ 已完成 {py_camp['done']} 关 ｜ 本关 {py_camp['passed']}/{py_camp['count']} 过")
-        L.append(f"- [ ] **打开文件**：`{PY_CAMP_DIR}\\{py_camp['name']}.py`（VS Code，只改中间的函数体）")
-        if py_camp.get("error"):
-            L.append("- ⚠️ 本关文件当前有语法错误（或改动还没保存），先修好能正常运行再自检")
-        elif py_camp["pending"]:
-            L.append(f"- [ ] **今天要过的函数**：{'、'.join(py_camp['pending'])}")
+        if py_all:
+            L.append("## 2. 🐍 Python 基础关（冲刺日 · 9 关今天全通，约 3-4 小时）")
+            L.append(f"**当前进度 {py_camp['done']}/{py_camp['total']} 关已全过** ｜ 建议每关 20 分钟，"
+                     f"卡住超过 10 分钟先看文件顶部提示，别死磕 ｜ **明日起恢复 LeetCode 闯关**")
+            L.append("")
+            for i, s in enumerate(py_camp["stages"]):
+                if s["total"] and s["passed"] == s["total"]:
+                    mark = f"✅ 已通过 {s['passed']}/{s['total']}"
+                elif s.get("error"):
+                    mark = "⚠️ 文件有语法错误，先修好"
+                else:
+                    mark = f"{s['passed']}/{s['total']}"
+                    if s["pending"]:
+                        mark += f" ｜ 待过：{'、'.join(s['pending'])}"
+                L.append(f"- [ ] **第 {i+1} 关 {s['title']}** — `{s['name']}.py` — {mark}")
+            L.append(f"- [ ] **收官自检**：在 `{PY_CAMP_DIR}` 运行 `python check.py`，9 关全 `[通过]` 才算通关")
+            L.append("")
         else:
-            L.append("- [ ] **今天重写一遍本关**：把已通过的实现删掉，凭记忆重写（防遗忘）")
-        L.append(f"- [ ] **自检**：终端 `python {py_camp['name']}.py`，全部 [通过] 才算过关")
-        L.append(f"- 进度说明：9 关走完自动恢复 LeetCode 闯关（当前 {py_camp['done']}/{py_camp['total']}）")
-        L.append("")
+            L.append("## 2. 🐍 Python 基础关（20-30 分钟 · 暂替算法闯关）")
+            L.append(f"**第 {idx+1}/{py_camp['total']} 关：{py_camp['title']}** ｜ 已完成 {py_camp['done']} 关 ｜ 本关 {py_camp['passed']}/{py_camp['count']} 过")
+            L.append(f"- [ ] **打开文件**：`{PY_CAMP_DIR}\\{py_camp['name']}.py`（VS Code，只改中间的函数体）")
+            if py_camp.get("error"):
+                L.append("- ⚠️ 本关文件当前有语法错误（或改动还没保存），先修好能正常运行再自检")
+            elif py_camp["pending"]:
+                L.append(f"- [ ] **今天要过的函数**：{'、'.join(py_camp['pending'])}")
+            else:
+                L.append("- [ ] **今天重写一遍本关**：把已通过的实现删掉，凭记忆重写（防遗忘）")
+            L.append(f"- [ ] **自检**：终端 `python {py_camp['name']}.py`，全部 [通过] 才算过关")
+            L.append(f"- 进度说明：9 关走完自动恢复 LeetCode 闯关（当前 {py_camp['done']}/{py_camp['total']}）")
+            L.append("")
     elif lc_on:
         topic, _, extras = lc
         L.append("## 2. 算法闯关（30-40 分钟）")
@@ -908,12 +931,17 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     L.append("")
     next_no += 1
     L.append(f"## {next_no}. 完成后（确认归档）")
-    if py_on:
+    if py_all:
+        L.append("1. `python check.py` 显示 9 关全 `[通过]`，主任务当天有 commit")
+    elif py_on:
         L.append(f"1. 第 {py_camp['index']+1} 关全部 `[通过]`，主任务当天有 commit")
     else:
         L.append("1. 练习文件本地跑通看到 `AC!`，主任务当天有 commit")
     L.append("2. **双击桌面「✅完成今日计划」**：本计划自动归档到 GitHub dailyPlan 仓库并删除本地文件，之后才推进新题")
-    L.append("3. 没完成就不点确认：文件保留，明天继续攻克同一题（最小方案：练习文件写 1 行也是进步）")
+    if py_all:
+        L.append("3. 没做完也不影响明天：**明天自动回到 LeetCode 闯关**（今天能做几关就几关，进度已保存在代码里）")
+    else:
+        L.append("3. 没完成就不点确认：文件保留，明天继续攻克同一题（最小方案：练习文件写 1 行也是进步）")
     L.append("")
     L.append(f"---\n_由 gen_daily.py 于 {datetime.now().strftime('%Y-%m-%d %H:%M')} 自动生成_")
     return "\n".join(L)
@@ -927,7 +955,8 @@ def main():
     state["last_date"] = iso
 
     # 今天已确认归档：重启 / 重复触发不得再生成（防止"已完成的任务复活"）
-    if state["history"].get(iso, {}).get("status") == "done":
+    # 例外：--py-all 冲刺日需要主动覆盖今天（已归档的日子也不拦）
+    if state["history"].get(iso, {}).get("status") == "done" and "--py-all" not in sys.argv[1:]:
         print("TODAY_DONE")
         write_run_result({"result": "today_done", "date": iso})
         return
@@ -956,7 +985,11 @@ def main():
                                  "station": stage_of(today)[0], "status": "pending"}
 
     py_camp = py_camp_status()
-    py_on = bool(py_camp and not py_camp["all_done"])
+    py_all = ("--py-all" in sys.argv[1:]) and bool(py_camp)
+    if py_all:
+        state["py_camp_end"] = iso   # 冲刺日：从明天起强制恢复 LeetCode，不再看剩余关卡
+    py_on = bool(py_camp and not py_camp["all_done"]
+                 and iso <= state.get("py_camp_end", "9999-12-31"))
     # 标记该日走的是 Python 基础关：确认归档时不推进 LeetCode 题号（否则会空跳题）
     state["history"][iso]["py_stage"] = py_camp["name"] if py_on else ""
     if py_on:
@@ -967,7 +1000,7 @@ def main():
     lc = lc_entry(qi)
     weekend = weekend_project(today, plan["station"]) if today.weekday() >= 5 else None
     state["history"][iso]["station"] = plan["station"]
-    md = build_md(today, plan, qmeta, qi, review, qfname, state, carry=carry, lc=lc, weekend=weekend, py_camp=py_camp)
+    md = build_md(today, plan, qmeta, qi, review, qfname, state, carry=carry, lc=lc, weekend=weekend, py_camp=py_camp, py_all=py_all)
 
     plan_path = os.path.join(REPO_PLANS, f"{iso}.md")
     with open(plan_path, "w", encoding="utf-8") as f:
@@ -990,8 +1023,11 @@ def main():
     with open(summary, "w", encoding="utf-8") as f:
         f.write(f"今日计划已生成 | 连续 {state['streak']} 天\n")
         if py_on:
-            f.write(f"{plan['station']}：Python 基础第 {py_camp['index']+1}/{py_camp['total']} 关"
-                    f"（{py_camp['title']}）\n")
+            if py_all:
+                f.write(f"{plan['station']}：Python 基础冲刺，9 关今天全通（约 3-4h）\n")
+            else:
+                f.write(f"{plan['station']}：Python 基础第 {py_camp['index']+1}/{py_camp['total']} 关"
+                        f"（{py_camp['title']}）\n")
         else:
             f.write(f"{plan['station']}：{qnum}.{qname}（{'复习' if review else '新题'}）已就位\n")
 
