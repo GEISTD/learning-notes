@@ -825,7 +825,8 @@ def build_md(d, plan, qmeta, qi, review, qfname, state, carry=None, lc=None, wee
     sql_line = plan.get("extra") or None
     station, main_task = plan["station"], plan["main"]
     hand, ai_help, grad = plan["hand"], plan["ai"], plan["grad"]
-    py_on = bool(py_camp and not py_camp["all_done"])
+    py_on = bool(py_camp and not py_camp["all_done"]
+                 and d.isoformat() <= state.get("py_camp_end", "9999-12-31"))
     lc_on = bool(LC_FOCUS and lc and not py_on)
     sec = 3 if (lc_on or py_on) else 2
     L = []
