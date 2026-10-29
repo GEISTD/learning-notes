@@ -1,139 +1,90 @@
-# ML from Scratch
+# 手写三个机器学习模型（只用 NumPy）
 
-Three classic machine learning models implemented from scratch with NumPy, sharing one
-minimal scikit-learn-style interface. No ML libraries, no dataset downloads — cloning the
-repository and running one command is enough.
+用 sklearn 的时候 `fit` 一行就出结果，但不知道里面在算什么。所以把三个最基础的模型各手写一遍，接口做成 sklearn 的样子，方便互相替换。
 
-## Models
+## 三个模型
 
-| Model | Task | Learning method | Default metric |
-| --- | --- | --- | --- |
-| `KNN` | Classification | Euclidean distance + majority vote | Accuracy |
-| `LinearRegression` | Regression | Ordinary least squares (SVD) | R² |
-| `LogisticRegression` | Binary classification | Full-batch gradient descent | Accuracy |
+| 模型 | 任务 | 方法 | 指标 |
+|---|---|---|---|
+| `KNN` | 分类 | 欧氏距离 + 多数投票 | 准确率 |
+| `LinearRegression` | 回归 | 最小二乘（SVD 解） | R² |
+| `LogisticRegression` | 二分类 | 全批量梯度下降 | 准确率 |
 
-Every model is still a few dozen lines of readable code; NumPy is used only for array math,
-not for ready-made estimators.
+每个模型几十行，NumPy 只用来做数组运算，没有调用现成的 estimator。
 
-## Quickstart
+## 跑法
 
 ```bash
 pip install -r requirements.txt
-python demo.py
+python demo.py        # Windows 上 python 不在 PATH 就用 py demo.py
 ```
 
-On Windows, use `py demo.py` if `python` is not on your `PATH`.
-
-That single command generates the datasets, trains all three models, evaluates them on a
-held-out test set, and runs sanity checks. Example output:
+`demo.py` 会生成数据、训练三个模型、在测试集上打分，最后跑五项断言：
 
 ```text
-==================================================================
-ML from Scratch - one-command demo (NumPy only, no ML libraries)
-==================================================================
-
 [1/3] k-NN | 3-class blobs | 600 samples, 2 features
-  model     : KNN(n_neighbors=5)
   test score: accuracy = 0.9667
-
-[2/3] LinearRegression | synthetic linear data | 200 samples, 3 features
-  model     : LinearRegression(fit_intercept=True)
+[2/3] LinearRegression | 200 samples, 3 features
   test score: R2 = 0.9906, RMSE = 0.3378
-  coef      : learned [ 2.997 -1.992  0.491], true [ 3.  -2.   0.5]
-  intercept : learned 1.517, true 1.500
-
-[3/3] LogisticRegression | 2-class blobs | 500 samples, 2 features
-  model     : LogisticRegression(learning_rate=0.5, n_iters=1500, l2=0.0)
+  coef: learned [ 2.997 -1.992  0.491], true [ 3.  -2.   0.5]
+[3/3] LogisticRegression | 500 samples, 2 classes
   test score: accuracy = 0.9800
   train loss: 0.6931 -> 0.0912
-
-------------------------------------------------------------------
-  [PASS] k-NN test accuracy >= 0.90
-  [PASS] linear regression R2 >= 0.95
-  [PASS] linear regression recovers coefficients
-  [PASS] logistic regression test accuracy >= 0.88
-  [PASS] logistic regression loss decreased by half
-  5/5 checks passed
-==================================================================
+5/5 checks passed
 ```
 
-The exit code is non-zero if any check fails, so `demo.py` doubles as a smoke test.
+任何一项不过，退出码非 0，所以它同时当冒烟测试用。
 
-## Unified API
+## 接口
 
-All estimators follow the same lifecycle: `fit` → `predict` → `score` (plus `predict_proba`
-for the classifier that supports it). Fitted attributes end with `_`, hyperparameters do not.
+统一是 `fit` → `predict` → `score`，分类器另有 `predict_proba`。学到的属性带下划线结尾，超参数不带——这条是跟 sklearn 学的，换模型时只改构造函数：
 
 ```python
-import numpy as np
-
 from mlfs import KNN, LinearRegression, LogisticRegression, StandardScaler
 
-X_train, X_test, y_train, y_test = ...
-
-scaler = StandardScaler().fit(X_train)
-
+scaler = StandardScaler().fit(X_train)          # 只在训练集上 fit
 model = KNN(n_neighbors=5).fit(scaler.transform(X_train), y_train)
-predictions = model.predict(scaler.transform(X_test))
-accuracy = model.score(scaler.transform(X_test), y_test)
-
-print(model)          # KNN(n_neighbors=5)
-print(model.get_params())  # {'n_neighbors': 5}
+print(model.score(scaler.transform(X_test), y_test))
+print(model.get_params())                        # {'n_neighbors': 5}
 ```
 
-Swapping models requires no other changes — only the constructor differs:
+## 几个实现上的选择
 
-```python
-LinearRegression(fit_intercept=True)
-LogisticRegression(learning_rate=0.5, n_iters=1500, l2=0.0)
-```
+- **KNN** 用 `|a|² + |b|² - 2ab` 展开算全部样本对的距离，比双重循环快；`argsort` 取前 k 个，`bincount` 投票，票数相同取标签小的那个。
+- **线性回归** 用 `np.linalg.lstsq`，不写 `(XᵀX)⁻¹Xᵀy`——直接求逆在特征共线时数值不稳。
+- **逻辑回归** 用二元交叉熵，可选 L2，全批量梯度下降；`loss_history_` 存每次迭代的 loss，方便看收敛。
+- **数据** 在 `demo.py` 里用固定种子生成，不联网、不依赖 sklearn 自带数据集，结果可复现。
+- **标准化** 只在训练集上 fit，再 transform 测试集，避免数据泄漏。
 
-`StandardScaler` is also written from scratch and, importantly, is fitted on the training
-split only to avoid data leakage.
+## 结果
 
-## Project layout
+固定种子下：
+
+| 模型 | 数据 | 测试集 |
+|---|---|---|
+| `KNN(k=5)` | 600 样本，3 类，2 特征 | 0.9667 |
+| `LinearRegression()` | 200 样本，3 特征，已知系数 | R² 0.9906 |
+| `LogisticRegression()` | 500 样本，2 类，2 特征 | 0.9800 |
+
+不同 NumPy/BLAS 版本小数位会有差异，断言的阈值留得比较宽。
+
+## 目录
 
 ```text
 ml-from-scratch/
-├── demo.py                    # one-command runner + sanity checks
+├── demo.py
 ├── requirements.txt
 └── mlfs/
-    ├── __init__.py
-    ├── base.py                # BaseEstimator, classifier/regressor mixins, input checks
-    ├── metrics.py             # accuracy, MSE, R²
-    ├── preprocessing.py       # StandardScaler
+    ├── base.py              BaseEstimator、输入检查
+    ├── metrics.py           accuracy / MSE / R²
+    ├── preprocessing.py     StandardScaler
     ├── knn.py
     ├── linear_regression.py
     └── logistic_regression.py
 ```
 
-## Implementation notes
+## 还没做
 
-- **k-NN** computes all pairwise squared distances with the
-  `|a|² + |b|² - 2ab` expansion, then uses `argsort` for the nearest neighbours and
-  `bincount` for the vote. Ties are broken towards the smallest class label.
-- **Linear regression** builds a design matrix with a leading column of ones and solves it
-  with `np.linalg.lstsq`, i.e. SVD-based least squares rather than a normal-equation inverse.
-- **Logistic regression** minimizes binary cross-entropy with optional L2 regularization
-  using full-batch gradient descent. `loss_history_` records the loss after every iteration.
-- **Datasets** are generated deterministically inside `demo.py` with NumPy, so the demo needs
-  no network access and results are reproducible. Scikit-learn is intentionally not a
-  dependency — not even for its bundled toy datasets.
-
-## Results
-
-With the fixed seeds used in `demo.py`:
-
-| Model | Dataset | Test score |
-| --- | --- | --- |
-| `KNN(k=5)` | 600 samples, 3 classes, 2 features | 0.9667 accuracy |
-| `LinearRegression()` | 200 samples, 3 features, known coefficients | 0.9906 R² |
-| `LogisticRegression()` | 500 samples, 2 classes, 2 features | 0.9800 accuracy |
-
-Exact values may vary slightly across NumPy/BLAS versions, but the sanity thresholds are
-loose enough to stay stable.
-
-## Requirements
-
-- Python 3.9+
-- NumPy 1.24+
+- 逻辑回归目前只有二分类，多分类要再加 softmax 或 one-vs-rest
+- 梯度下降是全批量的，样本量上去以后要换 mini-batch
+- 想加一组和 sklearn 的数值对比测试，确认手写实现的结果能对上
