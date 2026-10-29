@@ -316,10 +316,16 @@
 
   /* ========== Print ========== */
   @media print {
-    body { background: #fff; padding: 0; font-size: 14px; }
+    body { background: #fff; padding: 0; font-size: 13px; line-height: 1.45; }
     .page { box-shadow: none; border-radius: 0; max-width: 100%; }
-    .header { padding: 24px 30px 20px; }
-    .body { padding: 20px 30px 24px; }
+    .header { padding: 20px 30px 18px; }
+    .body { padding: 16px 30px 18px; }
+    .section { margin-bottom: 18px; }
+    .section-title { margin-bottom: 9px; }
+    .project { margin-bottom: 9px; padding-bottom: 9px; break-inside: avoid; page-break-inside: avoid; }
+    .project-points li { font-size: 12.5px; margin-bottom: 2px; }
+    .skill-group { margin-bottom: 7px; }
+    .learning-list li { margin-bottom: 3px; }
   }
 
   @media (max-width: 600px) {
@@ -382,27 +388,27 @@
 
       <div class="skill-group">
         <span class="skill-category">编程语言</span>
-        <span class="skill-items"><strong>C++</strong>（主力，面向对象、STL、Qt框架开发）、<strong>Python</strong>（基础语法、NumPy科学计算）</span>
+        <span class="skill-items"><strong>C++</strong>（面向对象、STL、Qt开发）、<strong>Python</strong>（NumPy、机器学习基础实现）、JavaScript / Node.js（Web API）</span>
       </div>
 
       <div class="skill-group">
-        <span class="skill-category">开发框架</span>
-        <span class="skill-items"><strong>Qt</strong>（信号槽机制、对象树内存管理、UI设计、定时器、文件IO、QSS样式、自定义控件、QPainter绘图）</span>
+        <span class="skill-category">开发与AI应用</span>
+        <span class="skill-items"><strong>Qt</strong>（信号槽、UI、自定义控件、QPainter）、HTML / CSS、OpenAI兼容模型API接入与提示词设计</span>
       </div>
 
       <div class="skill-group">
         <span class="skill-category">网络编程</span>
-        <span class="skill-items">TCP/IP协议、<strong>Qt Socket编程</strong>（QTcpServer/QTcpSocket）、C/S架构设计与实现、多客户端并发处理、自定义通信协议</span>
+        <span class="skill-items">TCP/IP、<strong>Qt Socket</strong>（QTcpServer/QTcpSocket）、C/S架构、自定义通信协议、Node.js HTTP API代理</span>
       </div>
 
       <div class="skill-group">
         <span class="skill-category">软件设计</span>
-        <span class="skill-items"><strong>DAO设计模式</strong>（Data Access Object）、分层架构（数据层/业务逻辑层/UI层）、数据库管理（SQLite/Qt SQL）、文件导出</span>
+        <span class="skill-items"><strong>分层架构与DAO</strong>、SQLite / Qt SQL、状态机设计、输入校验、API安全基础（来源限制、限流）</span>
       </div>
 
       <div class="skill-group">
         <span class="skill-category">工具平台</span>
-        <span class="skill-items"><strong>Git</strong>（分支管理、版本回退、协作流程）、<strong>Linux/WSL2</strong>（系统配置、SSH服务、systemd管理、Shell命令）、CMake构建系统、FinalShell远程连接</span>
+        <span class="skill-items"><strong>Git</strong>、<strong>Linux / WSL2</strong>（SSH、systemd、Shell）、CMake、PowerShell、Vercel / CloudBase</span>
       </div>
 
       <div class="skill-group">
@@ -415,7 +421,47 @@
     <div class="section">
       <div class="section-title">项目经历</div>
 
-      <!-- Project 1: Student Management System -->
+      <!-- Project 1: Geist -->
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">Geist · AI情绪陪伴 Web 应用 <a href="https://github.com/GEISTD/geist" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
+          <span class="project-tech">JavaScript / Node.js / LLM API / Vercel</span>
+        </div>
+        <div class="project-desc">面向情绪倾听场景的 AI 对话应用，提供分析师与哲学家两种交互模式，支持多家 OpenAI 兼容模型。</div>
+        <ul class="project-points">
+          <li>实现纯前端交互与对话体验，支持浏览器端偏好设置和本地会话记录；通过统一 API 代理接入智谱、DeepSeek、OpenAI、通义千问</li>
+          <li>搭建 Node.js 本地代理及 Vercel / CloudBase 服务端接口，加入来源白名单、请求格式与长度校验、速率限制；避免记录密钥和聊天正文</li>
+          <li>使用 <strong>Node.js 内置测试</strong>覆盖来源校验、密钥缺失及不支持目标等安全场景；项目支持 GitHub Pages 与云端部署</li>
+        </ul>
+      </div>
+
+      <!-- Project 2: ML from Scratch -->
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">ML from Scratch · NumPy 机器学习模型实现 <a href="https://github.com/GEISTD/learning-notes/tree/main/ml-from-scratch" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
+          <span class="project-tech">Python / NumPy / Machine Learning</span>
+        </div>
+        <div class="project-desc">不依赖现成机器学习估计器，使用 NumPy 实现经典模型与统一的训练、预测和评估接口。</div>
+        <ul class="project-points">
+          <li>实现 <strong>KNN、线性回归、逻辑回归</strong>及 StandardScaler；线性回归采用最小二乘求解，逻辑回归使用全批量梯度下降并支持 L2 正则化</li>
+          <li>编写可复现合成数据 Demo 与自动检查，当前示例测试集准确率：KNN <strong>96.67%</strong>、逻辑回归 <strong>98.00%</strong>，线性回归 <strong>R² = 0.9906</strong>（5 项检查通过）</li>
+        </ul>
+      </div>
+
+      <!-- Project 3: Daily Plan Agent -->
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">Daily Plan Agent · 每日学习计划自动化系统 <a href="https://github.com/GEISTD/daily-plan-agent" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
+          <span class="project-tech">Python / PowerShell / Windows Task Scheduler / Git</span>
+        </div>
+        <div class="project-desc">Windows 端学习计划生成与确认归档工具，串联定时任务、桌面提醒、练习生成及 GitHub 归档。</div>
+        <ul class="project-points">
+          <li>设计确认驱动的状态机：未确认计划不推进题目游标，支持重复触发幂等处理、遗留计划补归档及复习日规则</li>
+          <li>本人负责需求与学习规则定义、验收及实机运行；使用 TRAE + GLM 辅助编码，并通过真实 Windows 环境迭代验证</li>
+        </ul>
+      </div>
+
+      <!-- Project 4: Student Management System -->
       <div class="project">
         <div class="project-header">
           <span class="project-name">C/S架构学生信息管理系统 <a href="https://github.com/GEISTD/student-management-system" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
@@ -423,16 +469,13 @@
         </div>
         <div class="project-desc">独立设计并开发的C/S（客户端/服务端）架构学生信息管理系统，支持用户认证、学生管理、成绩管理、数据导出等完整业务流程。</div>
         <ul class="project-points">
-          <li>采用<strong>分层架构</strong>设计：数据层（DatabaseManager + DAO）→ 业务逻辑层（BusinessLogic）→ UI层（UIManager），各层职责清晰</li>
-          <li>使用<strong>DAO设计模式</strong>封装 StudentDAO、UserDAO、ScoreDAO，将数据访问与业务逻辑解耦，便于维护和扩展</li>
-          <li>基于<strong>QTcpServer</strong>实现服务端，支持多客户端并发连接，自定义TCP通信协议完成增删改查请求的解析与响应</li>
-          <li>客户端通过<strong>NetworkManager</strong>管理TCP连接，基于信号槽实现异步数据收发，UI操作零阻塞</li>
-          <li>实现<strong>文件导出模块</strong>（FileExporter），支持将学生成绩数据批量导出</li>
-          <li>服务端与客户端各自独立编译，代码总量超过 <strong>200KB</strong>，UIManager单文件达110KB</li>
+          <li>采用<strong>分层架构</strong>组织数据访问、业务逻辑与 UI，并以 StudentDAO、UserDAO、ScoreDAO 隔离数据库操作</li>
+          <li>基于 <strong>QTcpServer / QTcpSocket</strong> 实现客户端/服务端通信、自定义请求协议和多客户端连接；客户端通过信号槽异步收发数据</li>
+          <li>支持用户认证、学生与成绩管理、SQLite 持久化和成绩批量导出；客户端与服务端可独立构建</li>
         </ul>
       </div>
 
-      <!-- Project 2: Gomoku -->
+      <!-- Project 5: Gomoku -->
       <div class="project">
         <div class="project-header">
           <span class="project-name">网络五子棋对弈系统（含AI对手） <a href="https://github.com/GEISTD/gomoku" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:400;">[GitHub]</a></span>
@@ -440,26 +483,8 @@
         </div>
         <div class="project-desc">基于Qt开发的五子棋游戏，支持人机AI对弈与TCP联机对战两种模式，自定义棋盘控件实现图形渲染。</div>
         <ul class="project-points">
-          <li>设计并实现<strong>AI对弈引擎</strong>（ai.cpp），基于棋型评估函数进行局面打分与最优落子决策</li>
-          <li>通过<strong>BoardWidget</strong>自定义控件，使用QPainter绘制棋盘与棋子，支持鼠标交互落子</li>
-          <li>基于<strong>NetManager</strong>封装TCP通信，实现联机对战模式，双方落子通过socket实时同步</li>
-          <li>编写<strong>联机部署说明</strong>文档，涵盖服务端启动、端口配置、客户端连接完整流程</li>
-          <li>同时支持<strong>CMake和qmake</strong>两套构建系统，兼容不同开发环境</li>
-        </ul>
-      </div>
-
-      <!-- Project 3: WSL2 Environment -->
-      <div class="project">
-        <div class="project-header">
-          <span class="project-name">WSL2 + SSH Linux远程开发环境</span>
-          <span class="project-tech">Linux / WSL2 / SSH / systemd</span>
-        </div>
-        <div class="project-desc">从零搭建Windows + WSL2 Ubuntu远程开发环境，解决多项网络与服务配置问题。</div>
-        <ul class="project-points">
-          <li>部署WSL2 Ubuntu 22.04，配置<strong>/etc/wsl.conf</strong>实现systemd服务管理与默认用户设置</li>
-          <li>排查并解决SSH端口非默认(2222)、WSL2 IP动态变化、SSH服务未自启等实际问题</li>
-          <li>利用WSL2 <strong>localhost自动转发机制</strong>，实现Windows→WSL的稳定远程连接</li>
-          <li>配置SSH密钥认证，实现FinalShell免密远程登录开发工作流</li>
+          <li>实现基于<strong>棋型评估函数</strong>的 AI 落子决策；通过 BoardWidget 与 QPainter 绘制棋盘、棋子并处理鼠标交互</li>
+          <li>封装 TCP 联机通信，实现双方落子实时同步；项目同时支持 <strong>CMake 与 qmake</strong> 构建</li>
         </ul>
       </div>
     </div>
@@ -469,14 +494,11 @@
       <div class="section-title">核心课程成绩</div>
       <div class="course-grid">
         <div class="course-item"><span class="course-name">离散数学</span><span class="course-score">87</span></div>
-        <div class="course-item"><span class="course-name">计算机科学前沿</span><span class="course-score">89</span></div>
+        <div class="course-item"><span class="course-name">计算机学科前沿导论</span><span class="course-score">89</span></div>
         <div class="course-item"><span class="course-name">面向对象程序设计</span><span class="course-score">84</span></div>
         <div class="course-item"><span class="course-name">软件设计实践</span><span class="course-score">84</span></div>
         <div class="course-item"><span class="course-name">高等数学I</span><span class="course-score">86</span></div>
         <div class="course-item"><span class="course-name">线性代数B</span><span class="course-score">83</span></div>
-        <div class="course-item"><span class="course-name">英语II</span><span class="course-score">84</span></div>
-        <div class="course-item"><span class="course-name">军事理论</span><span class="course-score">88</span></div>
-        <div class="course-item"><span class="course-name">形势与政策II</span><span class="course-score">90</span></div>
       </div>
     </div>
 
@@ -484,11 +506,9 @@
     <div class="section">
       <div class="section-title">自学经历与技术沉淀</div>
       <ul class="learning-list">
-        <li>系统学习<strong>C++/Qt框架开发</strong>，涵盖信号槽机制、对象树内存管理、定时器、文件IO、网络编程等核心模块，并整理完整技术笔记</li>
-        <li>系统学习<strong>Git版本控制</strong>，掌握分支管理、版本回退(reset/revert/checkout)、远程协作(push/pull/rebase)等完整工作流</li>
-        <li>搭建<strong>WSL2 + Linux开发环境</strong>，掌握Ubuntu系统配置、SSH服务管理、systemd服务自启，具备Linux环境排查问题能力</li>
-        <li>学习<strong>Python编程</strong>，掌握基础语法与NumPy科学计算库，完成从C++到Python的技术迁移</li>
-        <li>制定<strong>AI工程师方向学习计划</strong>，持续跟进计算机科学与人工智能领域的前沿技术发展</li>
+        <li>持续整理<strong>C++ / Qt、数据结构与算法、Git</strong>学习笔记，并以独立项目练习网络编程、分层设计与软件交付</li>
+        <li>搭建并维护<strong>WSL2 Ubuntu + SSH</strong>开发环境，配置 systemd、密钥认证及 Windows 到 Linux 的远程开发流程</li>
+        <li>围绕<strong>AI 工程方向</strong>学习 Python、NumPy 与机器学习基础，并通过模型实现和 LLM 应用项目进行实践</li>
       </ul>
     </div>
 
