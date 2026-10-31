@@ -1,90 +1,90 @@
-# 手写三个机器学习模型（只用 NumPy）
+# ML from Scratch
 
-用 sklearn 的时候 `fit` 一行就出结果，但不知道里面在算什么。所以把三个最基础的模型各手写一遍，接口做成 sklearn 的样子，方便互相替换。
+用 NumPy 手写一组常见传统机器学习算法，重点是理解每个模型如何 `fit`、预测和评估。实现不调用 scikit-learn 或其他现成机器学习 estimator。
 
-## 三个模型
+## 已实现算法
 
-| 模型 | 任务 | 方法 | 指标 |
-|---|---|---|---|
-| `KNN` | 分类 | 欧氏距离 + 多数投票 | 准确率 |
-| `LinearRegression` | 回归 | 最小二乘（SVD 解） | R² |
-| `LogisticRegression` | 二分类 | 全批量梯度下降 | 准确率 |
+| 算法 | 任务 | 拟合/预测能力 |
+|---|---|---|
+| `LinearRegression` | 回归 | SVD 最小二乘，支持截距开关 |
+| `LogisticRegression` | 二/多分类 | 全批量梯度下降、softmax、多类别概率、可选 L2 |
+| `KNN` | 分类 | 欧氏距离、多数投票、类别概率 |
+| `GaussianNB` | 分类 | 高斯特征似然、类别先验与概率 |
+| `DecisionTreeClassifier` | 分类 | CART/Gini、深度和叶节点样本数限制 |
+| `DecisionTreeRegressor` | 回归 | CART/平方误差分裂 |
+| `RandomForestClassifier` | 分类 | bootstrap、随机特征、概率平均 |
+| `RandomForestRegressor` | 回归 | bootstrap、随机特征、树预测平均 |
+| `KMeans` | 聚类 | k-means++、多次初始化、惯性值与预测簇 |
+| `PCA` | 降维 | SVD、方差解释率、正向和逆向变换 |
 
-每个模型几十行，NumPy 只用来做数组运算，没有调用现成的 estimator。
+另有 `StandardScaler`、分类准确率、均方误差和 R²。除 PCA 变换器外，监督模型采用统一的 `fit(X, y) -> predict(X) -> score(X, y)` 接口；分类器提供 `predict_proba`。K-means 支持 `fit(X)`、`fit_predict(X)` 和 `predict(X)`。
 
-## 跑法
+## 安装和运行
+
+只依赖 NumPy：
 
 ```bash
-pip install -r requirements.txt
-python demo.py        # Windows 上 python 不在 PATH 就用 py demo.py
+py -m pip install -r requirements.txt
+py demo.py
+py -m unittest discover -s tests -v
 ```
 
-`demo.py` 会生成数据、训练三个模型、在测试集上打分，最后跑五项断言：
+`demo.py` 会生成固定随机种子的分类、回归、聚类和降维样本，训练模型并检查结果。当前演示共 10 项检查，所有数据均本地生成，不需要联网或 sklearn。
 
-```text
-[1/3] k-NN | 3-class blobs | 600 samples, 2 features
-  test score: accuracy = 0.9667
-[2/3] LinearRegression | 200 samples, 3 features
-  test score: R2 = 0.9906, RMSE = 0.3378
-  coef: learned [ 2.997 -1.992  0.491], true [ 3.  -2.   0.5]
-[3/3] LogisticRegression | 500 samples, 2 classes
-  test score: accuracy = 0.9800
-  train loss: 0.6931 -> 0.0912
-5/5 checks passed
-```
-
-任何一项不过，退出码非 0，所以它同时当冒烟测试用。
-
-## 接口
-
-统一是 `fit` → `predict` → `score`，分类器另有 `predict_proba`。学到的属性带下划线结尾，超参数不带——这条是跟 sklearn 学的，换模型时只改构造函数：
+## 快速示例
 
 ```python
-from mlfs import KNN, LinearRegression, LogisticRegression, StandardScaler
+from mlfs import LogisticRegression, StandardScaler
 
-scaler = StandardScaler().fit(X_train)          # 只在训练集上 fit
-model = KNN(n_neighbors=5).fit(scaler.transform(X_train), y_train)
+# 只用训练集拟合 scaler，避免把测试集信息泄漏进训练流程。
+scaler = StandardScaler().fit(X_train)
+model = LogisticRegression(learning_rate=0.2, n_iters=1500)
+model.fit(scaler.transform(X_train), y_train)
+
+predictions = model.predict(scaler.transform(X_test))
+probabilities = model.predict_proba(scaler.transform(X_test))
 print(model.score(scaler.transform(X_test), y_test))
-print(model.get_params())                        # {'n_neighbors': 5}
 ```
 
-## 几个实现上的选择
+其他模型同样通过构造函数设置超参数，再调用 `.fit(...)`。例如：
 
-- **KNN** 用 `|a|² + |b|² - 2ab` 展开算全部样本对的距离，比双重循环快；`argsort` 取前 k 个，`bincount` 投票，票数相同取标签小的那个。
-- **线性回归** 用 `np.linalg.lstsq`，不写 `(XᵀX)⁻¹Xᵀy`——直接求逆在特征共线时数值不稳。
-- **逻辑回归** 用二元交叉熵，可选 L2，全批量梯度下降；`loss_history_` 存每次迭代的 loss，方便看收敛。
-- **数据** 在 `demo.py` 里用固定种子生成，不联网、不依赖 sklearn 自带数据集，结果可复现。
-- **标准化** 只在训练集上 fit，再 transform 测试集，避免数据泄漏。
+```python
+from mlfs import KMeans, PCA, RandomForestClassifier
 
-## 结果
+forest = RandomForestClassifier(n_estimators=50, max_depth=8, random_state=0)
+forest.fit(X_train, y_train)
 
-固定种子下：
+clusters = KMeans(n_clusters=3, random_state=0).fit_predict(X)
+reduced = PCA(n_components=0.95).fit_transform(X)
+```
 
-| 模型 | 数据 | 测试集 |
-|---|---|---|
-| `KNN(k=5)` | 600 样本，3 类，2 特征 | 0.9667 |
-| `LinearRegression()` | 200 样本，3 特征，已知系数 | R² 0.9906 |
-| `LogisticRegression()` | 500 样本，2 类，2 特征 | 0.9800 |
+## 实现说明
 
-不同 NumPy/BLAS 版本小数位会有差异，断言的阈值留得比较宽。
+- 线性回归通过 `np.linalg.lstsq` 求解，避免显式求逆。
+- 逻辑回归支持二分类 sigmoid 和多分类 softmax；`loss_history_` 可观察梯度下降过程。
+- 决策树按特征阈值递归分裂；分类使用 Gini 不纯度，回归使用平方误差。
+- 随机森林为每棵树抽取 bootstrap 样本，并在节点分裂时随机抽取特征。
+- K-means 使用 k-means++ 初始化和多次重启；PCA 使用 SVD，不构造协方差矩阵再求逆。
+- 训练属性以 `_` 结尾，超参数保留在普通属性中；模型随机性可由 `random_state` 复现。
 
 ## 目录
 
 ```text
 ml-from-scratch/
 ├── demo.py
-├── requirements.txt
+├── tests/test_estimators.py
 └── mlfs/
-    ├── base.py              BaseEstimator、输入检查
-    ├── metrics.py           accuracy / MSE / R²
-    ├── preprocessing.py     StandardScaler
+    ├── base.py
+    ├── cluster.py          # KMeans
+    ├── decomposition.py    # PCA
+    ├── ensemble.py         # RandomForest
     ├── knn.py
     ├── linear_regression.py
-    └── logistic_regression.py
+    ├── logistic_regression.py
+    ├── metrics.py
+    ├── naive_bayes.py      # GaussianNB
+    ├── preprocessing.py
+    └── tree.py             # 决策树分类/回归
 ```
 
-## 还没做
-
-- 逻辑回归目前只有二分类，多分类要再加 softmax 或 one-vs-rest
-- 梯度下降是全批量的，样本量上去以后要换 mini-batch
-- 想加一组和 sklearn 的数值对比测试，确认手写实现的结果能对上
+这是面向学习的轻量实现，不承诺覆盖所有传统 ML 算法，也不替代经过优化的生产级库；例如 SVM、集成提升方法、特征缺失处理和稀疏矩阵目前不在范围内。

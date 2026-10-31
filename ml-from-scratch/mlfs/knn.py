@@ -30,7 +30,7 @@ class KNN(ClassifierMixin, BaseEstimator):
         self.n_features_in_ = X.shape[1]
         return self
 
-    def predict(self, X):
+    def predict_proba(self, X):
         check_is_fitted(self)
         X = check_X(X, self.n_features_in_)
 
@@ -44,11 +44,13 @@ class KNN(ClassifierMixin, BaseEstimator):
         np.maximum(distances, 0.0, out=distances)
 
         nearest = np.argsort(distances, axis=1, kind="stable")[:, : self.n_neighbors]
-        nearest_labels = self.y_train_[nearest]
-
-        # Majority vote; ties go to the smallest class label.
-        encoded = np.searchsorted(self.classes_, nearest_labels)
+        encoded = np.searchsorted(self.classes_, self.y_train_[nearest])
         counts = np.stack(
             [np.bincount(row, minlength=len(self.classes_)) for row in encoded]
         )
-        return self.classes_[np.argmax(counts, axis=1)]
+        return counts / self.n_neighbors
+
+    def predict(self, X):
+        # Majority vote; ties go to the smallest class label.
+        check_is_fitted(self)
+        return self.classes_[np.argmax(self.predict_proba(X), axis=1)]

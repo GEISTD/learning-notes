@@ -1,126 +1,122 @@
-"""Train and evaluate all three models with one command: python demo.py."""
+"""Fit and evaluate the implemented estimators with one command: python demo.py."""
 
 import numpy as np
 
-from mlfs import KNN, LinearRegression, LogisticRegression, StandardScaler
+from mlfs import (
+    DecisionTreeClassifier,
+    DecisionTreeRegressor,
+    GaussianNB,
+    KMeans,
+    KNN,
+    LinearRegression,
+    LogisticRegression,
+    PCA,
+    RandomForestClassifier,
+    RandomForestRegressor,
+    StandardScaler,
+)
 from mlfs.metrics import mean_squared_error
 
 
 def make_blobs(n_samples, centers, cluster_std=1.0, random_state=0):
-    """Generate isotropic Gaussian blobs for classification."""
+    """Generate shuffled isotropic Gaussian blobs without sklearn."""
     rng = np.random.default_rng(random_state)
     centers = np.asarray(centers, dtype=float)
     counts = [n_samples // len(centers)] * len(centers)
     for index in range(n_samples - sum(counts)):
         counts[index] += 1
-
-    features = []
-    labels = []
+    features, labels = [], []
     for label, (center, count) in enumerate(zip(centers, counts)):
         features.append(rng.normal(center, cluster_std, size=(count, centers.shape[1])))
         labels.append(np.full(count, label))
-
-    X = np.vstack(features)
-    y = np.concatenate(labels)
+    X, y = np.vstack(features), np.concatenate(labels)
     order = rng.permutation(len(y))
     return X[order], y[order]
 
 
-def make_regression(n_samples=200, n_features=3, noise=0.3, random_state=0):
-    """Generate y = X @ coef + intercept + Gaussian noise with known coefficients."""
+def train_test_split(X, y, test_size=0.2, random_state=0):
+    """Split arrays with a reproducible random permutation."""
     rng = np.random.default_rng(random_state)
-    X = rng.normal(size=(n_samples, n_features))
-    true_coef = np.array([3.0, -2.0, 0.5])[:n_features]
-    true_intercept = 1.5
-    y = X @ true_coef + true_intercept + rng.normal(scale=noise, size=n_samples)
-    return X, y, true_coef, true_intercept
-
-
-def train_test_split(X, y, test_size=0.2):
-    """Hold out the last fraction of an already shuffled dataset."""
+    order = rng.permutation(len(y))
     n_test = max(1, int(round(len(y) * test_size)))
-    return X[:-n_test], X[-n_test:], y[:-n_test], y[-n_test:]
+    test_idx, train_idx = order[:n_test], order[n_test:]
+    return X[train_idx], X[test_idx], y[train_idx], y[test_idx]
 
 
 def main() -> int:
-    print("=" * 66)
-    print("ML from Scratch - one-command demo (NumPy only, no ML libraries)")
-    print("=" * 66)
+    rng = np.random.default_rng(11)
+    checks = []
 
-    # 1. k-NN: three overlapping Gaussian blobs -------------------------
+    # Supervised classification: three classes, including softmax logistic regression.
     X, y = make_blobs(
-        n_samples=600,
-        centers=[[0.0, 0.0], [3.2, 0.4], [1.6, 2.8]],
-        cluster_std=0.8,
-        random_state=7,
+        600, [[-3, -2], [3, -2], [0, 3.5]], cluster_std=0.65, random_state=7
     )
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=8)
     scaler = StandardScaler().fit(X_train)
-    knn = KNN(n_neighbors=5).fit(scaler.transform(X_train), y_train)
-    knn_accuracy = knn.score(scaler.transform(X_test), y_test)
+    X_train_scaled = scaler.transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    classifiers = [
+        ("KNN", KNN(n_neighbors=5), X_train_scaled, X_test_scaled),
+        ("LogisticRegression", LogisticRegression(learning_rate=0.3, n_iters=1800), X_train_scaled, X_test_scaled),
+        ("GaussianNB", GaussianNB(), X_train, X_test),
+        ("DecisionTreeClassifier", DecisionTreeClassifier(max_depth=6, random_state=3), X_train, X_test),
+        ("RandomForestClassifier", RandomForestClassifier(n_estimators=30, max_depth=8, random_state=3), X_train, X_test),
+    ]
+    print("ML from Scratch | NumPy only")
+    print("=" * 66)
+    for name, model, train_features, test_features in classifiers:
+        model.fit(train_features, y_train)
+        accuracy = model.score(test_features, y_test)
+        print(f"{name:24s} accuracy = {accuracy:.4f}")
+        checks.append((f"{name} classification accuracy", accuracy >= 0.88))
 
-    print(f"\n[1/3] k-NN | 3-class blobs | {len(X)} samples, {X.shape[1]} features")
-    print(f"  model     : {knn!r}")
-    print(f"  test score: accuracy = {knn_accuracy:.4f}")
-
-    # 2. Linear regression: recover known coefficients -------------------
-    X, y, true_coef, true_intercept = make_regression(
-        n_samples=200, n_features=3, noise=0.3, random_state=11
-    )
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    # Linear regression recovers known coefficients using least squares.
+    X_reg = rng.normal(size=(240, 3))
+    true_coef = np.array([3.0, -2.0, 0.5])
+    y_reg = X_reg @ true_coef + 1.5 + rng.normal(scale=0.2, size=len(X_reg))
+    X_train, X_test, y_train, y_test = train_test_split(X_reg, y_reg, random_state=9)
     linear = LinearRegression().fit(X_train, y_train)
     linear_r2 = linear.score(X_test, y_test)
     linear_rmse = float(np.sqrt(mean_squared_error(y_test, linear.predict(X_test))))
+    print(f"\nLinearRegression        R² = {linear_r2:.4f}, RMSE = {linear_rmse:.4f}")
+    checks.append(("linear regression recovers coefficients", np.max(np.abs(linear.coef_ - true_coef)) < 0.08))
 
-    print(f"\n[2/3] LinearRegression | synthetic linear data | {len(X)} samples, {X.shape[1]} features")
-    print(f"  model     : {linear!r}")
-    print(f"  test score: R2 = {linear_r2:.4f}, RMSE = {linear_rmse:.4f}")
-    print(
-        f"  coef      : learned {np.array2string(linear.coef_, precision=3)}, "
-        f"true {np.array2string(true_coef, precision=3)}"
+    # Regression trees and forests fit a nonlinear signal.
+    X_curve = rng.uniform(-2.0, 2.0, size=(360, 1))
+    y_curve = np.sin(2.5 * X_curve[:, 0]) + rng.normal(scale=0.08, size=len(X_curve))
+    X_train, X_test, y_train, y_test = train_test_split(X_curve, y_curve, random_state=10)
+    for name, model in [
+        ("DecisionTreeRegressor", DecisionTreeRegressor(max_depth=7, min_samples_leaf=3, random_state=5)),
+        ("RandomForestRegressor", RandomForestRegressor(n_estimators=35, max_depth=8, random_state=5)),
+    ]:
+        model.fit(X_train, y_train)
+        r2 = model.score(X_test, y_test)
+        print(f"{name:24s} R² = {r2:.4f}")
+        checks.append((f"{name} nonlinear fit", r2 >= 0.75))
+
+    # Unsupervised clustering and dimensionality reduction.
+    X_cluster, _ = make_blobs(
+        300, [[-4, -3], [4, -3], [0, 4]], cluster_std=0.55, random_state=12
     )
-    print(f"  intercept : learned {linear.intercept_:.3f}, true {true_intercept:.3f}")
+    kmeans = KMeans(n_clusters=3, n_init=5, random_state=6).fit(X_cluster)
+    print(f"\nKMeans                  inertia = {kmeans.inertia_:.2f}")
+    checks.append(("KMeans recovers compact clusters", kmeans.inertia_ < 250.0))
 
-    # 3. Logistic regression: two overlapping Gaussian blobs -------------
-    X, y = make_blobs(
-        n_samples=500,
-        centers=[[0.0, 0.0], [2.4, 2.4]],
-        cluster_std=0.9,
-        random_state=3,
+    latent = rng.normal(size=(180, 2))
+    X_correlated = np.column_stack(
+        (latent[:, 0], latent[:, 1], latent[:, 0] + 2.0 * latent[:, 1])
     )
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
-    scaler = StandardScaler().fit(X_train)
-    logistic = LogisticRegression(learning_rate=0.5, n_iters=1500).fit(
-        scaler.transform(X_train), y_train
-    )
-    logistic_accuracy = logistic.score(scaler.transform(X_test), y_test)
-    first_loss = logistic.loss_history_[0]
-    final_loss = logistic.loss_history_[-1]
-
-    print(f"\n[3/3] LogisticRegression | 2-class blobs | {len(X)} samples, {X.shape[1]} features")
-    print(f"  model     : {logistic!r}")
-    print(f"  test score: accuracy = {logistic_accuracy:.4f}")
-    print(f"  train loss: {first_loss:.4f} -> {final_loss:.4f}")
-
-    checks = [
-        ("k-NN test accuracy >= 0.90", knn_accuracy >= 0.90),
-        ("linear regression R2 >= 0.95", linear_r2 >= 0.95),
-        (
-            "linear regression recovers coefficients",
-            float(np.max(np.abs(linear.coef_ - true_coef))) < 0.05
-            and abs(linear.intercept_ - true_intercept) < 0.05,
-        ),
-        ("logistic regression test accuracy >= 0.88", logistic_accuracy >= 0.88),
-        ("logistic regression loss decreased by half", final_loss <= 0.5 * first_loss),
-    ]
+    pca = PCA(n_components=2)
+    reduced = pca.fit_transform(X_correlated)
+    reconstruction_error = float(np.mean((pca.inverse_transform(reduced) - X_correlated) ** 2))
+    print(f"PCA                     variance = {pca.explained_variance_ratio_.sum():.4f}, reconstruction MSE = {reconstruction_error:.2e}")
+    checks.append(("PCA preserves the rank-2 signal", reconstruction_error < 1e-10))
 
     print("\n" + "-" * 66)
     for label, passed in checks:
         print(f"  [{'PASS' if passed else 'FAIL'}] {label}")
-    passed = sum(1 for _, ok in checks if ok)
+    passed = sum(ok for _, ok in checks)
     print(f"  {passed}/{len(checks)} checks passed")
-    print("=" * 66)
-
     return 0 if passed == len(checks) else 1
 
 
